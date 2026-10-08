@@ -27,8 +27,8 @@ export function emailLayout(opts: { title: string; bodyHtml: string; cta?: { lab
   return `<!doctype html><html lang="de"><body style="margin:0;background:#eef2f8;font-family:Arial,Helvetica,sans-serif;color:#0b0e14">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px"><tr><td align="center">
   <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
-    <tr><td style="background:#06080c;padding:22px 28px;color:#f2f5fa;font-size:20px;font-weight:800;letter-spacing:.3px;line-height:1">
-      GebrauchtFelgen<span style="color:#5b93ff">24</span>
+    <tr><td style="background:#06080c;padding:20px 28px">
+      <a href="${env.appUrl}" style="text-decoration:none"><img src="${env.appUrl}/brand/logo-email.png" width="184" height="40" alt="GebrauchtFelgen24" style="display:block;border:0;height:40px;width:184px"></a>
     </td></tr>
     <tr><td style="padding:28px">
       <h1 style="font-size:20px;margin:0 0 16px">${escapeHtml(opts.title)}</h1>

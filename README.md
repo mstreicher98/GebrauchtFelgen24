@@ -20,7 +20,7 @@ Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Comp
 | **Benachrichtigungen** | E-Mail und Web-Push (PWA) bei neuen Nachrichten (max. 1 Mail / 15 Min. pro Chat), **Suchaufträge** mit Benachrichtigung bei neuen Treffern, Ablauferinnerung – alles in den Einstellungen abschaltbar |
 | **Merkliste** | Herz auf jeder Karte, Übersicht im Konto |
 | **Admin** | Dashboard, Meldungen bearbeiten, Inserate sperren / als **TOP** hervorheben, Nutzer sperren / Admin-Rechte, Fahrzeugdatenbank bearbeiten, HSN/TSN-CSV-Import |
-| **Design** | Sportlich/dunkel + Premium (Schwarz/Anthrazit, Gold, Rot), Hell/Dunkel automatisch nach System (umschaltbar), animierte Felge im Hero, sanfte Scroll-Einblendungen, Felgen-Ladeanimation, Respektiert „Bewegung reduzieren“ |
+| **Design** | Premium in Markenfarbe Königsblau #0D47A1 (aus dem Logo) mit Blau-Schwarz und Chrom, Überschriften in der Logo-Schrift Saira, Hell/Dunkel automatisch nach System (umschaltbar), animierte Chrom-Felge im Hero, sanfte Scroll-Einblendungen, Felgen-Ladeanimation, respektiert „Bewegung reduzieren“ |
 | **Performance** | Server-Rendering, kaum Client-JS, selbst gehostete Schriften, WebP in passenden Größen, PWA mit Offline-Seite. Lighthouse (Mobil): Performance 88–99, Best Practices 100, SEO 100, CLS 0 |
 | **Rechtliches** | Vorlagen für Impressum (ECG/UGB/MedienG + DSA-Kontaktstelle), Datenschutzerklärung (DSGVO), AGB – Platzhalter sind gelb markiert |
 
@@ -159,6 +159,25 @@ Logik: `src/lib/fitment.ts` (Badges) und `src/lib/search.ts` (SQL-Filter) – mi
 
 ---
 
+## Logo & Markenauftritt
+
+Das Logo ist eine modernisierte Fassung des Original-Logos: „Gebraucht“ (leichter) über „Felgen“ (kräftig), rechtsbündig,
+daneben die große „24“ im Blauverlauf (#3D7FE8 → #0D47A1). Schrift: Saira, in Pfade umgewandelt (keine Schriftdatei nötig).
+
+| Datei | Verwendung |
+| --- | --- |
+| `design/logo/preview.png` | Übersicht aller Varianten |
+| `public/brand/logo-dark.svg` / `logo-light.svg` | Logo für dunkle / helle Hintergründe (z. B. Druck, Partner) |
+| `public/brand/logo-mono.svg` | einfarbig |
+| `public/brand/wordmark-compact-*.svg` | einzeilige Variante „GebrauchtFelgen24“ |
+| `public/brand/mark.svg`, `public/icons/*` | App-Icon / Favicon (blaues Quadrat mit weißer 24) |
+| `public/brand/rim.svg` | Felgen-Motiv (Ladeanimation, Platzhalter) |
+| `public/brand/logo-email.png`, `public/og.png` | E-Mail-Kopf und Vorschaubild für Social Media |
+
+Auf der Website wird das Logo inline gerendert (`src/components/logo.tsx`), die Farben kommen aus CSS-Variablen
+(`--logo-*` in `globals.css`): Chrom-Wortmarke im dunklen, Schwarz im hellen Design. Nach Änderungen an
+`design/logo/parts*.json` die Pfaddaten neu erzeugen: `node scripts/build-logo-data.mjs`.
+
 ## Entwicklung
 
 Voraussetzungen: Node.js 22, PostgreSQL 16 (oder `docker compose`).
@@ -187,6 +206,5 @@ Ohne SMTP stehen Bestätigungslinks im Server-Log (`[mail] Link: …`).
 - **Telefonnummer-Verifizierung** (SMS) – vorgesehen (`phone_verified` existiert bereits), Umsetzung später.
 - **Bezahlte TOP-Inserate** – technisch vorbereitet (`featured_until`, Admin kann TOP setzen), Zahlungsanbieter folgt.
 - **Bewertungen** nach dem Kauf – bei Bedarf als nächster Ausbauschritt.
-- **Logo**: Aktuell ein SVG-Logo (Felge + Schriftzug); `public/icons/icon.svg` bzw. `src/components/logo.tsx` bei einem finalen Logo ersetzen.
 
-Schriften: Inter & Oswald (SIL Open Font License). Postleitzahlen: © GeoNames, CC BY 4.0.
+Schriften: Inter & Saira (SIL Open Font License). Postleitzahlen: © GeoNames, CC BY 4.0.

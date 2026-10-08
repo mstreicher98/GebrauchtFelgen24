@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="carbon mt-24 border-t border-line bg-bg-elev pb-24 md:pb-0">
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
-          <Logo />
+          <Logo id="gf24-ftr" className="h-12" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
             Der Marktplatz für gebrauchte Felgen und Kompletträder für Auto und Motorrad in Österreich, Deutschland und der
             Schweiz. Mit Passungsprüfung für dein Fahrzeug.

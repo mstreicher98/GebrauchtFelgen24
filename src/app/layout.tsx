@@ -23,11 +23,17 @@ export const metadata: Metadata = {
     "Der Marktplatz für gebrauchte Felgen und Kompletträder für Auto und Motorrad in Österreich, Deutschland und der Schweiz – mit Passungsprüfung für dein Fahrzeug.",
   applicationName: "GebrauchtFelgen24",
   appleWebApp: { capable: true, title: "Felgen24", statusBarStyle: "black-translucent" },
-  openGraph: { type: "website", locale: "de_AT", siteName: "GebrauchtFelgen24" },
+  openGraph: {
+    type: "website",
+    locale: "de_AT",
+    siteName: "GebrauchtFelgen24",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "GebrauchtFelgen24 – gebrauchte Felgen & Kompletträder" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
   icons: {
     icon: [
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/icons/favicon.svg", type: "image/svg+xml" },
     ],
     apple: "/icons/apple-touch-icon.png",
   },

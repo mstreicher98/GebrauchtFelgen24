@@ -1,43 +1,70 @@
 import { clsx } from "clsx";
+import { LOGO_COMPACT, LOGO_STACKED, RIM } from "./brand/logo-data";
 
-export function RimMark({ className, spinning = false }: { className?: string; spinning?: boolean }) {
-  const spokes = Array.from({ length: 5 }, (_, i) => i * 72);
+type LogoProps = {
+  /** „stacked“ = Original-Aufbau (Gebraucht/Felgen + große 24), „compact“ = einzeilig */
+  variant?: "stacked" | "compact";
+  className?: string;
+  /** Eindeutiges Präfix für die Verlaufs-IDs, wenn das Logo mehrfach auf einer Seite steht */
+  id?: string;
+};
+
+/**
+ * GebrauchtFelgen24-Logo als Inline-SVG.
+ * Farben kommen aus CSS-Variablen (--logo-*), dadurch wechselt es automatisch zwischen
+ * Chrom/Hellblau (dunkles Design) und Schwarz/Königsblau (helles Design).
+ */
+export function Logo({ variant = "stacked", className, id = "gf24" }: LogoProps) {
+  const d = variant === "stacked" ? LOGO_STACKED : LOGO_COMPACT;
   return (
-    <svg viewBox="0 0 48 48" className={clsx(className, spinning && "animate-spin-loader")} aria-hidden="true">
+    <svg
+      viewBox={d.viewBox}
+      width={d.width}
+      height={d.height}
+      overflow="visible"
+      role="img"
+      aria-label="GebrauchtFelgen24"
+      className={clsx("block h-10 w-auto", className)}
+    >
       <defs>
-        <linearGradient id="rimGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--brand-strong)" />
-          <stop offset="1" stopColor="var(--brand)" />
+        {d.wordGradients.map((g, i) => (
+          <linearGradient key={i} id={`${id}-w${i}`} gradientUnits="userSpaceOnUse" x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2}>
+            <stop offset="0" style={{ stopColor: "var(--logo-word-0)" }} />
+            <stop offset="0.55" style={{ stopColor: "var(--logo-word-1)" }} />
+            <stop offset="1" style={{ stopColor: "var(--logo-word-2)" }} />
+          </linearGradient>
+        ))}
+        <linearGradient
+          id={`${id}-a`}
+          gradientUnits="userSpaceOnUse"
+          x1={d.accentGradient.x1}
+          y1={d.accentGradient.y1}
+          x2={d.accentGradient.x2}
+          y2={d.accentGradient.y2}
+        >
+          <stop offset="0" style={{ stopColor: "var(--logo-acc-0)" }} />
+          <stop offset="1" style={{ stopColor: "var(--logo-acc-1)" }} />
         </linearGradient>
       </defs>
-      <circle cx="24" cy="24" r="21" fill="none" stroke="url(#rimGold)" strokeWidth="3.5" />
-      <circle cx="24" cy="24" r="16.5" fill="none" stroke="currentColor" strokeOpacity=".25" strokeWidth="1" />
-      {spokes.map((a) => (
-        <path
-          key={a}
-          d="M22.6 19.5 L21 6.5 Q24 5.4 27 6.5 L25.4 19.5 Z"
-          fill="url(#rimGold)"
-          transform={`rotate(${a} 24 24)`}
-        />
+      {d.word.map((p, i) => (
+        <path key={i} d={p} fill={`url(#${id}-w${i})`} />
       ))}
-      <circle cx="24" cy="24" r="5" fill="none" stroke="url(#rimGold)" strokeWidth="2.5" />
-      <circle cx="24" cy="24" r="1.6" fill="currentColor" />
+      {d.accent.map((p, i) => (
+        <path key={i} d={p} fill={`url(#${id}-a)`} />
+      ))}
     </svg>
   );
 }
 
-export function Logo({ className }: { className?: string }) {
+/** 5-Speichen-Felge – zweites Markenmotiv (Platzhalter, Leerzustände, Ladeanimation). */
+export function RimMark({ className, spinning = false }: { className?: string; spinning?: boolean }) {
   return (
-    <span className={clsx("inline-flex items-center gap-2", className)}>
-      <RimMark className="h-8 w-8 text-fg transition-transform duration-700 group-hover:rotate-[72deg]" />
-      <span className="font-display text-[1.2rem] font-semibold uppercase leading-none tracking-wide">
-        Gebraucht<span className="text-brand">Felgen</span>
-        <span className="ml-0.5 rounded bg-red-solid px-1 py-0.5 align-[2px] text-[0.7rem] font-bold text-white">24</span>
-      </span>
-    </span>
+    <svg viewBox={RIM.viewBox} className={clsx(className, spinning && "animate-spin-loader")} aria-hidden="true" fill="currentColor">
+      <path fillRule="evenodd" d={RIM.d} />
+    </svg>
   );
 }
 
 export function Spinner({ className }: { className?: string }) {
-  return <RimMark spinning className={clsx("h-6 w-6 text-fg", className)} />;
+  return <RimMark spinning className={clsx("h-6 w-6 text-brand", className)} />;
 }

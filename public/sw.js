@@ -1,5 +1,5 @@
 /* GebrauchtFelgen24 Service Worker – Push-Benachrichtigungen & Offline-Fallback */
-const CACHE = "gf24-v1";
+const CACHE = "gf24-v2";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
