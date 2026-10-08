@@ -6,8 +6,8 @@ export function RimMark({ className, spinning = false }: { className?: string; s
     <svg viewBox="0 0 48 48" className={clsx(className, spinning && "animate-spin-loader")} aria-hidden="true">
       <defs>
         <linearGradient id="rimGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--gold-strong)" />
-          <stop offset="1" stopColor="var(--gold)" />
+          <stop offset="0" stopColor="var(--brand-strong)" />
+          <stop offset="1" stopColor="var(--brand)" />
         </linearGradient>
       </defs>
       <circle cx="24" cy="24" r="21" fill="none" stroke="url(#rimGold)" strokeWidth="3.5" />
@@ -31,7 +31,7 @@ export function Logo({ className }: { className?: string }) {
     <span className={clsx("inline-flex items-center gap-2", className)}>
       <RimMark className="h-8 w-8 text-fg transition-transform duration-700 group-hover:rotate-[72deg]" />
       <span className="font-display text-[1.2rem] font-semibold uppercase leading-none tracking-wide">
-        Gebraucht<span className="text-gold">Felgen</span>
+        Gebraucht<span className="text-brand">Felgen</span>
         <span className="ml-0.5 rounded bg-red-solid px-1 py-0.5 align-[2px] text-[0.7rem] font-bold text-white">24</span>
       </span>
     </span>

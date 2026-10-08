@@ -132,7 +132,7 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">
-              {other.name} {other.isDealer && <span className="badge badge-gold ml-1">Händler</span>}
+              {other.name} {other.isDealer && <span className="badge badge-brand ml-1">Händler</span>}
             </p>
             <p className="truncate text-xs text-muted">
               {listing.title} · {formatPrice(listing.priceCents)}
@@ -205,7 +205,7 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
                 <div
                   className={clsx(
                     "max-w-[82%] overflow-hidden rounded-2xl text-[0.95rem] leading-relaxed shadow-sm sm:max-w-[70%]",
-                    mine ? "rounded-br-md bg-gradient-to-br from-gold-strong to-gold text-on-gold" : "rounded-bl-md bg-surface-2",
+                    mine ? "rounded-br-md bg-gradient-to-br from-brand-fill to-brand-fill-2 text-on-brand" : "rounded-bl-md bg-surface-2",
                     m.pending && "opacity-70",
                   )}
                 >
@@ -216,7 +216,7 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
                     </a>
                   )}
                   {(m.body || !m.imageKey) && <p className="whitespace-pre-wrap break-words px-3.5 py-2">{m.body}</p>}
-                  <p className={clsx("flex items-center justify-end gap-1 px-3 pb-1.5 text-[10px]", mine ? "text-on-gold/70" : "text-faint", !m.body && m.imageKey && "pt-1.5")}>
+                  <p className={clsx("flex items-center justify-end gap-1 px-3 pb-1.5 text-[10px]", mine ? "text-on-brand/70" : "text-faint", !m.body && m.imageKey && "pt-1.5")}>
                     {formatTime(d)}
                     {mine &&
                       (m.pending ? (
@@ -298,7 +298,7 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
               }}
               aria-label="Nachricht"
             />
-            <button className="btn btn-gold btn-icon shrink-0" disabled={!text.trim() && !image} aria-label="Senden">
+            <button className="btn btn-brand btn-icon shrink-0" disabled={!text.trim() && !image} aria-label="Senden">
               <Send className="h-5 w-5" />
             </button>
           </div>

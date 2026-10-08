@@ -53,7 +53,7 @@ export async function notifyNewMessage(opts: {
         emailLayout({
           title: `${opts.senderName} hat dir geschrieben`,
           bodyHtml: `<p>Zu deinem Inserat bzw. deiner Anfrage <strong>${escapeHtml(opts.listingTitle)}</strong>:</p>
-            <blockquote style="border-left:3px solid #d6a84f;margin:16px 0;padding:8px 14px;color:#444">${escapeHtml(opts.preview)}</blockquote>`,
+            <blockquote style="border-left:3px solid #0d47a1;margin:16px 0;padding:8px 14px;color:#444">${escapeHtml(opts.preview)}</blockquote>`,
           cta: { label: "Nachricht beantworten", url },
           footerNote: "Antworte bitte direkt im Chat – Antworten auf diese E-Mail kommen nicht an.",
         }),

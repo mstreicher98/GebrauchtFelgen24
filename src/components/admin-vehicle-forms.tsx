@@ -34,7 +34,7 @@ export function NewMakeForm() {
         <option value="auto">Auto</option>
         <option value="motorrad">Motorrad</option>
       </select>
-      <button className="btn btn-gold" disabled={pending}>
+      <button className="btn btn-brand" disabled={pending}>
         <Plus className="h-4 w-4" /> Anlegen
       </button>
     </form>
@@ -82,7 +82,7 @@ export function GenerationEditor({ makeId, vehicleType, initial }: { makeId: num
   return (
     <div className="rounded-xl border border-line">
       <button type="button" className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm" onClick={() => setOpen((o) => !o)}>
-        <span className={isNew ? "text-gold" : "font-medium"}>
+        <span className={isNew ? "text-brand" : "font-medium"}>
           {isNew ? "+ Neue Baureihe" : `${initial.name} (${initial.yearFrom || "?"}–${initial.yearTo || "heute"}) · ${initial.pcd || "–"}`}
         </span>
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -123,7 +123,7 @@ export function GenerationEditor({ makeId, vehicleType, initial }: { makeId: num
           </div>
           <div className="sm:col-span-4">{f("notes", "Hinweis (optional)")}</div>
           <div className="flex gap-2 sm:col-span-4">
-            <button className="btn btn-gold btn-sm" disabled={pending}>
+            <button className="btn btn-brand btn-sm" disabled={pending}>
               Speichern
             </button>
             {!isNew && (
@@ -167,7 +167,7 @@ export function HsnImportForm() {
     >
       <label className="label">CSV einfügen (HSN;TSN;Baureihen-ID;Beschreibung)</label>
       <textarea className="textarea min-h-48 font-mono text-sm" value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={"0603;BQR;12;VW Golf VII 1.4 TSI\n0603;AXT;12;VW Golf VII 2.0 TDI"} />
-      <button className="btn btn-gold" disabled={pending || !csv.trim()}>
+      <button className="btn btn-brand" disabled={pending || !csv.trim()}>
         Importieren
       </button>
       {result && (

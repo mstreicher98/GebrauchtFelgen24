@@ -165,13 +165,13 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
     <div className="container-page py-6 sm:py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-faint" aria-label="Brotkrümel">
-        <Link href="/" className="hover:text-gold">Start</Link>/
-        <Link href={`/suche?typ=${l.vehicleType}`} className="hover:text-gold">{isCar ? "Autofelgen" : "Motorradfelgen"}</Link>/
-        <Link href={`/suche?typ=${l.vehicleType}&zoll=${l.diameter}`} className="hover:text-gold">{formatNumber(l.diameter)} Zoll</Link>
+        <Link href="/" className="hover:text-brand">Start</Link>/
+        <Link href={`/suche?typ=${l.vehicleType}`} className="hover:text-brand">{isCar ? "Autofelgen" : "Motorradfelgen"}</Link>/
+        <Link href={`/suche?typ=${l.vehicleType}&zoll=${l.diameter}`} className="hover:text-brand">{formatNumber(l.diameter)} Zoll</Link>
       </nav>
 
       {l.status !== "aktiv" && (
-        <div className="mb-4 rounded-2xl border border-gold/40 bg-gold-soft px-4 py-3 text-sm text-gold">
+        <div className="mb-4 rounded-2xl border border-brand/40 bg-brand-soft px-4 py-3 text-sm text-brand">
           Dieses Inserat ist {LISTING_STATUS[l.status].toLowerCase()}
           {l.status === "verkauft" && l.soldAt ? ` (seit ${formatDate(l.soldAt)})` : ""}.
         </div>
@@ -266,17 +266,17 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
 
           <div className="card p-5">
             <div className="flex items-center gap-3">
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft text-lg font-bold text-gold">
+              <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-soft text-lg font-bold text-brand">
                 {seller.accountType === "haendler" ? <Store className="h-5 w-5" /> : sellerName.slice(0, 1)}
               </span>
               <div className="min-w-0">
-                <Link href={`/nutzer/${seller.id}`} className="block truncate font-semibold hover:text-gold">
+                <Link href={`/nutzer/${seller.id}`} className="block truncate font-semibold hover:text-brand">
                   {sellerName}
                 </Link>
                 <p className="flex items-center gap-1 text-xs text-muted">
                   {seller.accountType === "haendler" ? (
                     <>
-                      <BadgeCheck className="h-3.5 w-3.5 text-gold" /> Gewerblicher Händler
+                      <BadgeCheck className="h-3.5 w-3.5 text-brand" /> Gewerblicher Händler
                     </>
                   ) : (
                     <>
@@ -333,14 +333,14 @@ function TitleBlock({ l, favorite }: { l: typeof listing.$inferSelect; favorite:
   const featured = l.featuredUntil && l.featuredUntil > new Date();
   return (
     <div className="card relative overflow-hidden p-5">
-      {featured && <span className="badge mb-3 bg-red-solid text-white">TOP-Inserat</span>}
+      {featured && <span className="badge badge-top mb-3">TOP-Inserat</span>}
       <h1 className="text-xl font-bold leading-snug sm:text-2xl">{l.title}</h1>
       <p className="mt-2 text-sm text-muted">
         {[formatRimSize(l.width, l.diameter), l.et != null ? `ET${l.et}` : null, pcd, `${l.quantity} Stk.`].filter(Boolean).join(" · ")}
       </p>
       <div className="mt-4 flex items-end justify-between gap-3">
         <div>
-          <span className="font-display text-4xl font-bold tracking-wide text-gradient-gold">{formatPrice(l.priceCents)}</span>
+          <span className="font-display text-4xl font-bold tracking-wide text-gradient-brand">{formatPrice(l.priceCents)}</span>
           <span className="ml-2 text-sm text-muted">{PRICE_TYPES[l.priceType]}</span>
           {l.quantity > 1 && <p className="text-xs text-faint">für {l.quantity} Stück</p>}
         </div>

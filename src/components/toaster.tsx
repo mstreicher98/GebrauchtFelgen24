@@ -29,7 +29,7 @@ export function Toaster() {
             key={t.id}
             className="animate-fade-up pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-surface-2 px-4 py-2.5 text-sm shadow-[var(--shadow)]"
           >
-            <Icon className={t.type === "error" ? "h-4 w-4 text-red" : "h-4 w-4 text-gold"} />
+            <Icon className={t.type === "error" ? "h-4 w-4 text-red" : "h-4 w-4 text-brand"} />
             {t.text}
           </div>
         );

@@ -18,7 +18,7 @@ export default async function AdminVehiclesPage() {
             {rows
               .filter((r) => r.type === t)
               .map((r) => (
-                <Link key={r.id} href={`/admin/fahrzeuge/${r.id}`} className="card p-3 text-sm hover:border-gold">
+                <Link key={r.id} href={`/admin/fahrzeuge/${r.id}`} className="card p-3 text-sm hover:border-brand">
                   <span className="font-semibold">{r.name}</span>
                   <span className="block text-xs text-faint">{r.gens} Baureihen</span>
                 </Link>

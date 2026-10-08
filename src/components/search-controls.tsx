@@ -58,7 +58,7 @@ export function FitModeToggle() {
           role="radio"
           aria-checked={loose === v}
           onClick={() => update({ modus: v ? "locker" : null })}
-          className={clsx("rounded-full px-3.5 py-1.5 font-semibold transition-all", loose === v ? "bg-gold text-on-gold" : "text-muted hover:text-fg")}
+          className={clsx("rounded-full px-3.5 py-1.5 font-semibold transition-all", loose === v ? "bg-brand-fill text-on-brand" : "text-muted hover:text-fg")}
         >
           {l as string}
         </button>
@@ -75,7 +75,7 @@ export function SaveSearchButton() {
   return (
     <button
       type="button"
-      className={clsx("btn btn-outline btn-sm", saved && "border-gold text-gold")}
+      className={clsx("btn btn-outline btn-sm", saved && "border-brand text-brand")}
       disabled={pending || saved}
       onClick={() =>
         start(async () => {

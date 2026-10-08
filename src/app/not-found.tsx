@@ -11,7 +11,7 @@ export default function NotFound() {
       <p className="mt-2 text-muted">Hier ist uns wohl ein Rad abgefallen – diese Seite gibt es nicht (mehr).</p>
       <div className="mt-6 flex gap-3">
         <Link href="/" className="btn btn-outline">Zur Startseite</Link>
-        <Link href="/suche" className="btn btn-gold">Felgen suchen</Link>
+        <Link href="/suche" className="btn btn-brand">Felgen suchen</Link>
       </div>
     </div>
   );

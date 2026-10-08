@@ -97,7 +97,7 @@ export function ImageGallery({ images, title }: { images: { key: string; width: 
               key={im.key}
               type="button"
               onClick={() => go(i)}
-              className={clsx("h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all", i === idx ? "border-gold" : "border-transparent opacity-60 hover:opacity-100")}
+              className={clsx("h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all", i === idx ? "border-brand" : "border-transparent opacity-60 hover:opacity-100")}
               aria-label={`Bild ${i + 1} anzeigen`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

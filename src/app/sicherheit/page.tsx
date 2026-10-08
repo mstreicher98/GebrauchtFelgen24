@@ -16,13 +16,13 @@ export default function SafetyPage() {
   return (
     <div className="container-page py-12">
       <h1 className="font-display text-4xl font-bold uppercase sm:text-5xl">
-        Sicher <span className="text-gradient-gold">handeln</span>
+        Sicher <span className="text-gradient-brand">handeln</span>
       </h1>
       <p className="mt-3 max-w-2xl text-muted">Mit diesen Tipps kaufst und verkaufst du gebrauchte Felgen ohne böse Überraschungen.</p>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {TIPS.map((t, i) => (
           <div key={t.t} className="card reveal p-6" style={{ ["--reveal-delay" as string]: `${(i % 3) * 80}ms` }}>
-            <t.icon className="h-7 w-7 text-gold" />
+            <t.icon className="h-7 w-7 text-brand" />
             <h2 className="mt-4 font-semibold">{t.t}</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">{t.d}</p>
           </div>

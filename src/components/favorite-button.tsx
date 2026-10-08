@@ -42,7 +42,7 @@ export function FavoriteButton({
 
   if (variant === "button") {
     return (
-      <button type="button" onClick={onClick} disabled={pending} className={clsx("btn btn-outline", fav && "border-gold text-gold")}>
+      <button type="button" onClick={onClick} disabled={pending} className={clsx("btn btn-outline", fav && "border-brand text-brand")}>
         <Heart key={anim} className={clsx("h-5 w-5", fav && "animate-pop fill-current")} />
         {fav ? "Gemerkt" : "Merken"}
       </button>

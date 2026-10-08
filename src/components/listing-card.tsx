@@ -12,7 +12,7 @@ import { RimMark } from "./logo";
 export function FitBadge({ fit, className }: { fit: FitResult; className?: string }) {
   if (fit.level === "nein") return null;
   const tone =
-    fit.level === "perfekt" ? "badge-green" : fit.level === "passend" ? "badge-green" : fit.level === "zentrierring" ? "badge-gold" : "";
+    fit.level === "perfekt" ? "badge-green" : fit.level === "passend" ? "badge-green" : fit.level === "zentrierring" ? "badge-brand" : "";
   return (
     <span className={clsx("badge", tone, className)} title={fit.hints.join(" · ")}>
       <span className={clsx("h-1.5 w-1.5 rounded-full", fit.level === "pruefen" ? "bg-muted" : "bg-current")} />
@@ -67,7 +67,7 @@ export function ListingCard({
           </div>
         )}
         <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-          {featured && <span className="badge bg-red-solid text-white shadow">TOP</span>}
+          {featured && <span className="badge badge-top">TOP</span>}
           {l.kind === "komplettrad" && <span className="badge bg-black/65 text-white backdrop-blur">Komplettrad</span>}
           {inactive && <span className="badge bg-black/75 text-white">{l.status === "verkauft" ? "Verkauft" : "Inaktiv"}</span>}
         </div>
@@ -94,7 +94,7 @@ export function ListingCard({
           <span className="text-xs text-faint">{l.priceType === "vb" ? "VB" : "Festpreis"}</span>
         </div>
         <Heading className="line-clamp-2 text-[0.95rem] font-semibold leading-snug">
-          <Link href={listingUrl(l)} className="after:absolute after:inset-0 after:content-[''] hover:text-gold">
+          <Link href={listingUrl(l)} className="after:absolute after:inset-0 after:content-[''] hover:text-brand">
             {l.title}
           </Link>
         </Heading>
@@ -107,7 +107,7 @@ export function ListingCard({
           {l.fit && <FitBadge fit={l.fit} />}
           {l.season && <span className="badge">{SEASONS[l.season]}</span>}
           <span className="badge">{CONDITIONS[l.condition]}</span>
-          {l.sellerType === "haendler" && <span className="badge badge-gold">Händler</span>}
+          {l.sellerType === "haendler" && <span className="badge badge-brand">Händler</span>}
         </div>
         <div className="mt-auto flex items-center justify-between gap-2 pt-2 text-xs text-faint">
           <span className="flex min-w-0 items-center gap-1">

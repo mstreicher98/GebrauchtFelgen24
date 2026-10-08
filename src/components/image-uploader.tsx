@@ -87,12 +87,12 @@ export function ImageUploader({ value, onChange, invalid }: { value: string[]; o
               if (dragIdx !== null) move(dragIdx, i);
               setDragIdx(null);
             }}
-            className={clsx("animate-scale-in group relative aspect-square overflow-hidden rounded-xl border-2 bg-surface-2", i === 0 ? "border-gold" : "border-transparent")}
+            className={clsx("animate-scale-in group relative aspect-square overflow-hidden rounded-xl border-2 bg-surface-2", i === 0 ? "border-brand" : "border-transparent")}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={imageUrl(key, 400)} alt={`Foto ${i + 1}`} className="h-full w-full object-cover" />
             {i === 0 && (
-              <span className="badge absolute left-1.5 top-1.5 bg-gold text-on-gold">
+              <span className="badge absolute left-1.5 top-1.5 bg-brand-fill text-on-brand">
                 <Star className="h-3 w-3" /> Titelbild
               </span>
             )}
@@ -142,8 +142,8 @@ export function ImageUploader({ value, onChange, invalid }: { value: string[]; o
               if (e.dataTransfer.files.length) void add(e.dataTransfer.files);
             }}
             className={clsx(
-              "flex aspect-square flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed text-sm text-muted transition-all hover:border-gold hover:text-gold",
-              drag ? "scale-[1.02] border-gold bg-gold-soft text-gold" : invalid ? "border-red" : "border-line-strong",
+              "flex aspect-square flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed text-sm text-muted transition-all hover:border-brand hover:text-brand",
+              drag ? "scale-[1.02] border-brand bg-brand-soft text-brand" : invalid ? "border-red" : "border-line-strong",
             )}
           >
             <ImagePlus className="h-7 w-7" />

@@ -58,11 +58,11 @@ export default async function MakePage(props: PageProps<"/fahrzeuge/[typ]/[marke
 
   return (
     <div className="container-page py-10">
-      <Link href="/fahrzeuge" className="inline-flex items-center gap-1 text-sm text-muted hover:text-gold">
+      <Link href="/fahrzeuge" className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
         <ChevronLeft className="h-4 w-4" /> Alle Marken
       </Link>
       <h1 className="font-display mt-3 flex items-center gap-3 text-4xl font-bold uppercase sm:text-5xl">
-        <span className="text-gold">{isCar ? <Car className="h-9 w-9" /> : <Bike className="h-9 w-9" />}</span>
+        <span className="text-brand">{isCar ? <Car className="h-9 w-9" /> : <Bike className="h-9 w-9" />}</span>
         {mk.name}
       </h1>
       <p className="mt-2 text-muted">
@@ -97,7 +97,7 @@ export default async function MakePage(props: PageProps<"/fahrzeuge/[typ]/[marke
                           <h3 className="font-semibold">{generationLabel(m.name, g.name)}</h3>
                           <p className="text-sm text-muted">{yearRange(g.yearFrom, g.yearTo)}</p>
                         </div>
-                        <Link href={`/suche?fahrzeug=${g.id}`} className="btn btn-gold btn-sm group shrink-0">
+                        <Link href={`/suche?fahrzeug=${g.id}`} className="btn btn-brand btn-sm group shrink-0">
                           Felgen{n > 0 ? ` (${n})` : ""}
                           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                         </Link>

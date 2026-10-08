@@ -76,7 +76,7 @@ export const DEMO_STYLES: RimStyle[] = [
   { spokes: 5, color: "#b08a3e", accent: "#e8c779", bg: ["#16171b", "#060607"], tire: false, split: true },
   { spokes: 6, color: "#6c7078", accent: "#b9bcc2", bg: ["#22252b", "#0c0d10"], tire: true },
   { spokes: 7, color: "#d8dadf", accent: "#ffffff", bg: ["#30343b", "#121317"], tire: true, split: true },
-  { spokes: 12, color: "#3b3d43", accent: "#d6a84f", bg: ["#1a1715", "#070707"], tire: false },
+  { spokes: 12, color: "#3b3d43", accent: "#2563eb", bg: ["#1a1715", "#070707"], tire: false },
   { spokes: 9, color: "#9a9ea6", accent: "#e6e8ec", bg: ["#1e2128", "#0a0b0d"], tire: true },
   { spokes: 3, color: "#202024", accent: "#e63b2e", bg: ["#241413", "#0a0707"], tire: true, split: true },
 ];

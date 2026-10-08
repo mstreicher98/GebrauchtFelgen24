@@ -39,7 +39,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/nutzer">) 
               <tr key={u.id} className="border-t border-line">
                 <td className="p-3">
                   {u.companyName ?? u.name}
-                  {u.role === "admin" && <span className="badge badge-gold ml-1">Admin</span>}
+                  {u.role === "admin" && <span className="badge badge-brand ml-1">Admin</span>}
                   {u.banned && <span className="badge badge-red ml-1">gesperrt</span>}
                 </td>
                 <td className="p-3 text-muted">

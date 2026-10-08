@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Gebrauchte Felgen & Kompletträder für Auto und Motorrad kaufen und verkaufen.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0a0c",
-    theme_color: "#0a0a0c",
+    background_color: "#06080c",
+    theme_color: "#06080c",
     lang: "de",
     categories: ["shopping", "auto"],
     icons: [

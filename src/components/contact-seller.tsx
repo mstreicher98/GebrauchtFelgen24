@@ -14,7 +14,7 @@ export function ContactSeller({ listingId, loggedIn, existingConversation }: { l
 
   if (existingConversation) {
     return (
-      <button type="button" className="btn btn-gold w-full" onClick={() => router.push(`/nachrichten/${existingConversation}`)}>
+      <button type="button" className="btn btn-brand w-full" onClick={() => router.push(`/nachrichten/${existingConversation}`)}>
         Zum Chat mit dem Verkäufer
       </button>
     );
@@ -49,7 +49,7 @@ export function ContactSeller({ listingId, loggedIn, existingConversation }: { l
         ))}
       </div>
       {error && <p className="mt-2 text-sm text-red">{error}</p>}
-      <button className="btn btn-gold mt-4 w-full" disabled={pending || !text.trim()}>
+      <button className="btn btn-brand mt-4 w-full" disabled={pending || !text.trim()}>
         <Send className="h-4 w-4" />
         {loggedIn ? "Chat starten" : "Anmelden & Chat starten"}
       </button>

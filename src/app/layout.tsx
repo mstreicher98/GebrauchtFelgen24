@@ -10,7 +10,7 @@ import { ServiceWorkerRegistration } from "@/components/sw-register";
 import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/session";
 import { countUnread } from "@/lib/unread";
-import { inter, oswald } from "./fonts";
+import { inter, saira } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0c",
+  themeColor: "#06080c",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const body = (
     <>
-      <a href="#inhalt" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-gold focus:px-4 focus:py-2 focus:text-on-gold">
+      <a href="#inhalt" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-brand-fill focus:px-4 focus:py-2 focus:text-on-brand">
         Zum Inhalt springen
       </a>
       <SiteHeader user={user} />
@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   return (
-    <html lang="de" data-theme="dark" className={`${inter.variable} ${oswald.variable}`} suppressHydrationWarning>
+    <html lang="de" data-theme="dark" className={`${inter.variable} ${saira.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

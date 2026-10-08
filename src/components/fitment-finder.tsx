@@ -40,7 +40,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
               }}
               className={clsx(
                 "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all",
-                type === t ? "bg-gold text-on-gold shadow" : "text-muted hover:text-fg",
+                type === t ? "bg-brand-fill text-on-brand shadow" : "text-muted hover:text-fg",
               )}
             >
               {t === "auto" ? <Car className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
@@ -51,7 +51,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
         {type === "auto" && (
           <button
             type="button"
-            className="flex items-center gap-1.5 text-sm text-muted hover:text-gold"
+            className="flex items-center gap-1.5 text-sm text-muted hover:text-brand"
             onClick={() => setMode((m) => (m === "hsn" ? "auswahl" : "hsn"))}
           >
             <KeyRound className="h-4 w-4" />
@@ -82,7 +82,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
           >
             <input className="input" placeholder="HSN (z. B. 0603)" inputMode="numeric" maxLength={4} value={hsn} onChange={(e) => setHsn(e.target.value)} required aria-label="Herstellerschlüsselnummer (HSN)" />
             <input className="input uppercase" placeholder="TSN (z. B. BQR)" maxLength={3} value={tsn} onChange={(e) => setTsn(e.target.value)} required aria-label="Typschlüsselnummer (TSN)" />
-            <button className="btn btn-gold" disabled={busy}>
+            <button className="btn btn-brand" disabled={busy}>
               Suchen
             </button>
             <p className="text-xs text-faint sm:col-span-3">
@@ -98,7 +98,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
           <label className="flex cursor-pointer items-center gap-3 text-sm">
             <span className="relative inline-flex">
               <input type="checkbox" className="peer sr-only" checked={!strict} onChange={(e) => setStrict(!e.target.checked)} />
-              <span className="h-6 w-11 rounded-full bg-surface-3 transition-colors peer-checked:bg-gold" />
+              <span className="h-6 w-11 rounded-full bg-surface-3 transition-colors peer-checked:bg-brand-fill" />
               <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
             </span>
             <span>
@@ -108,7 +108,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
           </label>
           <button
             type="button"
-            className="btn btn-gold group"
+            className="btn btn-brand group"
             disabled={!picked}
             onClick={() => picked && go(picked.generationId)}
           >

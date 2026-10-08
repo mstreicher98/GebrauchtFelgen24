@@ -71,25 +71,25 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       <section className="carbon relative overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-gold/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-red-solid/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-brand/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-brand-fill-2/20 blur-3xl" />
         <div className="container-page relative grid items-center gap-10 pb-16 pt-10 md:pb-24 md:pt-16 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-surface/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted backdrop-blur" style={{ animationDelay: "50ms" }}>
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" />
               {data.activeCount.toLocaleString("de-AT")} aktive Inserate in AT · DE · CH
             </p>
-            <h1 className="animate-rise font-display mt-5 text-[2.6rem] font-bold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl" style={{ animationDelay: "120ms" }}>
-              Die richtige Felge.
+            <h1 className="animate-rise font-display mt-5 text-[2.15rem] uppercase leading-[0.98] tracking-tight sm:text-5xl lg:text-[3.6rem] xl:text-[4rem]" style={{ animationDelay: "120ms" }}>
+              <span className="text-chrome">Die richtige Felge.</span>
               <br />
-              <span className="text-gradient-gold">Für dein Fahrzeug.</span>
+              <span className="text-gradient-brand">Für dein Fahrzeug.</span>
             </h1>
             <p className="animate-rise mt-5 max-w-xl text-lg text-muted" style={{ animationDelay: "200ms" }}>
               Gebrauchte Felgen und Kompletträder für Auto und Motorrad kaufen und verkaufen. Wähle dein Fahrzeug, und wir zeigen dir nur, was
               wirklich passt: Lochkreis, Einpresstiefe, Mittenloch und Größe.
             </p>
             <div className="animate-rise mt-7 flex flex-wrap gap-3" style={{ animationDelay: "280ms" }}>
-              <Link href="/suche" className="btn btn-gold group">
+              <Link href="/suche" className="btn btn-brand group">
                 <Search className="h-4 w-4" />
                 Felgen durchsuchen
               </Link>
@@ -128,13 +128,13 @@ export default async function HomePage() {
             <Link
               key={c.href}
               href={c.href}
-              className="reveal card group relative overflow-hidden p-5 transition-all hover:border-gold"
+              className="reveal card group relative overflow-hidden p-5 transition-all hover:border-brand"
               style={{ ["--reveal-delay" as string]: `${i * 80}ms` }}
             >
-              <c.icon className="h-7 w-7 text-gold transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
+              <c.icon className="h-7 w-7 text-brand transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
               <h3 className="font-display mt-4 text-lg font-semibold uppercase tracking-wide">{c.label}</h3>
               <p className="mt-1 text-sm text-muted">{c.text}</p>
-              <ArrowRight className="absolute right-4 top-5 h-4 w-4 text-faint transition-all group-hover:translate-x-1 group-hover:text-gold" />
+              <ArrowRight className="absolute right-4 top-5 h-4 w-4 text-faint transition-all group-hover:translate-x-1 group-hover:text-brand" />
             </Link>
           ))}
         </div>
@@ -171,7 +171,7 @@ export default async function HomePage() {
       {/* SO FUNKTIONIERT'S */}
       <section className="container-page mt-24">
         <div className="reveal text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gold">So einfach geht&apos;s</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand">So einfach geht&apos;s</p>
           <h2 className="font-display mt-2 text-3xl font-bold uppercase sm:text-4xl">In drei Schritten zur neuen Felge</h2>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -182,7 +182,7 @@ export default async function HomePage() {
           ].map((s, i) => (
             <div key={s.t} className="reveal card relative p-6" style={{ ["--reveal-delay" as string]: `${i * 100}ms` }}>
               <span className="font-display absolute right-5 top-3 text-6xl font-bold text-surface-3">{i + 1}</span>
-              <s.icon className="relative h-8 w-8 text-gold" />
+              <s.icon className="relative h-8 w-8 text-brand" />
               <h3 className="relative mt-4 text-lg font-semibold">{s.t}</h3>
               <p className="relative mt-2 text-sm leading-relaxed text-muted">{s.d}</p>
             </div>
@@ -192,23 +192,23 @@ export default async function HomePage() {
 
       {/* VERKAUFEN CTA */}
       <section className="container-page mt-24">
-        <div className="reveal streak relative overflow-hidden rounded-[1.75rem] border border-gold/30 bg-gradient-to-br from-surface-2 via-surface to-bg p-8 sm:p-12">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gold/15 blur-3xl" />
+        <div className="reveal streak relative overflow-hidden rounded-[1.75rem] border border-brand/30 bg-gradient-to-br from-surface-2 via-surface to-bg p-8 sm:p-12">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/15 blur-3xl" />
           <div className="relative grid items-center gap-8 md:grid-cols-[1fr_auto]">
             <div>
               <h2 className="font-display text-3xl font-bold uppercase sm:text-4xl">
-                Felgen im Keller? <span className="text-gradient-gold">Mach Geld daraus.</span>
+                Felgen im Keller? <span className="text-gradient-brand">Mach Geld daraus.</span>
               </h2>
               <p className="mt-3 max-w-2xl text-muted">
                 Inserieren ist kostenlos. Lade bis zu 12 Fotos hoch, gib die Daten ein, und Käufer mit passendem Fahrzeug finden dich automatisch.
               </p>
               <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-gold" /> Kontakt nur über den Chat</li>
-                <li className="flex items-center gap-2"><Upload className="h-4 w-4 text-gold" /> In 3 Minuten online</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-gold" /> Privat & gewerblich</li>
+                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-brand" /> Kontakt nur über den Chat</li>
+                <li className="flex items-center gap-2"><Upload className="h-4 w-4 text-brand" /> In 3 Minuten online</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-brand" /> Privat & gewerblich</li>
               </ul>
             </div>
-            <Link href="/inserat/neu" className="btn btn-gold h-14 px-8 text-base">
+            <Link href="/inserat/neu" className="btn btn-brand h-14 px-8 text-base">
               Jetzt inserieren
               <ArrowRight className="h-5 w-5" />
             </Link>
@@ -223,11 +223,11 @@ function SectionTitle({ eyebrow, title, href }: { eyebrow: string; title: string
   return (
     <div className="reveal mb-6 flex items-end justify-between gap-4">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-widest text-gold">{eyebrow}</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand">{eyebrow}</p>
         <h2 className="font-display mt-1 text-2xl font-bold uppercase sm:text-3xl">{title}</h2>
       </div>
       {href && (
-        <Link href={href} className="group flex shrink-0 items-center gap-1 text-sm font-semibold text-muted hover:text-gold">
+        <Link href={href} className="group flex shrink-0 items-center gap-1 text-sm font-semibold text-muted hover:text-brand">
           Alle ansehen <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       )}

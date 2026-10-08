@@ -17,7 +17,7 @@ export function SiteHeader({ user }: { user: User | null }) {
           {user ? (
             <>
               <MessagesLink />
-              <Link href="/inserat/neu" className="btn btn-gold btn-sm ml-1 hidden md:inline-flex">
+              <Link href="/inserat/neu" className="btn btn-brand btn-sm ml-1 hidden md:inline-flex">
                 + Inserieren
               </Link>
               <UserMenu name={user.name} isAdmin={user.role === "admin"} image={user.image} />
@@ -27,7 +27,7 @@ export function SiteHeader({ user }: { user: User | null }) {
               <Link href="/anmelden" className="btn btn-ghost btn-sm hidden sm:inline-flex">
                 Anmelden
               </Link>
-              <Link href="/inserat/neu" className="btn btn-gold btn-sm hidden md:inline-flex">
+              <Link href="/inserat/neu" className="btn btn-brand btn-sm hidden md:inline-flex">
                 + Inserieren
               </Link>
             </>

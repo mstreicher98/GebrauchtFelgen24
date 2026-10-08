@@ -7,7 +7,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
       <RimMark className="h-20 w-20 text-red" />
       <h1 className="font-display mt-6 text-3xl font-bold uppercase">Da ist etwas schiefgelaufen</h1>
       <p className="mt-2 text-muted">Bitte versuche es gleich noch einmal.</p>
-      <button type="button" className="btn btn-gold mt-6" onClick={reset}>
+      <button type="button" className="btn btn-brand mt-6" onClick={reset}>
         Erneut versuchen
       </button>
     </div>

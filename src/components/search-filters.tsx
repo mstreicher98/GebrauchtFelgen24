@@ -28,7 +28,7 @@ export function MobileFilterButton({ hasVehicle, vehicleType }: Props) {
     <>
       <button type="button" className="btn btn-outline btn-sm lg:hidden" onClick={() => setOpen(true)}>
         <SlidersHorizontal className="h-4 w-4" />
-        Filter{active > 0 && <span className="badge badge-gold">{active}</span>}
+        Filter{active > 0 && <span className="badge badge-brand">{active}</span>}
       </button>
       {/* Mobile Drawer */}
       {open && (
@@ -197,7 +197,7 @@ function FilterForm({ hasVehicle, vehicleType, onApplied }: Props & { onApplied?
           ))}
         </select>
         <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-muted">
-          <input type="checkbox" className="h-4 w-4 accent-[var(--gold)]" checked={sp.get("versand") === "1"} onChange={(e) => update({ versand: e.target.checked ? "1" : null })} />
+          <input type="checkbox" className="h-4 w-4 accent-[var(--brand)]" checked={sp.get("versand") === "1"} onChange={(e) => update({ versand: e.target.checked ? "1" : null })} />
           Nur mit Versand
         </label>
       </Section>
@@ -246,7 +246,7 @@ function FilterForm({ hasVehicle, vehicleType, onApplied }: Props & { onApplied?
       </Section>
 
       <div className="sticky bottom-0 -mx-1 flex gap-2 bg-gradient-to-t from-bg via-bg to-transparent px-1 pb-1 pt-4">
-        <button className="btn btn-gold flex-1" disabled={pending}>
+        <button className="btn btn-brand flex-1" disabled={pending}>
           Filter anwenden
         </button>
         <button

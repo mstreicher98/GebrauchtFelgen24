@@ -15,9 +15,9 @@ export function FitCheck({ listingId, vehicleType }: { listingId: number; vehicl
     lvl === "perfekt" || lvl === "passend" ? (
       <CheckCircle2 className="h-6 w-6 text-green" />
     ) : lvl === "zentrierring" ? (
-      <Wrench className="h-6 w-6 text-gold" />
+      <Wrench className="h-6 w-6 text-brand" />
     ) : lvl === "pruefen" ? (
-      <CircleHelp className="h-6 w-6 text-gold" />
+      <CircleHelp className="h-6 w-6 text-brand" />
     ) : (
       <XCircle className="h-6 w-6 text-red" />
     );
@@ -47,7 +47,7 @@ export function FitCheck({ listingId, vehicleType }: { listingId: number; vehicl
         <div
           className={clsx(
             "animate-scale-in mt-4 rounded-2xl border p-4",
-            result.fit.level === "nein" ? "border-red/40 bg-red-soft" : result.fit.level === "perfekt" || result.fit.level === "passend" ? "border-green/40 bg-green-soft" : "border-gold/40 bg-gold-soft",
+            result.fit.level === "nein" ? "border-red/40 bg-red-soft" : result.fit.level === "perfekt" || result.fit.level === "passend" ? "border-green/40 bg-green-soft" : "border-brand/40 bg-brand-soft",
           )}
         >
           <div className="flex items-center gap-3">

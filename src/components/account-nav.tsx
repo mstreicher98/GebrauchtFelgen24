@@ -25,7 +25,7 @@ export function AccountNav() {
             href={i.href}
             className={clsx(
               "flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors",
-              active ? "bg-gold-soft text-gold" : "text-muted hover:bg-surface-2 hover:text-fg",
+              active ? "bg-brand-soft text-brand" : "text-muted hover:bg-surface-2 hover:text-fg",
             )}
           >
             <i.icon className="h-4 w-4" />

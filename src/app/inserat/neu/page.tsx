@@ -21,7 +21,7 @@ export default async function NewListingPage() {
     <div className="container-page py-8">
       <div className="mx-auto mb-8 max-w-3xl">
         <h1 className="font-display text-3xl font-bold uppercase sm:text-4xl">
-          Felgen <span className="text-gradient-gold">inserieren</span>
+          Felgen <span className="text-gradient-brand">inserieren</span>
         </h1>
         <p className="mt-2 text-muted">Kostenlos, in wenigen Minuten online und {env.listingLifetimeDays} Tage sichtbar.</p>
       </div>

@@ -48,8 +48,8 @@ export function ReportButton({ targetType, targetId, label = "Melden", loggedIn 
             </h2>
             <div className="mt-4 space-y-2">
               {REPORT_REASONS.map((r) => (
-                <label key={r} className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2.5 text-sm has-[:checked]:border-gold has-[:checked]:bg-gold-soft">
-                  <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-[var(--gold)]" required />
+                <label key={r} className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2.5 text-sm has-[:checked]:border-brand has-[:checked]:bg-brand-soft">
+                  <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-[var(--brand)]" required />
                   {r}
                 </label>
               ))}

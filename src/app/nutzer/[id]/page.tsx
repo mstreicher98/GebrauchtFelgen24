@@ -41,14 +41,14 @@ export default async function SellerPage(props: PageProps<"/nutzer/[id]">) {
   return (
     <div className="container-page py-8">
       <div className="card carbon mb-8 flex flex-col gap-5 p-6 sm:flex-row sm:items-center">
-        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-gold-soft text-3xl font-bold text-gold">
+        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-brand-soft text-3xl font-bold text-brand">
           {dealer ? <Store className="h-9 w-9" /> : displayName(u).slice(0, 1)}
         </span>
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-3xl font-bold uppercase">{displayName(u)}</h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
             <span className="flex items-center gap-1">
-              {dealer ? <BadgeCheck className="h-4 w-4 text-gold" /> : <UserIcon className="h-4 w-4" />}
+              {dealer ? <BadgeCheck className="h-4 w-4 text-brand" /> : <UserIcon className="h-4 w-4" />}
               {dealer ? "Gewerblicher Händler" : "Privatverkäufer"}
             </span>
             {u.city && (

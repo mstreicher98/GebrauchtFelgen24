@@ -95,7 +95,7 @@ export default function GuidePage() {
   return (
     <div className="container-page py-12">
       <div className="max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-gold">Felgen-Ratgeber</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand">Felgen-Ratgeber</p>
         <h1 className="font-display mt-2 text-4xl font-bold uppercase sm:text-5xl">8Jx18 ET45 5x112 – was heißt das?</h1>
         <p className="mt-3 text-muted">Die wichtigsten Begriffe rund um Felgen und Reifen – kurz und verständlich erklärt.</p>
       </div>
@@ -109,13 +109,13 @@ export default function GuidePage() {
       <div className="mt-10 grid gap-4 lg:grid-cols-2">
         {TOPICS.map((t, i) => (
           <section key={t.id} id={t.id} className="card reveal scroll-mt-24 p-6" style={{ ["--reveal-delay" as string]: `${(i % 2) * 80}ms` }}>
-            <h2 className="font-display text-xl uppercase tracking-wide text-gold">{t.t}</h2>
+            <h2 className="font-display text-xl uppercase tracking-wide text-brand">{t.t}</h2>
             <div className="mt-3 space-y-3 leading-relaxed text-muted [&_strong]:text-fg">{t.d}</div>
           </section>
         ))}
       </div>
       <div className="mt-12 text-center">
-        <Link href="/fahrzeuge" className="btn btn-gold group">
+        <Link href="/fahrzeuge" className="btn btn-brand group">
           Werte für mein Fahrzeug nachschlagen <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>

@@ -35,12 +35,12 @@ export default async function MyListingsPage(props: PageProps<"/konto/inserate">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="inline-flex rounded-full border border-line p-1 text-sm">
           {TABS.map(([k, l]) => (
-            <Link key={k} href={`/konto/inserate?status=${k}`} className={`rounded-full px-3.5 py-1.5 font-semibold transition-colors ${tab === k ? "bg-gold text-on-gold" : "text-muted hover:text-fg"}`}>
+            <Link key={k} href={`/konto/inserate?status=${k}`} className={`rounded-full px-3.5 py-1.5 font-semibold transition-colors ${tab === k ? "bg-brand-fill text-on-brand" : "text-muted hover:text-fg"}`}>
               {l}
             </Link>
           ))}
         </div>
-        <Link href="/inserat/neu" className="btn btn-gold btn-sm">
+        <Link href="/inserat/neu" className="btn btn-brand btn-sm">
           <Plus className="h-4 w-4" /> Neues Inserat
         </Link>
       </div>
@@ -66,7 +66,7 @@ export default async function MyListingsPage(props: PageProps<"/konto/inserate">
                   </span>
                   {l.status === "aktiv" && <span className="text-xs text-faint">läuft bis {formatDate(l.expiresAt)}</span>}
                 </div>
-                <Link href={listingUrl(l)} className="mt-1 block truncate font-semibold hover:text-gold">
+                <Link href={listingUrl(l)} className="mt-1 block truncate font-semibold hover:text-brand">
                   {l.title}
                 </Link>
                 <p className="text-sm text-muted">{formatPrice(l.priceCents)}</p>

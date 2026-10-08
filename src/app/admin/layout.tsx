@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="container-page py-8">
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <h1 className="font-display text-3xl font-bold uppercase">
-          Admin<span className="text-gold">.</span>
+          Admin<span className="text-brand">.</span>
         </h1>
         <nav className="scrollbar-none flex gap-1 overflow-x-auto">
           {NAV.map(([href, label]) => (

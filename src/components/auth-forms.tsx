@@ -96,13 +96,13 @@ export function LoginForm({ google, apple }: { google: boolean; apple: boolean }
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="label">Passwort</label>
-            <Link href="/passwort-vergessen" className="mb-1.5 text-xs text-muted hover:text-gold">Passwort vergessen?</Link>
+            <Link href="/passwort-vergessen" className="mb-1.5 text-xs text-muted hover:text-brand">Passwort vergessen?</Link>
           </div>
           <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="current-password" />
         </div>
         {error && <p className="animate-fade-in rounded-xl bg-red-soft px-3 py-2 text-sm text-red">{error}</p>}
-        <button className="btn btn-gold w-full" disabled={busy}>
-          {busy ? <Spinner className="h-5 w-5 text-on-gold" /> : "Anmelden"}
+        <button className="btn btn-brand w-full" disabled={busy}>
+          {busy ? <Spinner className="h-5 w-5 text-on-brand" /> : "Anmelden"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
@@ -131,7 +131,7 @@ export function RegisterForm({ google, apple }: { google: boolean; apple: boolea
   if (done) {
     return (
       <div className="animate-scale-in text-center">
-        <MailCheck className="mx-auto h-14 w-14 text-gold" />
+        <MailCheck className="mx-auto h-14 w-14 text-brand" />
         <h2 className="font-display mt-4 text-2xl uppercase">Fast geschafft!</h2>
         <p className="mt-3 text-muted">
           Wir haben dir eine E-Mail an <strong className="text-fg">{email}</strong> geschickt. Bitte klicke auf den Bestätigungslink, um dein Konto zu aktivieren.
@@ -177,7 +177,7 @@ export function RegisterForm({ google, apple }: { google: boolean; apple: boolea
               role="radio"
               aria-checked={type === v}
               onClick={() => setType(v)}
-              className={clsx("flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition-all", type === v ? "border-gold bg-gold-soft text-gold" : "border-line text-muted")}
+              className={clsx("flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition-all", type === v ? "border-brand bg-brand-soft text-brand" : "border-line text-muted")}
             >
               <Icon className="h-4 w-4" /> {l}
             </button>
@@ -202,20 +202,20 @@ export function RegisterForm({ google, apple }: { google: boolean; apple: boolea
           <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="new-password" />
           <div className="mt-2 flex gap-1" aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={clsx("h-1 flex-1 rounded-full transition-colors", strength(password) > i ? (strength(password) > 2 ? "bg-green" : "bg-gold") : "bg-surface-3")} />
+              <span key={i} className={clsx("h-1 flex-1 rounded-full transition-colors", strength(password) > i ? (strength(password) > 2 ? "bg-green" : "bg-brand") : "bg-surface-3")} />
             ))}
           </div>
         </div>
         <label className="flex cursor-pointer items-start gap-2.5 text-sm text-muted">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--gold)]" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
+          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--brand)]" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
           <span>
             Ich akzeptiere die <Link href="/agb" className="link" target="_blank">AGB</Link> und habe die{" "}
             <Link href="/datenschutz" className="link" target="_blank">Datenschutzerklärung</Link> gelesen.
           </span>
         </label>
         {error && <p className="animate-fade-in rounded-xl bg-red-soft px-3 py-2 text-sm text-red">{error}</p>}
-        <button className="btn btn-gold w-full" disabled={busy}>
-          {busy ? <Spinner className="h-5 w-5 text-on-gold" /> : "Konto erstellen"}
+        <button className="btn btn-brand w-full" disabled={busy}>
+          {busy ? <Spinner className="h-5 w-5 text-on-brand" /> : "Konto erstellen"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
@@ -260,7 +260,7 @@ export function ForgotPasswordForm() {
         <label htmlFor="email" className="label">E-Mail</label>
         <input id="email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
       </div>
-      <button className="btn btn-gold w-full" disabled={busy}>Link anfordern</button>
+      <button className="btn btn-brand w-full" disabled={busy}>Link anfordern</button>
     </form>
   );
 }
@@ -290,7 +290,7 @@ export function ResetPasswordForm() {
         <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="new-password" />
       </div>
       {error && <p className="rounded-xl bg-red-soft px-3 py-2 text-sm text-red">{error}</p>}
-      <button className="btn btn-gold w-full" disabled={busy}>Passwort speichern</button>
+      <button className="btn btn-brand w-full" disabled={busy}>Passwort speichern</button>
     </form>
   );
 }

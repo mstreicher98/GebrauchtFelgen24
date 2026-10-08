@@ -35,7 +35,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
           <h1 className="font-display text-3xl font-bold uppercase sm:text-4xl">
             {gen ? (
               <>
-                Felgen für <span className="text-gradient-gold">{gen.fullName}</span>
+                Felgen für <span className="text-gradient-brand">{gen.fullName}</span>
               </>
             ) : (
               "Felgen finden"
@@ -59,7 +59,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
         <div className="card reveal mb-6 overflow-hidden">
           <div className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gold">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand">
                 {gen.type === "auto" ? "Dein Auto" : "Dein Motorrad"}
                 <Link href="/suche" className="text-faint hover:text-red" aria-label="Fahrzeug entfernen">
                   <X className="h-3.5 w-3.5" />
@@ -92,7 +92,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
             </Suspense>
           </div>
           <div className="flex items-start gap-2 border-t border-line bg-surface-2/50 px-4 py-2.5 text-xs text-muted sm:px-5">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
             {gen.type === "auto"
               ? "Geprüft werden Lochkreis, Mittenloch, Zollgröße, Breite und Einpresstiefe gegen die Serienwerte. Angaben ohne Gewähr – maßgeblich sind Fahrzeugpapiere und Felgengutachten."
               : "Motorradfelgen passen meist nur modellspezifisch. „Nur passende“ zeigt Felgen, die der Verkäufer für dein Modell angegeben hat."}
@@ -102,7 +102,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
         <details className="card reveal mb-6 overflow-hidden" open={res.total === 0 || undefined}>
           <summary className="cursor-pointer list-none px-5 py-4 font-semibold marker:hidden">
             <span className="inline-flex items-center gap-2">
-              <CarFront className="h-5 w-5 text-gold" /> Nach Fahrzeug filtern: nur Felgen, die wirklich passen
+              <CarFront className="h-5 w-5 text-brand" /> Nach Fahrzeug filtern: nur Felgen, die wirklich passen
             </span>
           </summary>
           <div className="border-t border-line p-1">
@@ -126,7 +126,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
             </ListingGrid>
           ) : (
             <div className="card animate-fade-up flex flex-col items-center p-10 text-center">
-              <CircleAlert className="h-10 w-10 text-gold" />
+              <CircleAlert className="h-10 w-10 text-brand" />
               <h2 className="mt-4 text-lg font-semibold">Keine passenden Inserate gefunden</h2>
               <p className="mt-2 max-w-md text-sm text-muted">
                 {gen && f.modus === "streng"

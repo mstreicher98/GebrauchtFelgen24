@@ -42,10 +42,10 @@ export default async function AdminListingsPage(props: PageProps<"/admin/inserat
                 <tr key={l.id} className="border-t border-line align-top">
                   <td className="p-3 text-faint">{l.id}</td>
                   <td className="max-w-xs p-3">
-                    <Link href={listingUrl(l)} className="hover:text-gold" target="_blank">
+                    <Link href={listingUrl(l)} className="hover:text-brand" target="_blank">
                       {l.title}
                     </Link>
-                    {featured && <span className="badge ml-1 bg-red-solid text-white">TOP bis {formatDate(l.featuredUntil!)}</span>}
+                    {featured && <span className="badge badge-top ml-1">TOP bis {formatDate(l.featuredUntil!)}</span>}
                   </td>
                   <td className="p-3 text-muted">{email}</td>
                   <td className="p-3">{formatPrice(l.priceCents)}</td>

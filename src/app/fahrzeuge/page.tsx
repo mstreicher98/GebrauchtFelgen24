@@ -22,7 +22,7 @@ export default async function VehiclesPage() {
   return (
     <div className="container-page py-10">
       <div className="max-w-3xl">
-        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-gold">
+        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-brand">
           <Database className="h-4 w-4" /> Fahrzeug-Datenbank
         </p>
         <h1 className="font-display mt-2 text-4xl font-bold uppercase sm:text-5xl">Welche Felge passt?</h1>
@@ -44,7 +44,7 @@ function Section({ title, icon, items }: { title: string; icon: React.ReactNode;
   return (
     <section className="mt-10">
       <h2 className="font-display mb-4 flex items-center gap-2 text-2xl font-bold uppercase">
-        <span className="text-gold">{icon}</span> {title}
+        <span className="text-brand">{icon}</span> {title}
       </h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {items.map((m, i) => (
@@ -52,10 +52,10 @@ function Section({ title, icon, items }: { title: string; icon: React.ReactNode;
             key={m.id}
             href={`/fahrzeuge/${m.type}/${m.slug}`}
             data-make={m.name.toLowerCase()}
-            className="card reveal group p-4 transition-all hover:-translate-y-0.5 hover:border-gold"
+            className="card reveal group p-4 transition-all hover:-translate-y-0.5 hover:border-brand"
             style={{ ["--reveal-delay" as string]: `${(i % 5) * 40}ms` }}
           >
-            <p className="font-semibold group-hover:text-gold">{m.name}</p>
+            <p className="font-semibold group-hover:text-brand">{m.name}</p>
             <p className="mt-0.5 text-xs text-faint">
               {m.models} Modelle · {m.gens} Baureihen
             </p>

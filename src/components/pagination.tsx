@@ -19,7 +19,7 @@ export function Pagination({ page, pages, makeHref }: { page: number; pages: num
           <Link
             href={makeHref(n)}
             aria-current={n === page ? "page" : undefined}
-            className={clsx("btn btn-sm min-w-9 px-3", n === page ? "btn-gold" : "btn-outline")}
+            className={clsx("btn btn-sm min-w-9 px-3", n === page ? "btn-brand" : "btn-outline")}
           >
             {n}
           </Link>

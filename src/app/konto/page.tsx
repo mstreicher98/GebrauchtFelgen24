@@ -37,8 +37,8 @@ export default async function AccountPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {tiles.map((t, i) => (
-          <Link key={t.href} href={t.href} className="card reveal group p-5 transition-colors hover:border-gold" style={{ ["--reveal-delay" as string]: `${i * 60}ms` }}>
-            <t.icon className={t.highlight ? "h-5 w-5 text-red" : "h-5 w-5 text-gold"} />
+          <Link key={t.href} href={t.href} className="card reveal group p-5 transition-colors hover:border-brand" style={{ ["--reveal-delay" as string]: `${i * 60}ms` }}>
+            <t.icon className={t.highlight ? "h-5 w-5 text-red" : "h-5 w-5 text-brand"} />
             <p className="font-display mt-3 text-3xl font-bold">{t.value}</p>
             <p className="text-sm text-muted">{t.label}</p>
           </Link>
@@ -51,12 +51,12 @@ export default async function AccountPage() {
             <Eye className="h-4 w-4" /> Mehr Fotos und genaue Daten (ET, Mittenloch) bringen mehr Anfragen.
           </p>
         </div>
-        <Link href="/inserat/neu" className="btn btn-gold">
+        <Link href="/inserat/neu" className="btn btn-brand">
           <Plus className="h-4 w-4" /> Neues Inserat
         </Link>
       </div>
       <PushOptIn />
-      <Link href="/konto/einstellungen" className="flex items-center justify-between rounded-2xl border border-line px-5 py-4 text-sm text-muted hover:border-gold hover:text-fg">
+      <Link href="/konto/einstellungen" className="flex items-center justify-between rounded-2xl border border-line px-5 py-4 text-sm text-muted hover:border-brand hover:text-fg">
         Profil, Händlerdaten und Benachrichtigungen bearbeiten <ArrowRight className="h-4 w-4" />
       </Link>
     </div>

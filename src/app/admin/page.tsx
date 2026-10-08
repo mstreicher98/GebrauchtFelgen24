@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
           </>
         );
         return href ? (
-          <Link key={label} href={href} className="card p-5 hover:border-gold">
+          <Link key={label} href={href} className="card p-5 hover:border-brand">
             {inner}
           </Link>
         ) : (

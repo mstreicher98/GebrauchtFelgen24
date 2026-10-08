@@ -40,12 +40,12 @@ export function PushOptIn() {
   }, []);
   if (!show) return null;
   return (
-    <div className="animate-fade-up flex items-center gap-3 rounded-2xl border border-gold/30 bg-gold-soft p-3 text-left text-sm">
-      <BellRing className="h-5 w-5 shrink-0 text-gold" />
+    <div className="animate-fade-up flex items-center gap-3 rounded-2xl border border-brand/30 bg-brand-soft p-3 text-left text-sm">
+      <BellRing className="h-5 w-5 shrink-0 text-brand" />
       <span className="flex-1">Push-Benachrichtigungen für neue Nachrichten aktivieren?</span>
       <button
         type="button"
-        className="btn btn-gold btn-sm"
+        className="btn btn-brand btn-sm"
         onClick={async () => {
           try {
             await subscribePush();

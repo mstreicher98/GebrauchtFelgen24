@@ -116,9 +116,9 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
               className="group w-full text-left"
               aria-current={i === step ? "step" : undefined}
             >
-              <span className={clsx("block h-1.5 rounded-full transition-all duration-500", i <= step ? "bg-gold" : "bg-surface-3")} />
+              <span className={clsx("block h-1.5 rounded-full transition-all duration-500", i <= step ? "bg-brand" : "bg-surface-3")} />
               <span className={clsx("mt-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider", i === step ? "text-fg" : "text-faint")}>
-                {i < step ? <Check className="h-3.5 w-3.5 text-gold" /> : <span>{i + 1}.</span>}
+                {i < step ? <Check className="h-3.5 w-3.5 text-brand" /> : <span>{i + 1}.</span>}
                 {s.label}
               </span>
             </button>
@@ -250,7 +250,7 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                 )}
               </div>
               <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
-                <input type="checkbox" className="h-4 w-4 accent-[var(--gold)]" checked={v.hasCertificate} onChange={(e) => set("hasCertificate", e.target.checked)} />
+                <input type="checkbox" className="h-4 w-4 accent-[var(--brand)]" checked={v.hasCertificate} onChange={(e) => set("hasCertificate", e.target.checked)} />
                 Gutachten / ABE / Teilegutachten vorhanden
               </label>
             </Block>
@@ -289,7 +289,7 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                     <input className="input" inputMode="numeric" maxLength={4} value={v.dot} onChange={(e) => set("dot", e.target.value.replace(/\D/g, ""))} placeholder="KWJJ" />
                   </Field>
                   <label className="flex cursor-pointer items-center gap-2 self-end pb-3 text-sm">
-                    <input type="checkbox" className="h-4 w-4 accent-[var(--gold)]" checked={v.tpms} onChange={(e) => set("tpms", e.target.checked)} />
+                    <input type="checkbox" className="h-4 w-4 accent-[var(--brand)]" checked={v.tpms} onChange={(e) => set("tpms", e.target.checked)} />
                     RDKS-Sensoren verbaut
                   </label>
                 </div>
@@ -346,7 +346,7 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
               </div>
               {userPhone && (
                 <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="checkbox" className="h-4 w-4 accent-[var(--gold)]" checked={v.showPhone} onChange={(e) => set("showPhone", e.target.checked)} />
+                  <input type="checkbox" className="h-4 w-4 accent-[var(--brand)]" checked={v.showPhone} onChange={(e) => set("showPhone", e.target.checked)} />
                   Telefonnummer ({userPhone}) im Inserat anzeigen
                 </label>
               )}
@@ -365,7 +365,7 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                     }}
                     aria-invalid={!!errors.title}
                   />
-                  {!titleTouched && <Sparkles className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold" />}
+                  {!titleTouched && <Sparkles className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />}
                 </div>
               </Field>
               <Field label="Beschreibung" className="mt-4" hint={`${v.description.length}/4000`}>
@@ -395,12 +395,12 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                 Speichern
               </button>
             )}
-            <button type="button" className="btn btn-gold" onClick={next}>
+            <button type="button" className="btn btn-brand" onClick={next}>
               Weiter <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         ) : (
-          <button type="button" className="btn btn-gold" onClick={submit} disabled={pending}>
+          <button type="button" className="btn btn-brand" onClick={submit} disabled={pending}>
             {pending ? "Speichere …" : listingId ? "Änderungen speichern" : "Jetzt veröffentlichen"}
             <Check className="h-4 w-4" />
           </button>
@@ -439,7 +439,7 @@ function BigChoice({ active, onClick, icon, label, sub }: { active: boolean; onC
       aria-pressed={active}
       className={clsx(
         "flex flex-col items-center gap-2 rounded-2xl border-2 p-5 text-center transition-all duration-300 sm:p-7",
-        active ? "scale-[1.02] border-gold bg-gold-soft text-gold shadow-[var(--shadow-gold)]" : "border-line text-muted hover:border-line-strong hover:text-fg",
+        active ? "scale-[1.02] border-brand bg-brand-soft text-brand shadow-[var(--shadow-brand)]" : "border-line text-muted hover:border-line-strong hover:text-fg",
       )}
     >
       {icon}

@@ -45,7 +45,7 @@ export function HeaderNav() {
             {n.label}
             <span
               className={clsx(
-                "absolute inset-x-3.5 -bottom-[1px] h-0.5 rounded-full bg-gold transition-transform duration-300",
+                "absolute inset-x-3.5 -bottom-[1px] h-0.5 rounded-full bg-brand transition-transform duration-300",
                 active ? "scale-x-100" : "scale-x-0",
               )}
             />
@@ -100,7 +100,7 @@ export function UserMenu({ name, isAdmin, image }: { name: string; isAdmin: bool
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="ml-1 flex items-center gap-1.5 rounded-full border border-line py-1 pl-1 pr-2.5 transition-colors hover:border-gold"
+        className="ml-1 flex items-center gap-1.5 rounded-full border border-line py-1 pl-1 pr-2.5 transition-colors hover:border-brand"
         aria-expanded={open}
         aria-haspopup="menu"
       >
@@ -108,7 +108,7 @@ export function UserMenu({ name, isAdmin, image }: { name: string; isAdmin: bool
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt="" className="h-7 w-7 rounded-full object-cover" referrerPolicy="no-referrer" />
         ) : (
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-gold-soft text-sm font-bold text-gold">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-soft text-sm font-bold text-brand">
             {name.slice(0, 1).toUpperCase()}
           </span>
         )}
@@ -127,7 +127,7 @@ export function UserMenu({ name, isAdmin, image }: { name: string; isAdmin: bool
             </Link>
           ))}
           {isAdmin && (
-            <Link href="/admin" role="menuitem" className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gold hover:bg-surface-2">
+            <Link href="/admin" role="menuitem" className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-brand hover:bg-surface-2">
               <Shield className="h-4 w-4" />
               Admin-Bereich
             </Link>
@@ -174,11 +174,11 @@ export function MobileTabBar({ loggedIn }: { loggedIn: boolean }) {
           return (
             <Link key={t.label} href={t.href} className="relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium">
               {t.primary ? (
-                <span className="-mt-5 grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-gold-strong to-gold text-on-gold shadow-[0_8px_24px_-8px_var(--gold)]">
+                <span className="-mt-5 grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-fill to-brand-fill-2 text-on-brand shadow-[0_8px_24px_-8px_var(--brand)]">
                   <t.icon className="h-6 w-6" />
                 </span>
               ) : (
-                <t.icon className={clsx("h-5 w-5 transition-colors", active ? "text-gold" : "text-muted")} />
+                <t.icon className={clsx("h-5 w-5 transition-colors", active ? "text-brand" : "text-muted")} />
               )}
               <span className={active ? "text-fg" : "text-muted"}>{t.label}</span>
               {!!t.badge && (

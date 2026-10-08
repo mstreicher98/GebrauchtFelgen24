@@ -24,11 +24,11 @@ export default async function AdminMakePage(props: PageProps<"/admin/fahrzeuge/[
 
   return (
     <div>
-      <Link href="/admin/fahrzeuge" className="text-sm text-muted hover:text-gold">← Alle Marken</Link>
+      <Link href="/admin/fahrzeuge" className="text-sm text-muted hover:text-brand">← Alle Marken</Link>
       <h2 className="font-display mt-2 text-2xl uppercase">{mk.name}</h2>
       <p className="mb-6 mt-1 text-sm text-muted">
-        Radgrößen bitte eine pro Zeile im Format <code className="text-gold">7.5Jx18 ET51 225/40 R18</code>, Mischbereifung mit{" "}
-        <code className="text-gold">V 8Jx19 ET27 225/40 R19 | H 8.5Jx19 ET40 255/35 R19</code>, Motorräder z. B. <code className="text-gold">V 3.50x17 120/70 ZR17</code>.
+        Radgrößen bitte eine pro Zeile im Format <code className="text-brand">7.5Jx18 ET51 225/40 R18</code>, Mischbereifung mit{" "}
+        <code className="text-brand">V 8Jx19 ET27 225/40 R19 | H 8.5Jx19 ET40 255/35 R19</code>, Motorräder z. B. <code className="text-brand">V 3.50x17 120/70 ZR17</code>.
         Zoll- und Breitenbereich werden automatisch aus den Radgrößen berechnet.
       </p>
       <NewModelForm makeId={makeId} />

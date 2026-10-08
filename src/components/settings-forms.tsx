@@ -65,7 +65,7 @@ export function ProfileSettings({ initial }: { initial: Profile }) {
               ["haendler", "Gewerblicher Händler", Building2],
             ] as const
           ).map(([val, l, Icon]) => (
-            <button key={val} type="button" onClick={() => set("accountType", val)} className={clsx("flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition-all", v.accountType === val ? "border-gold bg-gold-soft text-gold" : "border-line text-muted")}>
+            <button key={val} type="button" onClick={() => set("accountType", val)} className={clsx("flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition-all", v.accountType === val ? "border-brand bg-brand-soft text-brand" : "border-line text-muted")}>
               <Icon className="h-4 w-4" /> {l}
             </button>
           ))}
@@ -99,7 +99,7 @@ export function ProfileSettings({ initial }: { initial: Profile }) {
           <textarea className="textarea" value={v.bio} onChange={(e) => set("bio", e.target.value)} maxLength={1000} />
         </F>
         <div className="sm:col-span-2">
-          <button className="btn btn-gold" disabled={pending}>
+          <button className="btn btn-brand" disabled={pending}>
             Speichern
           </button>
         </div>
@@ -127,7 +127,7 @@ function Toggle({ checked, onChange, label, sub }: { checked: boolean; onChange:
       </span>
       <span className="relative inline-flex shrink-0">
         <input type="checkbox" className="peer sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-        <span className="h-7 w-12 rounded-full bg-surface-3 transition-colors peer-checked:bg-gold" />
+        <span className="h-7 w-12 rounded-full bg-surface-3 transition-colors peer-checked:bg-brand-fill" />
         <span className="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
       </span>
     </label>

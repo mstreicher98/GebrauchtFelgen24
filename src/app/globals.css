@@ -3,61 +3,75 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ------------------------------------------------------------------ */
-/* Design-Tokens – Standard: dunkel (sportlich/premium)                */
+/* Design-Tokens – Markenfarbe aus dem Logo: Königsblau #0D47A1         */
+/* Standard: dunkel (Premium: Blau-Schwarz, Silber, Blau)              */
 /* ------------------------------------------------------------------ */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0a0a0c;
-  --bg-elev: #111114;
-  --surface: #16161a;
-  --surface-2: #1d1d22;
-  --surface-3: #26262d;
-  --border: #2a2a31;
-  --border-strong: #3a3a43;
-  --text: #f3f1ec;
-  --text-muted: #a3a3ad;
-  --text-faint: #8b8b95;
-  --gold: #d6a84f;
-  --gold-strong: #e9c172;
-  --gold-soft: rgb(214 168 79 / 0.14);
-  --on-gold: #0b0b0d;
+  --bg: #06080c;
+  --bg-elev: #0a0d13;
+  --surface: #0f131a;
+  --surface-2: #151a23;
+  --surface-3: #1e2430;
+  --border: #212836;
+  --border-strong: #323b4c;
+  --text: #f2f5fa;
+  --text-muted: #a1abbd;
+  --text-faint: #8792a5;
+  /* Akzent als Schrift/Icon (hell genug für dunklen Grund) */
+  --brand: #5b93ff;
+  --brand-strong: #8fb5ff;
+  --brand-soft: rgb(59 130 246 / 0.14);
+  /* Akzent als Fläche (Buttons, aktive Elemente) – mit weißer Schrift */
+  --brand-fill: #2563eb;
+  --brand-fill-2: #0d47a1;
+  --on-brand: #ffffff;
+  /* Chrom/Silber für Premium-Details */
+  --chrome-1: #ffffff;
+  --chrome-2: #c9d3e3;
+  --chrome-3: #8d9bb3;
   --red: #ff6a5e;
   --red-solid: #d42a1e;
   --red-soft: rgb(230 59 46 / 0.14);
   --green: #3ccf8e;
   --green-soft: rgb(60 207 142 / 0.14);
-  --blue: #5aa9ff;
-  --shadow: 0 10px 30px -12px rgb(0 0 0 / 0.6);
-  --shadow-gold: 0 0 0 1px rgb(214 168 79 / 0.35), 0 18px 40px -18px rgb(214 168 79 / 0.45);
-  --carbon: repeating-linear-gradient(45deg, rgb(255 255 255 / 0.018) 0 2px, transparent 2px 6px);
+  --shadow: 0 10px 30px -12px rgb(0 0 0 / 0.65);
+  --shadow-brand: 0 0 0 1px rgb(91 147 255 / 0.4), 0 18px 44px -18px rgb(37 99 235 / 0.55);
+  --glow: rgb(37 99 235 / 0.16);
+  --carbon: repeating-linear-gradient(45deg, rgb(255 255 255 / 0.016) 0 2px, transparent 2px 6px);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f5f3ef;
-  --bg-elev: #fbfaf8;
+  --bg: #f5f7fb;
+  --bg-elev: #fbfcfe;
   --surface: #ffffff;
-  --surface-2: #f3f1ec;
-  --surface-3: #e9e6df;
-  --border: #e3dfd6;
-  --border-strong: #cfc9bc;
-  --text: #16161a;
-  --text-muted: #55555e;
-  --text-faint: #6b6b74;
-  --gold: #8a6212;
-  --gold-strong: #74510c;
-  --gold-soft: rgb(138 98 18 / 0.1);
-  --on-gold: #ffffff;
+  --surface-2: #eef2f8;
+  --surface-3: #e3e9f2;
+  --border: #dde3ec;
+  --border-strong: #c5cedb;
+  --text: #0b0e14;
+  --text-muted: #4a5466;
+  --text-faint: #5f697c;
+  --brand: #0d47a1;
+  --brand-strong: #0a3a85;
+  --brand-soft: rgb(13 71 161 / 0.08);
+  --brand-fill: #1d5fd6;
+  --brand-fill-2: #0d47a1;
+  --on-brand: #ffffff;
+  --chrome-1: #0b0e14;
+  --chrome-2: #2b3445;
+  --chrome-3: #56627a;
   --red: #b42318;
   --red-solid: #c8281c;
   --red-soft: rgb(201 40 28 / 0.1);
   --green: #148a57;
   --green-soft: rgb(20 138 87 / 0.1);
-  --blue: #1f6fd1;
-  --shadow: 0 10px 30px -14px rgb(40 30 10 / 0.25);
-  --shadow-gold: 0 0 0 1px rgb(168 122 34 / 0.35), 0 18px 40px -20px rgb(168 122 34 / 0.45);
-  --carbon: repeating-linear-gradient(45deg, rgb(0 0 0 / 0.02) 0 2px, transparent 2px 6px);
+  --shadow: 0 10px 30px -14px rgb(12 28 60 / 0.22);
+  --shadow-brand: 0 0 0 1px rgb(13 71 161 / 0.3), 0 18px 40px -20px rgb(13 71 161 / 0.45);
+  --glow: rgb(29 95 214 / 0.1);
+  --carbon: repeating-linear-gradient(45deg, rgb(10 30 70 / 0.022) 0 2px, transparent 2px 6px);
 }
 
 @theme inline {
@@ -71,17 +85,19 @@
   --color-fg: var(--text);
   --color-muted: var(--text-muted);
   --color-faint: var(--text-faint);
-  --color-gold: var(--gold);
-  --color-gold-strong: var(--gold-strong);
-  --color-gold-soft: var(--gold-soft);
-  --color-on-gold: var(--on-gold);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-brand-fill: var(--brand-fill);
+  --color-brand-fill-2: var(--brand-fill-2);
   --color-red: var(--red);
   --color-red-solid: var(--red-solid);
   --color-red-soft: var(--red-soft);
   --color-green: var(--green);
   --color-green-soft: var(--green-soft);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-oswald), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-saira), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 html {
@@ -96,11 +112,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 ::selection {
-  background: var(--gold);
-  color: var(--on-gold);
+  background: var(--brand-fill);
+  color: var(--on-brand);
 }
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -123,7 +139,8 @@ body {
 
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    font-weight: 800;
+    letter-spacing: -0.005em;
   }
 
   .btn {
@@ -152,13 +169,18 @@ body {
     opacity: 0.55;
     pointer-events: none;
   }
-  .btn-gold {
-    background: linear-gradient(135deg, var(--gold-strong), var(--gold));
-    color: var(--on-gold);
-    box-shadow: 0 8px 24px -10px var(--gold);
+  .btn-brand {
+    position: relative;
+    background: linear-gradient(135deg, var(--brand-fill) 0%, var(--brand-fill-2) 100%);
+    color: var(--on-brand);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      0 8px 24px -10px var(--brand-fill);
   }
-  .btn-gold:hover {
-    box-shadow: 0 12px 32px -8px var(--gold);
+  .btn-brand:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 14px 34px -10px var(--brand-fill);
     transform: translateY(-1px);
   }
   .btn-outline {
@@ -167,8 +189,8 @@ body {
     background: transparent;
   }
   .btn-outline:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: var(--brand);
+    color: var(--brand);
   }
   .btn-ghost {
     color: var(--text-muted);
@@ -219,8 +241,8 @@ body {
   .select:focus,
   .textarea:focus {
     outline: none;
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-soft);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-soft);
   }
   .select {
     appearance: none;
@@ -256,9 +278,9 @@ body {
   }
   .chip[data-active="true"],
   input:checked + .chip {
-    border-color: var(--gold);
-    background: var(--gold-soft);
-    color: var(--gold);
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    color: var(--brand);
   }
 
   .badge {
@@ -272,9 +294,15 @@ body {
     background: var(--surface-3);
     color: var(--text-muted);
   }
-  .badge-gold {
-    background: var(--gold-soft);
-    color: var(--gold);
+  .badge-brand {
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+  .badge-top {
+    background: linear-gradient(135deg, var(--brand-fill), var(--brand-fill-2));
+    color: #fff;
+    letter-spacing: 0.06em;
+    box-shadow: 0 4px 14px -4px rgb(13 71 161 / 0.6);
   }
   .badge-red {
     background: var(--red-soft);
@@ -286,23 +314,31 @@ body {
   }
 
   .link {
-    color: var(--gold);
+    color: var(--brand);
     text-underline-offset: 3px;
   }
   .link:hover {
     text-decoration: underline;
   }
 
-  .text-gradient-gold {
-    background: linear-gradient(100deg, var(--gold-strong) 10%, #fff3d6 45%, var(--gold) 80%);
+  .text-gradient-brand {
+    background: linear-gradient(100deg, var(--brand) 0%, var(--brand-strong) 45%, var(--brand) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-  [data-theme="light"] .text-gradient-gold {
-    background: linear-gradient(100deg, var(--gold-strong), var(--gold) 60%, #c99b3c);
+  [data-theme="light"] .text-gradient-brand {
+    background: linear-gradient(100deg, var(--brand-fill-2), var(--brand-fill) 60%, var(--brand-fill-2));
     -webkit-background-clip: text;
     background-clip: text;
+  }
+
+  /* Silber/Chrom-Verlauf für Premium-Überschriften */
+  .text-chrome {
+    background: linear-gradient(180deg, var(--chrome-1) 0%, var(--chrome-2) 55%, var(--chrome-3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .carbon {
@@ -329,8 +365,8 @@ body {
     padding-left: 1.25rem;
   }
   .prose-legal .placeholder {
-    background: var(--gold-soft);
-    color: var(--gold);
+    background: var(--brand-soft);
+    color: var(--brand);
     padding: 0 0.3rem;
     border-radius: 0.3rem;
     font-weight: 600;
@@ -528,7 +564,7 @@ body {
 @media (hover: hover) {
   .listing-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-gold);
+    box-shadow: var(--shadow-brand);
     border-color: transparent;
   }
   .listing-card:hover img {

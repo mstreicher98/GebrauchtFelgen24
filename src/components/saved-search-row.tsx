@@ -9,14 +9,14 @@ export function SavedSearchRow({ id, name, href, notify, created }: { id: number
   return (
     <li className={`card reveal flex items-center gap-3 p-4 transition-opacity ${pending ? "opacity-50" : ""}`}>
       <div className="min-w-0 flex-1">
-        <Link href={href} className="block truncate font-semibold hover:text-gold">
+        <Link href={href} className="block truncate font-semibold hover:text-brand">
           {name}
         </Link>
         <p className="text-xs text-faint">gespeichert am {created}</p>
       </div>
       <button
         type="button"
-        className={`btn btn-sm ${notify ? "btn-outline border-gold text-gold" : "btn-outline"}`}
+        className={`btn btn-sm ${notify ? "btn-outline border-brand text-brand" : "btn-outline"}`}
         onClick={() => start(() => setSavedSearchNotify(id, !notify))}
         aria-pressed={notify}
         title={notify ? "Benachrichtigungen aus" : "Benachrichtigungen an"}

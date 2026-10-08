@@ -10,7 +10,7 @@ export const themeScript = `(function(){document.documentElement.classList.add('
 function apply(t: Theme) {
   const d = t === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : t;
   document.documentElement.dataset.theme = d;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", d === "light" ? "#f5f3ef" : "#0a0a0c");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", d === "light" ? "#f5f7fb" : "#06080c");
 }
 
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {

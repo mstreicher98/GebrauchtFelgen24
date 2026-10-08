@@ -15,21 +15,21 @@ export function SiteFooter() {
         <div>
           <h3 className="font-display text-sm uppercase tracking-widest text-faint">Marktplatz</h3>
           <ul className="mt-4 space-y-2.5 text-sm">
-            <li><Link className="text-muted hover:text-gold" href="/suche?typ=auto">Autofelgen</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/suche?typ=motorrad">Motorradfelgen</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/suche?art=komplettrad">Kompletträder</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/fahrzeuge">Fahrzeug-Datenbank</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/inserat/neu">Felgen verkaufen</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/suche?typ=auto">Autofelgen</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/suche?typ=motorrad">Motorradfelgen</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/suche?art=komplettrad">Kompletträder</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/fahrzeuge">Fahrzeug-Datenbank</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/inserat/neu">Felgen verkaufen</Link></li>
           </ul>
         </div>
         <div>
           <h3 className="font-display text-sm uppercase tracking-widest text-faint">Info</h3>
           <ul className="mt-4 space-y-2.5 text-sm">
-            <li><Link className="text-muted hover:text-gold" href="/ratgeber">Felgen-Ratgeber</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/sicherheit">Sicher handeln</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/impressum">Impressum</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/datenschutz">Datenschutz</Link></li>
-            <li><Link className="text-muted hover:text-gold" href="/agb">AGB</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/ratgeber">Felgen-Ratgeber</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/sicherheit">Sicher handeln</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/impressum">Impressum</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/datenschutz">Datenschutz</Link></li>
+            <li><Link className="text-muted hover:text-brand" href="/agb">AGB</Link></li>
           </ul>
         </div>
       </div>
