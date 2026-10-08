@@ -1,0 +1,87 @@
+# ---------------------------------------------------------------
+# GebrauchtFelgen24 – Portainer-Stack
+#
+# Portainer → Stacks → Add stack → "Repository" (dieses Git-Repo, Compose-Pfad: docker-compose.yml)
+# oder Inhalt in den Web-Editor kopieren. Variablen unter "Environment variables" setzen
+# (siehe .env.example). Das Image wird per GitHub Actions nach ghcr.io gebaut.
+# ---------------------------------------------------------------
+name: gebrauchtfelgen24
+
+services:
+  app:
+    image: ghcr.io/mstreicher98/gebrauchtfelgen24:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_URL: ${APP_URL:-https://gebrauchtfelgen24.at}
+      DATABASE_URL: postgres://felgen:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt}@db:5432/felgen
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET fehlt (openssl rand -base64 32)}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-GebrauchtFelgen24 <noreply@gebrauchtfelgen24.at>}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      LISTING_LIFETIME_DAYS: ${LISTING_LIFETIME_DAYS:-60}
+      SEED_DEMO: ${SEED_DEMO:-false}
+    volumes:
+      - uploads:/data
+    ports:
+      # Für Nginx Proxy Manager / Traefik / Caddy davor. Ohne Reverse-Proxy: "80:3000"
+      - "${APP_PORT:-3000}:3000"
+    # Traefik (optional) – Kommentare entfernen und Netzwerk anpassen:
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.gf24.rule=Host(`gebrauchtfelgen24.at`) || Host(`www.gebrauchtfelgen24.at`)
+    #   - traefik.http.routers.gf24.entrypoints=websecure
+    #   - traefik.http.routers.gf24.tls.certresolver=letsencrypt
+    #   - traefik.http.services.gf24.loadbalancer.server.port=3000
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: felgen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt}
+      POSTGRES_DB: felgen
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U felgen -d felgen"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Tägliche Datenbank-Sicherung (7 Tage, 4 Wochen, 6 Monate aufbewahrt)
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: felgen
+      POSTGRES_USER: felgen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+    volumes:
+      - backups:/backups
+
+volumes:
+  pgdata:
+  uploads:
+  backups:

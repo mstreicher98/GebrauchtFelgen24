@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+/uploads
+/test-results
+/playwright-report
+.DS_Store
+.env.docker

@@ -1,0 +1,8 @@
+# Lokal bauen und testen:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env.docker up --build
+services:
+  app:
+    image: gebrauchtfelgen24:local
+    build: .
+  backup:
+    profiles: ["backup"]
