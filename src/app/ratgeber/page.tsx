@@ -115,7 +115,7 @@ export default function GuidePage() {
         ))}
       </div>
       <div className="mt-12 text-center">
-        <Link href="/fahrzeuge" className="btn btn-brand group">
+        <Link href="/fahrzeuge" className="btn btn-brand group h-auto whitespace-normal py-3 text-center">
           Werte für mein Fahrzeug nachschlagen <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>

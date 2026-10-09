@@ -6,6 +6,12 @@ export function formatPrice(cents: number) {
   return cents % 100 === 0 ? euro.format(cents / 100) : euro2.format(cents / 100);
 }
 
+/** Ganze Zahlen mit Punkt als Tausendertrennzeichen (1.234), wie bei den Preisen. */
+const count = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
+export function formatCount(n: number) {
+  return count.format(n);
+}
+
 export function formatNumber(n: number | null | undefined) {
   return n == null ? "–" : num.format(n);
 }

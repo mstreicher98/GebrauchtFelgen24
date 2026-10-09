@@ -6,30 +6,56 @@ export function Pagination({ page, pages, makeHref }: { page: number; pages: num
   if (pages <= 1) return null;
   const nums = new Set([1, pages, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pages));
   const list = [...nums].sort((a, b) => a - b);
+  const step = "btn btn-outline btn-sm gap-1 px-3";
   return (
-    <nav className="mt-10 flex items-center justify-center gap-1.5" aria-label="Seiten">
-      {page > 1 && (
-        <Link href={makeHref(page - 1)} className="btn btn-outline btn-sm btn-icon" aria-label="Vorherige Seite">
-          <ChevronLeft className="h-4 w-4" />
-        </Link>
-      )}
-      {list.map((n, i) => (
-        <span key={n} className="flex items-center gap-1.5">
-          {i > 0 && n - list[i - 1] > 1 && <span className="px-1 text-faint">…</span>}
-          <Link
-            href={makeHref(n)}
-            aria-current={n === page ? "page" : undefined}
-            className={clsx("btn btn-sm min-w-9 px-3", n === page ? "btn-brand" : "btn-outline")}
-          >
-            {n}
+    <nav className="mt-10 flex flex-col items-center gap-3" aria-label="Seiten">
+      <div className="flex items-center gap-1 sm:gap-1.5">
+        {page > 1 ? (
+          <Link href={makeHref(page - 1)} className={step} aria-label="Vorherige Seite" rel="prev">
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">Zurück</span>
           </Link>
-        </span>
-      ))}
-      {page < pages && (
-        <Link href={makeHref(page + 1)} className="btn btn-outline btn-sm btn-icon" aria-label="Nächste Seite">
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      )}
+        ) : (
+          <span className={clsx(step, "pointer-events-none opacity-40")} aria-hidden>
+            <ChevronLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Zurück</span>
+          </span>
+        )}
+        {list.map((n, i) => (
+          <span key={n} className="flex items-center gap-1 sm:gap-1.5">
+            {i > 0 && n - list[i - 1] > 1 && (
+              <span className="w-5 text-center text-faint" aria-hidden>
+                …
+              </span>
+            )}
+            <Link
+              href={makeHref(n)}
+              aria-current={n === page ? "page" : undefined}
+              aria-label={`Seite ${n}`}
+              className={clsx(
+                "grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-semibold tabular-nums transition-colors",
+                n === page ? "bg-brand-fill text-on-brand" : "text-muted hover:bg-surface-2 hover:text-fg",
+              )}
+            >
+              {n}
+            </Link>
+          </span>
+        ))}
+        {page < pages ? (
+          <Link href={makeHref(page + 1)} className={step} aria-label="Nächste Seite" rel="next">
+            <span className="hidden sm:inline">Weiter</span>
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </Link>
+        ) : (
+          <span className={clsx(step, "pointer-events-none opacity-40")} aria-hidden>
+            <span className="hidden sm:inline">Weiter</span>
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-faint">
+        Seite {page} von {pages}
+      </p>
     </nav>
   );
 }

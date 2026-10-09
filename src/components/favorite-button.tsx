@@ -30,7 +30,7 @@ export function FavoriteButton({
       const res = await toggleFavorite(listingId, next);
       if (res.error === "login") {
         setFav(!next);
-        router.push(`/anmelden?weiter=${encodeURIComponent(location.pathname)}`);
+        router.push(`/anmelden?weiter=${encodeURIComponent(location.pathname + location.search)}`);
       } else if (res.error) {
         setFav(!next);
         toast(res.error, "error");

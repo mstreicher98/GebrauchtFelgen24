@@ -6,7 +6,7 @@ export function P({ children }: { children: React.ReactNode }) {
 export function LegalPage({ title, updated, children }: { title: string; updated: string; children: React.ReactNode }) {
   return (
     <div className="container-page max-w-3xl py-12">
-      <h1 className="font-display text-4xl font-bold uppercase">{title}</h1>
+      <h1 className="font-display text-3xl font-bold uppercase sm:text-4xl">{title}</h1>
       <p className="mt-2 text-sm text-faint">Stand: {updated}</p>
       <div className="mt-4 rounded-xl border border-brand/40 bg-brand-soft px-4 py-3 text-sm text-brand">
         Vorlage – die gelb markierten Platzhalter müssen vor dem Livegang mit den Firmendaten ersetzt und der Text rechtlich geprüft werden.

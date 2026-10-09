@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { formatCount } from "@/lib/format";
 import Link from "next/link";
 import { db } from "@/db";
 
@@ -32,7 +33,7 @@ export default async function AdminDashboard() {
       {tiles.map(([label, value, href]) => {
         const inner = (
           <>
-            <p className={`font-display text-3xl font-bold ${label === "Offene Meldungen" && value > 0 ? "text-red" : ""}`}>{value.toLocaleString("de-AT")}</p>
+            <p className={`font-display text-3xl font-bold ${label === "Offene Meldungen" && value > 0 ? "text-red" : ""}`}>{formatCount(value)}</p>
             <p className="text-sm text-muted">{label}</p>
           </>
         );

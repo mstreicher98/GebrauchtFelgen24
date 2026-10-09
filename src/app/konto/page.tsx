@@ -1,4 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
+import { formatCount } from "@/lib/format";
 import { ArrowRight, Bell, Eye, Heart, LayoutList, MessageCircle, Plus } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
@@ -46,7 +47,7 @@ export default async function AccountPage() {
       </div>
       <div className="card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold">Deine Inserate wurden {stats.views.toLocaleString("de-AT")}× angesehen</h2>
+          <h2 className="font-semibold">Deine Inserate wurden {formatCount(stats.views)}× angesehen</h2>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted">
             <Eye className="h-4 w-4" /> Mehr Fotos und genaue Daten (ET, Mittenloch) bringen mehr Anfragen.
           </p>

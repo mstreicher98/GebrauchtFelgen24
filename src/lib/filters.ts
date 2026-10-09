@@ -26,6 +26,8 @@ export type SearchFilters = {
   pos?: "vorne" | "hinten";
   sort: "neu" | "preis_auf" | "preis_ab" | "entfernung";
   seite: number;
+  /** Darstellung der Trefferliste (nur Anzeige, kein Filter) – Standard: Raster */
+  ansicht?: "liste";
 };
 
 type Params = Record<string, string | string[] | undefined> | URLSearchParams;
@@ -74,6 +76,7 @@ export function parseFilters(p: Params): SearchFilters {
     pos: oneOf(get(p, "pos"), ["vorne", "hinten"] as const),
     sort: oneOf(get(p, "sort"), ["neu", "preis_auf", "preis_ab", "entfernung"] as const) ?? "neu",
     seite: Math.max(1, Math.floor(numOrUndef(get(p, "seite")) ?? 1)),
+    ansicht: get(p, "ansicht") === "liste" ? "liste" : undefined,
   };
 }
 
@@ -108,6 +111,7 @@ export function filtersToParams(f: Partial<SearchFilters>): URLSearchParams {
   set("pos", f.pos);
   if (f.sort && f.sort !== "neu") set("sort", f.sort);
   if (f.seite && f.seite > 1) set("seite", f.seite);
+  set("ansicht", f.ansicht);
   return p;
 }
 

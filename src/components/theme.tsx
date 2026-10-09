@@ -1,4 +1,5 @@
 "use client";
+import { clsx } from "clsx";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -10,18 +11,28 @@ export const themeScript = `(function(){document.documentElement.classList.add('
 function apply(t: Theme) {
   const d = t === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : t;
   document.documentElement.dataset.theme = d;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", d === "light" ? "#f5f7fb" : "#06080c");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", d === "light" ? "#ffffff" : "#0f131a");
 }
 
-export function ThemeToggle({ compact = false }: { compact?: boolean }) {
+export function ThemeToggle({ compact = false, className }: { compact?: boolean; className?: string }) {
   const [theme, setTheme] = useState<Theme>("system");
 
   useEffect(() => {
+    let stored: Theme = "system";
+    try {
+      const v = localStorage.getItem("theme");
+      if (v === "dark" || v === "light") stored = v;
+    } catch {}
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Wert existiert erst im Browser
-    setTheme(((localStorage.getItem("theme") as Theme) || "system") as Theme);
+    setTheme(stored);
+    // Browser-Leiste (theme-color) gleich beim Laden an die Kopfzeile anpassen, nicht erst beim Umschalten
+    apply(stored);
     const mq = matchMedia("(prefers-color-scheme: light)");
     const onChange = () => {
-      if ((localStorage.getItem("theme") || "system") === "system") apply("system");
+      try {
+        if ((localStorage.getItem("theme") || "system") !== "system") return;
+      } catch {}
+      apply("system");
     };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
@@ -34,7 +45,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   return (
     <button
       type="button"
-      className={compact ? "btn btn-ghost btn-icon" : "btn btn-ghost btn-sm"}
+      className={clsx(compact ? "btn btn-ghost btn-icon" : "btn btn-ghost btn-sm", className)}
       onClick={() => {
         const t = next[theme];
         setTheme(t);

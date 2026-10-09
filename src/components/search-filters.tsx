@@ -1,48 +1,90 @@
 "use client";
 import { clsx } from "clsx";
-import { Bike, Car, SlidersHorizontal, X } from "lucide-react";
+import { Bike, Car, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { CAR_DIAMETERS, COMMON_PCDS, CONDITIONS, MATERIALS, MOTO_DIAMETERS, SEASONS } from "@/lib/constants";
 import { PlzInput } from "./plz-input";
 
 type Props = { hasVehicle: boolean; vehicleType?: "auto" | "motorrad" };
 
+/** Parameter, die keine Filter sind (Darstellung, Fahrzeug, Seite) */
+const NON_FILTER_KEYS = ["seite", "sort", "fahrzeug", "modus", "ansicht"];
+/** Beim Zurücksetzen bleiben Fahrzeug, Modus, Sortierung und Ansicht erhalten */
+const KEEP_ON_RESET = ["fahrzeug", "modus", "sort", "ansicht"];
+/** Freitext-Felder (werden erst mit „Filter anwenden“ übernommen) */
+const TEXT_KEYS = ["q", "breite_min", "breite_max", "et_min", "et_max", "preis_min", "preis_max", "umkreis", "plz"];
+
+function useActiveCount() {
+  const sp = useSearchParams();
+  return [...sp.keys()].filter((k) => !NON_FILTER_KEYS.includes(k) && k !== "land").length;
+}
+
 export function FilterSidebar(props: Props) {
-  return <FilterForm {...props} />;
+  return (
+    <div className="overflow-clip rounded-2xl border border-line bg-surface">
+      <FilterForm {...props} variant="sidebar" />
+    </div>
+  );
 }
 
 export function MobileFilterButton({ hasVehicle, vehicleType }: Props) {
   const [open, setOpen] = useState(false);
-  const sp = useSearchParams();
-  const active = [...sp.keys()].filter((k) => !["seite", "sort", "fahrzeug", "modus"].includes(k)).length;
+  const active = useActiveCount();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    // Nach dem Schließen den Fokus zurück auf den Filter-Knopf setzen
+    if (!open && wasOpen.current) trigger.current?.focus();
+    wasOpen.current = open;
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
   return (
     <>
-      <button type="button" className="btn btn-outline btn-sm lg:hidden" onClick={() => setOpen(true)}>
-        <SlidersHorizontal className="h-4 w-4" />
-        Filter{active > 0 && <span className="badge badge-brand">{active}</span>}
+      <button
+        ref={trigger}
+        type="button"
+        className="btn btn-outline btn-sm shrink-0 gap-1.5 px-3 lg:hidden"
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+        aria-label={active > 0 ? `Filter (${active} aktiv)` : "Filter"}
+      >
+        <SlidersHorizontal className="h-4 w-4" aria-hidden />
+        Filter
+        {active > 0 && (
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand-fill px-1 text-[0.6875rem] font-bold text-on-brand" aria-hidden>
+            {active}
+          </span>
+        )}
       </button>
       {/* Mobile Drawer */}
       {open && (
         <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="Filter">
-          <div className="animate-fade-in absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-[min(92vw,24rem)] flex-col bg-bg shadow-2xl" style={{ animation: "slide-in-right .35s cubic-bezier(.2,.8,.2,1)" }}>
+          <div className="animate-fade-in absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
+          <div
+            className="absolute inset-y-0 right-0 flex w-[min(92vw,24rem)] flex-col bg-surface shadow-2xl"
+            style={{ animation: "slide-in-right .35s cubic-bezier(.2,.8,.2,1)" }}
+          >
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <span className="font-display text-lg uppercase">Filter</span>
-              <button type="button" className="btn btn-ghost btn-icon" onClick={() => setOpen(false)} aria-label="Schließen">
+              <span className="flex items-center gap-2 font-display text-lg uppercase">
+                <SlidersHorizontal className="h-4 w-4 text-brand" />
+                Filter
+              </span>
+              <button type="button" className="btn btn-ghost btn-icon" onClick={() => setOpen(false)} aria-label="Schließen" autoFocus>
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              <FilterForm hasVehicle={hasVehicle} vehicleType={vehicleType} onApplied={() => setOpen(false)} />
+            <div className="flex-1 overflow-y-auto">
+              <FilterForm hasVehicle={hasVehicle} vehicleType={vehicleType} variant="drawer" onApplied={() => setOpen(false)} />
             </div>
           </div>
         </div>
@@ -51,14 +93,26 @@ export function MobileFilterButton({ hasVehicle, vehicleType }: Props) {
   );
 }
 
-function FilterForm({ hasVehicle, vehicleType, onApplied }: Props & { onApplied?: () => void }) {
+function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { variant: "sidebar" | "drawer"; onApplied?: () => void }) {
   const sp = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [pending, start] = useTransition();
-  const [plz, setPlz] = useState(sp.get("plz") ?? "");
+  const plzParam = sp.get("plz") ?? "";
+  const [plz, setPlz] = useState(plzParam);
   const [land, setLand] = useState(sp.get("land") ?? "");
-  const [plzKey, setPlzKey] = useState(0);
+  const [dirty, setDirty] = useState(false);
+  const active = useActiveCount();
+  // Freitext-Felder sind unkontrolliert: bei geänderten URL-Werten neu aufbauen
+  const textKey = TEXT_KEYS.map((k) => sp.get(k) ?? "").join("|");
+  const [syncedKey, setSyncedKey] = useState(textKey);
+  // URL geändert (angewendet, zurückgesetzt oder Filter-Kennzeichen entfernt) → Zustand nachziehen
+  if (textKey !== syncedKey) {
+    setSyncedKey(textKey);
+    setPlz(plzParam);
+    setLand(sp.get("land") ?? "");
+    setDirty(false);
+  }
 
   const typ = (vehicleType ?? sp.get("typ") ?? "") as "" | "auto" | "motorrad";
   const list = (k: string) => (sp.get(k) ?? "").split(",").filter(Boolean);
@@ -80,11 +134,30 @@ function FilterForm({ hasVehicle, vehicleType, onApplied }: Props & { onApplied?
     update({ [k]: next.join(",") || null });
   };
 
-  const diameters = typ === "motorrad" ? MOTO_DIAMETERS : typ === "auto" ? CAR_DIAMETERS : [...new Set([...CAR_DIAMETERS, ...MOTO_DIAMETERS])].sort((a, b) => a - b);
+  const reset = () => {
+    const keep = new URLSearchParams();
+    for (const k of KEEP_ON_RESET) if (sp.get(k)) keep.set(k, sp.get(k)!);
+    setPlz("");
+    setLand("");
+    start(() => router.push(`${pathname}?${keep.toString()}`, { scroll: false }));
+    onApplied?.();
+  };
+
+  const diameters =
+    typ === "motorrad" ? MOTO_DIAMETERS : typ === "auto" ? CAR_DIAMETERS : [...new Set([...CAR_DIAMETERS, ...MOTO_DIAMETERS])].sort((a, b) => a - b);
+
+  const pad = variant === "sidebar" ? "px-5" : "px-4";
+  const field = "input h-10 py-0";
 
   return (
     <form
-      className={clsx("space-y-6 transition-opacity", pending && "opacity-60")}
+      className={clsx("transition-opacity", pending && "opacity-60")}
+      aria-busy={pending}
+      onInput={(e) => {
+        const t = e.target as HTMLElement;
+        if (t instanceof HTMLInputElement && t.type === "checkbox") return;
+        setDirty(true);
+      }}
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -97,182 +170,248 @@ function FilterForm({ hasVehicle, vehicleType, onApplied }: Props & { onApplied?
         update(patch, true);
       }}
     >
-      <Section title="Suchbegriff">
-        <input name="q" className="input" defaultValue={sp.get("q") ?? ""} placeholder="z. B. BBS, AMG, Winter …" />
-      </Section>
+      {variant === "sidebar" && (
+        <div className="flex items-center justify-between gap-2 border-b border-line px-5 py-4">
+          <h2 className="flex items-center gap-2 font-display text-base uppercase tracking-wide">
+            <SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden />
+            Filter
+            {active > 0 && <span className="badge badge-brand font-sans tracking-normal">{active}</span>}
+          </h2>
+          {active > 0 && (
+            <button type="button" onClick={reset} className="text-sm font-semibold text-brand hover:underline hover:underline-offset-2">
+              Zurücksetzen
+            </button>
+          )}
+        </div>
+      )}
 
-      {!hasVehicle && (
-        <Section title="Fahrzeug">
+      <div className="divide-y divide-line">
+        <Section title="Suchbegriff" pad={pad}>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" aria-hidden />
+            <input key={textKey} name="q" aria-label="Suchbegriff" className={clsx(field, "pl-9")} defaultValue={sp.get("q") ?? ""} placeholder="z. B. BBS, AMG, Winter …" />
+          </div>
+        </Section>
+
+        {!hasVehicle && (
+          <Section title="Fahrzeug" pad={pad}>
+            <div className="grid grid-cols-2 gap-2">
+              {(["auto", "motorrad"] as const).map((t) => (
+                <button
+                  type="button"
+                  key={t}
+                  className="chip h-10 justify-center font-medium"
+                  data-active={typ === t}
+                  aria-pressed={typ === t}
+                  onClick={() => update({ typ: typ === t ? null : t, lk: null, zoll: null })}
+                >
+                  {t === "auto" ? <Car className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
+                  {t === "auto" ? "Auto" : "Motorrad"}
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        <Section title="Art" pad={pad}>
           <div className="grid grid-cols-2 gap-2">
-            {(["auto", "motorrad"] as const).map((t) => (
+            {[
+              ["felge", "Nur Felgen"],
+              ["komplettrad", "Kompletträder"],
+            ].map(([v, l]) => (
               <button
                 type="button"
-                key={t}
-                className="chip justify-center"
-                data-active={typ === t}
-                onClick={() => update({ typ: typ === t ? null : t, lk: null, zoll: null })}
+                key={v}
+                className="chip h-10 justify-center px-2 font-medium"
+                data-active={sp.get("art") === v}
+                aria-pressed={sp.get("art") === v}
+                onClick={() => update({ art: sp.get("art") === v ? null : v })}
               >
-                {t === "auto" ? <Car className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
-                {t === "auto" ? "Auto" : "Motorrad"}
+                {l}
               </button>
             ))}
           </div>
         </Section>
-      )}
 
-      <Section title="Art">
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            ["felge", "Nur Felgen"],
-            ["komplettrad", "Kompletträder"],
-          ].map(([v, l]) => (
-            <button type="button" key={v} className="chip justify-center" data-active={sp.get("art") === v} onClick={() => update({ art: sp.get("art") === v ? null : v })}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </Section>
+        <Section title="Zollgröße" pad={pad}>
+          <div className="grid grid-cols-5 gap-1.5">
+            {diameters.map((d) => (
+              <button
+                type="button"
+                key={d}
+                className="chip h-9 justify-center px-0 font-medium tabular-nums"
+                data-active={list("zoll").includes(String(d))}
+                aria-pressed={list("zoll").includes(String(d))}
+                aria-label={`${d} Zoll`}
+                onClick={() => toggleList("zoll", String(d))}
+              >
+                {d}″
+              </button>
+            ))}
+          </div>
+        </Section>
 
-      <Section title="Zollgröße">
-        <div className="flex flex-wrap gap-1.5">
-          {diameters.map((d) => (
-            <button type="button" key={d} className="chip px-3" data-active={list("zoll").includes(String(d))} onClick={() => toggleList("zoll", String(d))}>
-              {d}&quot;
-            </button>
-          ))}
-        </div>
-      </Section>
+        {typ !== "motorrad" && !hasVehicle && (
+          <Section title="Lochkreis" pad={pad}>
+            <select aria-label="Lochkreis" className="select h-10 py-0" value={sp.get("lk") ?? ""} onChange={(e) => update({ lk: e.target.value || null })}>
+              <option value="">Alle Lochkreise</option>
+              {COMMON_PCDS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </Section>
+        )}
 
-      {typ !== "motorrad" && !hasVehicle && (
-        <Section title="Lochkreis">
-          <select className="select" value={sp.get("lk") ?? ""} onChange={(e) => update({ lk: e.target.value || null })}>
-            <option value="">Alle</option>
-            {COMMON_PCDS.map((p) => (
-              <option key={p} value={p}>
-                {p}
+        <Section title="Breite (J)" pad={pad}>
+          <Range key={textKey} field={field} names={["breite_min", "breite_max"]} label="Breite" inputMode="decimal" sp={sp} />
+        </Section>
+
+        {typ !== "motorrad" && (
+          <Section title="Einpresstiefe (ET)" pad={pad}>
+            <Range key={textKey} field={field} names={["et_min", "et_max"]} label="Einpresstiefe" inputMode="numeric" sp={sp} />
+          </Section>
+        )}
+
+        <Section title="Preis (€)" pad={pad}>
+          <Range key={textKey} field={field} names={["preis_min", "preis_max"]} label="Preis" inputMode="numeric" sp={sp} />
+        </Section>
+
+        <Section title="Standort" pad={pad}>
+          <div className="[&_input]:h-10 [&_input]:py-0">
+            <PlzInput
+              key={textKey}
+              value={plz}
+              onChange={(v, c) => {
+                setPlz(v);
+                if (c) setLand(c);
+              }}
+            />
+          </div>
+          <select key={textKey} name="umkreis" aria-label="Umkreis" className="select mt-2 h-10 py-0" defaultValue={sp.get("umkreis") ?? ""}>
+            <option value="">Umkreis: überall</option>
+            {[10, 25, 50, 100, 200, 500].map((k) => (
+              <option key={k} value={k}>
+                bis {k} km
               </option>
             ))}
           </select>
+          <label className="mt-3 flex cursor-pointer items-center gap-2.5 text-sm">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-[var(--brand-fill)]"
+              checked={sp.get("versand") === "1"}
+              onChange={(e) => update({ versand: e.target.checked ? "1" : null })}
+            />
+            Nur mit Versand
+          </label>
         </Section>
-      )}
 
-      <Section title="Breite (J)">
-        <div className="grid grid-cols-2 gap-2">
-          <input name="breite_min" className="input" inputMode="decimal" placeholder="von" defaultValue={sp.get("breite_min") ?? ""} />
-          <input name="breite_max" className="input" inputMode="decimal" placeholder="bis" defaultValue={sp.get("breite_max") ?? ""} />
-        </div>
-      </Section>
+        <ChipSection title="Saison" pad={pad} options={SEASONS} selected={list("saison")} onToggle={(v) => toggleList("saison", v)} />
+        <ChipSection title="Zustand" pad={pad} options={CONDITIONS} selected={list("zustand")} onToggle={(v) => toggleList("zustand", v)} />
+        <ChipSection title="Material" pad={pad} options={MATERIALS} selected={list("material")} onToggle={(v) => toggleList("material", v)} />
 
-      {typ !== "motorrad" && (
-        <Section title="Einpresstiefe (ET)">
+        <Section title="Anbieter" pad={pad}>
           <div className="grid grid-cols-2 gap-2">
-            <input name="et_min" className="input" inputMode="numeric" placeholder="von" defaultValue={sp.get("et_min") ?? ""} />
-            <input name="et_max" className="input" inputMode="numeric" placeholder="bis" defaultValue={sp.get("et_max") ?? ""} />
+            {[
+              ["privat", "Privat"],
+              ["haendler", "Händler"],
+            ].map(([v, l]) => (
+              <button
+                type="button"
+                key={v}
+                className="chip h-10 justify-center font-medium"
+                data-active={sp.get("anbieter") === v}
+                aria-pressed={sp.get("anbieter") === v}
+                onClick={() => update({ anbieter: sp.get("anbieter") === v ? null : v })}
+              >
+                {l}
+              </button>
+            ))}
           </div>
         </Section>
-      )}
+      </div>
 
-      <Section title="Preis (€)">
-        <div className="grid grid-cols-2 gap-2">
-          <input name="preis_min" className="input" inputMode="numeric" placeholder="von" defaultValue={sp.get("preis_min") ?? ""} />
-          <input name="preis_max" className="input" inputMode="numeric" placeholder="bis" defaultValue={sp.get("preis_max") ?? ""} />
-        </div>
-      </Section>
-
-      <Section title="Standort">
-        <PlzInput
-          key={plzKey}
-          value={plz}
-          onChange={(v, c) => {
-            setPlz(v);
-            if (c) setLand(c);
-          }}
-        />
-        <select name="umkreis" className="select mt-2" defaultValue={sp.get("umkreis") ?? ""}>
-          <option value="">Umkreis: überall</option>
-          {[10, 25, 50, 100, 200, 500].map((k) => (
-            <option key={k} value={k}>
-              bis {k} km
-            </option>
-          ))}
-        </select>
-        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-muted">
-          <input type="checkbox" className="h-4 w-4 accent-[var(--brand)]" checked={sp.get("versand") === "1"} onChange={(e) => update({ versand: e.target.checked ? "1" : null })} />
-          Nur mit Versand
-        </label>
-      </Section>
-
-      <Section title="Saison (Kompletträder)">
-        <div className="flex flex-wrap gap-1.5">
-          {Object.entries(SEASONS).map(([v, l]) => (
-            <button type="button" key={v} className="chip" data-active={list("saison").includes(v)} onClick={() => toggleList("saison", v)}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Zustand">
-        <div className="flex flex-wrap gap-1.5">
-          {Object.entries(CONDITIONS).map(([v, l]) => (
-            <button type="button" key={v} className="chip" data-active={list("zustand").includes(v)} onClick={() => toggleList("zustand", v)}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Material">
-        <div className="flex flex-wrap gap-1.5">
-          {Object.entries(MATERIALS).map(([v, l]) => (
-            <button type="button" key={v} className="chip" data-active={list("material").includes(v)} onClick={() => toggleList("material", v)}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Anbieter">
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            ["privat", "Privat"],
-            ["haendler", "Händler"],
-          ].map(([v, l]) => (
-            <button type="button" key={v} className="chip justify-center" data-active={sp.get("anbieter") === v} onClick={() => update({ anbieter: sp.get("anbieter") === v ? null : v })}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </Section>
-
-      <div className="sticky bottom-0 -mx-1 flex gap-2 bg-gradient-to-t from-bg via-bg to-transparent px-1 pb-1 pt-4">
+      {/* Am Desktop klebt die Leiste erst, wenn Eingaben noch nicht übernommen sind */}
+      <div className={clsx("bottom-0 z-10 flex gap-2 border-t border-line bg-surface py-4", pad, (variant === "drawer" || dirty) && "sticky")}>
         <button className="btn btn-brand flex-1" disabled={pending}>
           Filter anwenden
         </button>
-        <button
-          type="button"
-          className="btn btn-ghost"
-          onClick={() => {
-            const keep = new URLSearchParams();
-            for (const k of ["fahrzeug", "modus"]) if (sp.get(k)) keep.set(k, sp.get(k)!);
-            setPlz("");
-            setPlzKey((k) => k + 1);
-            start(() => router.push(`${pathname}?${keep.toString()}`, { scroll: false }));
-            onApplied?.();
-          }}
-        >
-          Zurücksetzen
-        </button>
+        {variant === "drawer" && (
+          <button type="button" className="btn btn-ghost" onClick={reset}>
+            Zurücksetzen
+          </button>
+        )}
       </div>
     </form>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Range({
+  field,
+  names,
+  label,
+  inputMode,
+  sp,
+}: {
+  field: string;
+  names: [string, string];
+  label: string;
+  inputMode: "decimal" | "numeric";
+  sp: URLSearchParams | ReturnType<typeof useSearchParams>;
+}) {
   return (
-    <fieldset>
-      <legend className="mb-2.5 text-xs font-semibold uppercase tracking-widest text-faint">{title}</legend>
-      {children}
-    </fieldset>
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+      <input name={names[0]} aria-label={`${label} von`} className={field} inputMode={inputMode} placeholder="von" defaultValue={sp.get(names[0]) ?? ""} />
+      <span className="text-faint" aria-hidden>
+        –
+      </span>
+      <input name={names[1]} aria-label={`${label} bis`} className={field} inputMode={inputMode} placeholder="bis" defaultValue={sp.get(names[1]) ?? ""} />
+    </div>
+  );
+}
+
+function ChipSection({
+  title,
+  pad,
+  options,
+  selected,
+  onToggle,
+}: {
+  title: string;
+  pad: string;
+  options: Record<string, string>;
+  selected: string[];
+  onToggle: (v: string) => void;
+}) {
+  return (
+    <Section title={title} pad={pad}>
+      <div className="flex flex-wrap gap-1.5">
+        {Object.entries(options).map(([v, l]) => (
+          <button
+            type="button"
+            key={v}
+            className="chip h-8 px-3 text-[0.8125rem] font-medium"
+            data-active={selected.includes(v)}
+            aria-pressed={selected.includes(v)}
+            onClick={() => onToggle(v)}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function Section({ title, pad, children }: { title: string; pad: string; children: React.ReactNode }) {
+  return (
+    <div className={clsx(pad, "py-4")}>
+      <fieldset>
+        <legend className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted">{title}</legend>
+        {children}
+      </fieldset>
+    </div>
   );
 }

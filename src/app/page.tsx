@@ -1,46 +1,103 @@
-import { and, desc, eq, gt, sql } from "drizzle-orm";
-import { ArrowRight, BadgeCheck, Bike, Car, MessageCircle, Search, ShieldCheck, Snowflake, Sparkles, Upload } from "lucide-react";
+import { and, asc, desc, eq, gt, gte, isNotNull, lte, sql } from "drizzle-orm";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Camera,
+  CarFront,
+  ChevronRight,
+  ClipboardList,
+  Globe2,
+  MessageCircle,
+  Store,
+  Tag,
+} from "lucide-react";
+import { clsx } from "clsx";
 import Link from "next/link";
 import { db } from "@/db";
-import { listing, user, vehicleGeneration, vehicleMake } from "@/db/schema";
+import { listing, user } from "@/db/schema";
 import { FitmentFinder } from "@/components/fitment-finder";
 import { HeroRim } from "@/components/hero-rim";
+import { HomeCarousel } from "@/components/home-carousel";
+import { CategoryArt, type CategoryArtKind } from "@/components/home-category-art";
+import { HomeSearch } from "@/components/home-search";
 import { ListingCard, ListingGrid } from "@/components/listing-card";
 import { getFavoriteIds } from "@/lib/favorites";
+import { formatPcd } from "@/lib/format";
 import { listingCardColumns } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
+/* ------------------------------------------------------------------ */
+/* Daten (alles serverseitig per SQL)                                  */
+/* ------------------------------------------------------------------ */
+
+const SIZES = [15, 16, 17, 18, 19, 20, 21];
+const PCDS = ["5x112", "5x120", "5x114.3", "5x100", "4x100", "5x108"];
+
 async function getHomeData() {
-  const base = db.select(listingCardColumns).from(listing).innerJoin(user, eq(user.id, listing.userId));
-  const [featured, latest, [stats], [vehicles]] = await Promise.all([
-    base
-      .where(and(eq(listing.status, "aktiv"), gt(listing.featuredUntil, new Date())))
+  const active = eq(listing.status, "aktiv");
+  const auto = eq(listing.vehicleType, "auto");
+  const cards = () => db.select(listingCardColumns).from(listing).innerJoin(user, eq(user.id, listing.userId));
+  const n = sql<number>`count(*)::int`;
+
+  const [featured, latest, [counts], sizes, pcds, brands, [platform]] = await Promise.all([
+    cards()
+      .where(and(active, gt(listing.featuredUntil, new Date())))
       .orderBy(sql`random()`)
-      .limit(4),
-    db
-      .select(listingCardColumns)
-      .from(listing)
-      .innerJoin(user, eq(user.id, listing.userId))
-      .where(eq(listing.status, "aktiv"))
-      .orderBy(desc(listing.publishedAt))
-      .limit(8),
-    db.select({ n: sql<number>`count(*)::int` }).from(listing).where(eq(listing.status, "aktiv")),
+      .limit(12),
+    cards().where(active).orderBy(desc(listing.publishedAt), desc(listing.id)).limit(8),
+    // Zählungen spiegeln exakt die Filter der verlinkten Suchen
     db
       .select({
-        gens: sql<number>`(select count(*)::int from ${vehicleGeneration})`,
-        makes: sql<number>`count(*)::int`,
+        total: n,
+        felge: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'auto' and ${listing.kind} = 'felge'))::int`,
+        komplettrad: sql<number>`(count(*) filter (where ${listing.kind} = 'komplettrad'))::int`,
+        winter: sql<number>`(count(*) filter (where ${listing.season} = 'winter'))::int`,
+        sommer: sql<number>`(count(*) filter (where ${listing.season} = 'sommer'))::int`,
+        motorrad: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'motorrad'))::int`,
+        stahl: sql<number>`(count(*) filter (where ${listing.material} = 'stahl'))::int`,
       })
-      .from(vehicleMake),
+      .from(listing)
+      .innerJoin(user, eq(user.id, listing.userId))
+      .where(active),
+    db
+      .select({ zoll: listing.diameter, n })
+      .from(listing)
+      .innerJoin(user, eq(user.id, listing.userId))
+      .where(and(active, auto, gte(listing.diameter, SIZES[0]), lte(listing.diameter, SIZES[SIZES.length - 1])))
+      .groupBy(listing.diameter),
+    db
+      .select({ boltCount: listing.boltCount, boltCircle: listing.boltCircle, n })
+      .from(listing)
+      .innerJoin(user, eq(user.id, listing.userId))
+      .where(and(active, isNotNull(listing.boltCount), isNotNull(listing.boltCircle)))
+      .groupBy(listing.boltCount, listing.boltCircle),
+    db
+      .select({ brand: listing.rimBrand, n })
+      .from(listing)
+      .innerJoin(user, eq(user.id, listing.userId))
+      .where(active)
+      .groupBy(listing.rimBrand)
+      .orderBy(desc(n), asc(listing.rimBrand))
+      .limit(12),
+    db.execute<{ generations: number; makes: number; dealers: number }>(sql`
+      select
+        (select count(*)::int from vehicle_generation) as generations,
+        (select count(*)::int from vehicle_make) as makes,
+        (select count(*)::int from "user" where account_type = 'haendler' and not banned) as dealers`),
   ]);
-  return { featured, latest, activeCount: stats.n, gens: vehicles.gens, makes: vehicles.makes };
-}
 
-const CATEGORIES = [
-  { href: "/suche?typ=auto&art=felge", label: "Autofelgen", icon: Car, text: "Alu, Stahl & geschmiedet" },
-  { href: "/suche?typ=auto&art=komplettrad", label: "Kompletträder", icon: Sparkles, text: "Felge + Reifen, sofort montiert" },
-  { href: "/suche?typ=auto&saison=winter", label: "Winterräder", icon: Snowflake, text: "Für die kalte Jahreszeit" },
-  { href: "/suche?typ=motorrad", label: "Motorrad", icon: Bike, text: "Vorder- & Hinterräder" },
-];
+  const sizeCount = new Map(sizes.map((s) => [Number(s.zoll), s.n]));
+  const pcdCount = new Map(pcds.map((p) => [formatPcd(p.boltCount, p.boltCircle), p.n]));
+  return {
+    featured,
+    latest,
+    counts,
+    sizes: SIZES.map((z) => ({ zoll: z, n: sizeCount.get(z) ?? 0 })),
+    pcds: PCDS.map((p) => ({ pcd: p, n: pcdCount.get(p) ?? 0 })),
+    brands,
+    platform,
+  };
+}
 
 const POPULAR = [
   ["VW Golf VII", "Volkswagen", "Golf VII (5G)"],
@@ -63,172 +120,326 @@ async function getPopularLinks() {
   }).filter((x): x is { label: string; href: string } => !!x);
 }
 
+/** Ganze Zahlen mit Punkt als Tausendertrennzeichen („1.234 Angebote“) */
+const int = new Intl.NumberFormat("de-DE");
+const offers = (n: number) => `${int.format(n)} ${n === 1 ? "Angebot" : "Angebote"}`;
+const brandLabel = (b: string) => (b === "Original (OEM)" ? "Originalfelgen" : b);
+
+/* ------------------------------------------------------------------ */
+/* Seite                                                               */
+/* ------------------------------------------------------------------ */
+
 export default async function HomePage() {
   const [me, data, popular] = await Promise.all([getCurrentUser(), getHomeData(), getPopularLinks()]);
   const favs = await getFavoriteIds(me?.id, [...data.featured, ...data.latest].map((l) => l.id));
+  const { counts, platform } = data;
+
+  const categories: { kind: CategoryArtKind; label: string; href: string; n: number }[] = [
+    { kind: "felge", label: "Autofelgen", href: "/suche?typ=auto&art=felge", n: counts.felge },
+    { kind: "komplettrad", label: "Kompletträder", href: "/suche?art=komplettrad", n: counts.komplettrad },
+    { kind: "winter", label: "Winterräder", href: "/suche?saison=winter", n: counts.winter },
+    { kind: "sommer", label: "Sommerräder", href: "/suche?saison=sommer", n: counts.sommer },
+    { kind: "motorrad", label: "Motorradfelgen", href: "/suche?typ=motorrad", n: counts.motorrad },
+    { kind: "stahl", label: "Stahlfelgen", href: "/suche?material=stahl", n: counts.stahl },
+  ];
 
   return (
     <>
-      {/* HERO */}
-      <section className="carbon relative overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-brand/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-brand-fill-2/20 blur-3xl" />
-        <div className="container-page relative grid items-center gap-10 pb-16 pt-10 md:pb-24 md:pt-16 lg:grid-cols-[1.15fr_0.85fr]">
-          <div>
-            <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-surface/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted backdrop-blur" style={{ animationDelay: "50ms" }}>
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" />
-              {data.activeCount.toLocaleString("de-AT")} aktive Inserate in AT · DE · CH
-            </p>
-            <h1 className="animate-rise font-display mt-5 text-[2.15rem] uppercase leading-[0.98] tracking-tight sm:text-5xl lg:text-[3.6rem] xl:text-[4rem]" style={{ animationDelay: "120ms" }}>
-              <span className="text-chrome">Die richtige Felge.</span>
-              <br />
-              <span className="text-gradient-brand">Für dein Fahrzeug.</span>
+      {/* 1 · HERO-SUCHMASKE */}
+      <section
+        aria-labelledby="hero-title"
+        className="relative overflow-hidden bg-[linear-gradient(125deg,var(--brand-fill-2)_0%,color-mix(in_oklab,var(--brand-fill-2)_62%,black)_58%,color-mix(in_oklab,var(--brand-fill-2)_30%,black)_100%)] text-on-brand"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_28rem_at_85%_0%,rgb(255_255_255/0.13),transparent_70%)]" />
+        <div className="container-page relative grid gap-12 pb-10 pt-8 sm:pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-center lg:pb-16 xl:grid-cols-[minmax(0,1fr)_18rem]">
+          <div className="min-w-0">
+            <h1 id="hero-title" className="font-display text-[1.875rem] uppercase leading-[1.05] tracking-tight sm:text-[2.75rem] lg:text-5xl">
+              Gebrauchte Felgen &amp; Kompletträder
             </h1>
-            <p className="animate-rise mt-5 max-w-xl text-lg text-muted" style={{ animationDelay: "200ms" }}>
-              Gebrauchte Felgen und Kompletträder für Auto und Motorrad kaufen und verkaufen. Wähle dein Fahrzeug, und wir zeigen dir nur, was
-              wirklich passt: Lochkreis, Einpresstiefe, Mittenloch und Größe.
+            <p className="mt-3 max-w-2xl text-base text-on-brand/80 sm:text-lg">
+              <strong className="font-semibold text-on-brand">{offers(counts.total)}</strong> von Privat und Händlern in Österreich,
+              Deutschland und der Schweiz – mit Passungsprüfung für dein Fahrzeug.
             </p>
-            <div className="animate-rise mt-7 flex flex-wrap gap-3" style={{ animationDelay: "280ms" }}>
-              <Link href="/suche" className="btn btn-brand group">
-                <Search className="h-4 w-4" />
-                Felgen durchsuchen
-              </Link>
-              <Link href="/inserat/neu" className="btn btn-outline group">
-                Kostenlos verkaufen
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
+            <HomeSearch initialTotal={counts.felge} className="mt-6 sm:mt-8" />
           </div>
-          <HeroRim className="animate-rise-scale mx-auto w-[min(78vw,26rem)] lg:w-full lg:max-w-[30rem]" />
+          <div className="relative hidden lg:block">
+            <div className="absolute inset-[6%] rounded-full bg-on-brand/[0.07] ring-1 ring-on-brand/10" />
+            <HeroRim className="relative w-full" />
+          </div>
         </div>
       </section>
 
-      {/* FITMENT FINDER */}
-      <section className="container-page relative z-10 -mt-10 md:-mt-14">
-        <div className="reveal">
-          <h2 className="sr-only">Felgen für dein Fahrzeug finden</h2>
-          <FitmentFinder />
-        </div>
-        {popular.length > 0 && (
-          <div className="reveal mt-5 flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-sm text-faint">Beliebt:</span>
-            {popular.map((p) => (
-              <Link key={p.href} href={p.href} className="chip">
-                {p.label}
+      {/* 2 · KATEGORIEN */}
+      <section aria-labelledby="kat-title" className="container-page mt-10 sm:mt-14">
+        <SectionHeader id="kat-title" title="Kategorien" sub="Felgen und Räder für jeden Einsatz" />
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+          {categories.map((c) => (
+            <li key={c.kind}>
+              <Link
+                href={c.href}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition-[border-color,box-shadow] duration-300 hover:border-brand hover:shadow-card-hover"
+              >
+                <span className="flex h-24 items-center justify-center bg-surface-2 sm:h-32">
+                  <CategoryArt
+                    kind={c.kind}
+                    className="h-[4.25rem] w-[4.25rem] transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-105 sm:h-[5.5rem] sm:w-[5.5rem]"
+                  />
+                </span>
+                <span className="flex items-center justify-between gap-2 px-3 py-3 sm:px-4">
+                  <span className="min-w-0">
+                    <span className="block truncate text-[0.9375rem] font-semibold leading-5 group-hover:text-brand">{c.label}</span>
+                    <span className="mt-0.5 block text-xs text-muted sm:text-[0.8125rem]">{offers(c.n)}</span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
+                </span>
               </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* KATEGORIEN */}
-      <section className="container-page mt-16">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {CATEGORIES.map((c, i) => (
-            <Link
-              key={c.href}
-              href={c.href}
-              className="reveal card group relative overflow-hidden p-5 transition-all hover:border-brand"
-              style={{ ["--reveal-delay" as string]: `${i * 80}ms` }}
-            >
-              <c.icon className="h-7 w-7 text-brand transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
-              <h3 className="font-display mt-4 text-lg font-semibold uppercase tracking-wide">{c.label}</h3>
-              <p className="mt-1 text-sm text-muted">{c.text}</p>
-              <ArrowRight className="absolute right-4 top-5 h-4 w-4 text-faint transition-all group-hover:translate-x-1 group-hover:text-brand" />
-            </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* TOP-INSERATE */}
+      {/* 3 · TOP-ANGEBOTE */}
       {data.featured.length > 0 && (
-        <section className="container-page mt-16">
-          <SectionTitle eyebrow="Hervorgehoben" title="Top-Inserate" href="/suche" />
-          <ListingGrid>
+        <section aria-labelledby="top-title" className="container-page mt-12 sm:mt-16">
+          <SectionHeader id="top-title" title="Top-Angebote" sub="Hervorgehobene Inserate" href="/suche" />
+          <HomeCarousel label="Top-Angebote">
             {data.featured.map((l, i) => (
               <ListingCard key={l.id} l={l} favorite={favs.has(l.id)} index={i} />
             ))}
-          </ListingGrid>
+          </HomeCarousel>
         </section>
       )}
 
-      {/* NEUESTE */}
-      <section className="container-page mt-16">
-        <SectionTitle eyebrow="Frisch eingestellt" title="Neueste Felgen" href="/suche" />
-        {data.latest.length ? (
-          <ListingGrid>
-            {data.latest.map((l, i) => (
-              <ListingCard key={l.id} l={l} favorite={favs.has(l.id)} index={i} priority={i < 2} />
+      {/* 4 · FELGEN NACH GRÖSSE */}
+      <section aria-labelledby="groesse-title" className="container-page mt-12 sm:mt-16">
+        <SectionHeader id="groesse-title" title="Felgen nach Größe" sub="Direkt zur passenden Zollgröße oder zum Lochkreis" />
+        <div className="rounded-2xl border border-line bg-surface p-4 shadow-card sm:p-6">
+          <h3 className="text-sm font-semibold text-muted">Zollgröße</h3>
+          <ul className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3">
+            {data.sizes.map((s) => (
+              <li key={s.zoll}>
+                <Link
+                  href={`/suche?typ=auto&zoll=${s.zoll}`}
+                  className="group flex h-full flex-col items-center justify-center rounded-xl border border-transparent bg-surface-2 px-1 py-3.5 text-center transition-colors hover:border-brand hover:bg-brand-soft sm:py-5"
+                >
+                  <span className="font-display text-2xl leading-none group-hover:text-brand sm:text-[2rem]">
+                    {s.zoll}
+                    <span className="text-brand">&quot;</span>
+                  </span>
+                  <span className={clsx("mt-1.5 whitespace-nowrap text-[0.6875rem] sm:text-xs", s.n ? "text-muted" : "text-faint")}>
+                    {s.n ? offers(s.n) : "keine"}
+                  </span>
+                </Link>
+              </li>
             ))}
-          </ListingGrid>
+            <li>
+              <Link
+                href="/suche?typ=auto"
+                className="group flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-line-strong px-1 py-3.5 text-center transition-colors hover:border-brand hover:bg-brand-soft sm:py-5"
+              >
+                <span className="text-sm font-semibold group-hover:text-brand">Alle</span>
+                <span className="mt-1.5 text-[0.6875rem] text-muted sm:text-xs">Größen</span>
+              </Link>
+            </li>
+          </ul>
+          <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center">
+            <h3 className="shrink-0 text-sm font-semibold text-muted sm:w-24">Lochkreis</h3>
+            <ul className="flex flex-wrap gap-2">
+              {data.pcds.map((p) => (
+                <li key={p.pcd}>
+                  <Link href={`/suche?lk=${p.pcd}`} className="chip tabular-nums">
+                    <span className="font-semibold text-fg">{p.pcd}</span>
+                    <span className="text-faint">· {int.format(p.n)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 5 · NEUESTE ANGEBOTE */}
+      <section aria-labelledby="neu-title" className="container-page mt-12 sm:mt-16">
+        <SectionHeader id="neu-title" title="Neueste Angebote" sub="Frisch eingestellt" href="/suche" />
+        {data.latest.length ? (
+          <>
+            <ListingGrid>
+              {data.latest.map((l, i) => (
+                // Handy: 4 Karten (kürzere Seite), lg mit 3 Spalten: 6 – so bleibt keine Reihe halb leer
+                <div key={l.id} className={clsx("contents", i >= 4 && "max-sm:hidden", i >= 6 && "lg:max-xl:hidden")}>
+                  <ListingCard l={l} favorite={favs.has(l.id)} index={i} />
+                </div>
+              ))}
+            </ListingGrid>
+            <div className="mt-6 flex justify-center sm:mt-8">
+              <Link href="/suche" className="btn btn-outline group w-full sm:w-auto sm:px-8">
+                Alle {offers(counts.total)} ansehen
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              </Link>
+            </div>
+          </>
         ) : (
           <div className="card p-10 text-center text-muted">
-            Noch keine Inserate. <Link className="link" href="/inserat/neu">Sei der Erste!</Link>
+            Noch keine Angebote.{" "}
+            <Link className="link" href="/inserat/neu">
+              Stell das erste ein!
+            </Link>
           </div>
         )}
       </section>
 
-      {/* SO FUNKTIONIERT'S */}
-      <section className="container-page mt-24">
-        <div className="reveal text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-brand">So einfach geht&apos;s</p>
-          <h2 className="font-display mt-2 text-3xl font-bold uppercase sm:text-4xl">In drei Schritten zur neuen Felge</h2>
-        </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {[
-            { icon: Search, t: "Fahrzeug wählen", d: `Über ${data.gens} Modelle von ${data.makes} Marken mit Lochkreis, Mittenloch, ET und Seriengrößen.` },
-            { icon: BadgeCheck, t: "Passende Felgen finden", d: "Wir prüfen jedes Inserat gegen dein Fahrzeug – streng oder mit „eventuell passend“." },
-            { icon: MessageCircle, t: "Direkt chatten", d: "Schreib dem Verkäufer im Chat. Deine Telefonnummer und E-Mail bleiben privat." },
-          ].map((s, i) => (
-            <div key={s.t} className="reveal card relative p-6" style={{ ["--reveal-delay" as string]: `${i * 100}ms` }}>
-              <span className="font-display absolute right-5 top-3 text-6xl font-bold text-surface-3">{i + 1}</span>
-              <s.icon className="relative h-8 w-8 text-brand" />
-              <h3 className="relative mt-4 text-lg font-semibold">{s.t}</h3>
-              <p className="relative mt-2 text-sm leading-relaxed text-muted">{s.d}</p>
-            </div>
-          ))}
+      {/* 6 · BELIEBTE FELGENMARKEN */}
+      {data.brands.length > 0 && (
+        <section aria-labelledby="marken-title" className="container-page mt-12 sm:mt-16">
+          <SectionHeader id="marken-title" title="Beliebte Felgenmarken" sub="Von Originalfelgen bis Premium-Schmiedefelge" />
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+            {data.brands.map((b) => (
+              <li key={b.brand}>
+                <Link
+                  href={`/suche?q=${encodeURIComponent(b.brand)}`}
+                  className="group flex h-full flex-col items-center justify-center rounded-2xl border border-line bg-surface px-3 py-5 text-center shadow-card transition-[border-color,box-shadow] duration-300 hover:border-brand hover:shadow-card-hover sm:py-6"
+                >
+                  <span className="font-display block max-w-full truncate text-base uppercase leading-tight tracking-wide group-hover:text-brand sm:text-lg">
+                    {brandLabel(b.brand)}
+                  </span>
+                  <span className="mt-1 text-xs text-muted sm:text-[0.8125rem]">{offers(b.n)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* 7 · KONFIGURATOR */}
+      <section aria-labelledby="konf-title" id="konfigurator" className="mt-14 scroll-mt-24 border-y border-line bg-brand-soft sm:mt-20">
+        <div className="container-page grid gap-8 py-10 sm:py-14 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:items-center xl:gap-12">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand">Felgen-Konfigurator</p>
+            <h2 id="konf-title" className="font-display mt-2 text-[1.625rem] uppercase leading-tight sm:text-[2rem]">
+              Welche Felgen passen auf mein Auto?
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted">
+              Wir kennen Lochkreis, Mittenloch, Einpresstiefe und Seriengrößen von {int.format(platform.generations)} Fahrzeugmodellen
+              aus {int.format(platform.makes)} Marken – und zeigen dir nur Felgen, die wirklich passen.
+            </p>
+            <ol className="mt-6 flex items-center gap-1.5 text-[0.8125rem] font-semibold sm:gap-2 sm:text-sm">
+              {["Marke", "Modell", "Baureihe"].map((s, i) => (
+                <li key={s} className="flex items-center gap-1.5 sm:gap-2">
+                  {i > 0 && <ChevronRight className="h-4 w-4 shrink-0 text-faint" aria-hidden />}
+                  <span className="flex items-center gap-2 whitespace-nowrap rounded-full border border-line bg-surface py-1 pl-1 pr-3 shadow-card sm:pr-3.5">
+                    <span className="font-display flex h-6 w-6 items-center justify-center rounded-full bg-brand-fill text-xs text-on-brand">
+                      {i + 1}
+                    </span>
+                    {s}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="min-w-0">
+            <FitmentFinder />
+            {popular.length > 0 && (
+              <div className="scrollbar-none mt-4 flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+                <span className="mr-1 shrink-0 text-sm text-muted">Beliebt:</span>
+                {popular.map((p) => (
+                  <Link key={p.href} href={p.href} className="chip shrink-0">
+                    {p.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* VERKAUFEN CTA */}
-      <section className="container-page mt-24">
-        <div className="reveal streak relative overflow-hidden rounded-[1.75rem] border border-brand/30 bg-gradient-to-br from-surface-2 via-surface to-bg p-8 sm:p-12">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/15 blur-3xl" />
-          <div className="relative grid items-center gap-8 md:grid-cols-[1fr_auto]">
-            <div>
-              <h2 className="font-display text-3xl font-bold uppercase sm:text-4xl">
-                Felgen im Keller? <span className="text-gradient-brand">Mach Geld daraus.</span>
-              </h2>
-              <p className="mt-3 max-w-2xl text-muted">
-                Inserieren ist kostenlos. Lade bis zu 12 Fotos hoch, gib die Daten ein, und Käufer mit passendem Fahrzeug finden dich automatisch.
-              </p>
-              <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-brand" /> Kontakt nur über den Chat</li>
-                <li className="flex items-center gap-2"><Upload className="h-4 w-4 text-brand" /> In 3 Minuten online</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-brand" /> Privat & gewerblich</li>
-              </ul>
+      {/* 8 · VERKAUFEN */}
+      <section aria-labelledby="verkaufen-title" className="container-page mt-14 sm:mt-20">
+        <div className="grid overflow-hidden rounded-2xl border border-line bg-surface shadow-card xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="relative bg-[linear-gradient(135deg,var(--brand-fill-2),color-mix(in_oklab,var(--brand-fill-2)_55%,black))] p-6 text-on-brand sm:p-8 xl:p-10">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-on-brand/75">Verkaufen</p>
+            <h2 id="verkaufen-title" className="font-display mt-2 text-[1.625rem] uppercase leading-tight sm:text-[2rem]">
+              Felgen verkaufen&nbsp;– kostenlos
+            </h2>
+            <p className="mt-3 max-w-md text-on-brand/80">
+              Inserat in wenigen Minuten erstellen. Käufer mit passendem Fahrzeug finden dich automatisch.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link
+                href="/inserat/neu"
+                className="btn group bg-on-brand px-6 text-brand-fill-2 shadow-sm hover:bg-on-brand/90"
+              >
+                Kostenlos inserieren
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              </Link>
+              <Link href="/registrieren" className="text-sm font-semibold text-on-brand/90 underline-offset-4 hover:underline">
+                Für Händler
+              </Link>
             </div>
-            <Link href="/inserat/neu" className="btn btn-brand h-14 px-8 text-base">
-              Jetzt inserieren
-              <ArrowRight className="h-5 w-5" />
-            </Link>
           </div>
+          <ol className="grid content-center gap-5 p-6 sm:grid-cols-3 sm:gap-6 sm:p-8 xl:p-10">
+            {[
+              { icon: Camera, t: "Fotos hochladen", d: "Bis zu 12 Bilder – am besten bei Tageslicht und mit Detailaufnahmen." },
+              { icon: ClipboardList, t: "Daten eingeben", d: "Zoll, Breite, ET und Lochkreis – die Passung prüfen wir automatisch." },
+              { icon: MessageCircle, t: "Anfragen erhalten", d: "Käufer schreiben dir im Chat. Telefon und E-Mail bleiben privat." },
+            ].map((s, i) => (
+              <li key={s.t} className="flex gap-4 sm:block">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
+                  <s.icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="min-w-0 sm:mt-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">Schritt {i + 1}</p>
+                  <h3 className="mt-1 font-semibold">{s.t}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{s.d}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
+      </section>
+
+      {/* 9 · VERTRAUENS-ZAHLEN */}
+      <section aria-labelledby="zahlen-title" className="container-page mb-16 mt-12 sm:mb-20 sm:mt-16">
+        <h2 id="zahlen-title" className="sr-only">
+          GebrauchtFelgen24 in Zahlen
+        </h2>
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4">
+          {[
+            { icon: Tag, value: int.format(counts.total), label: "aktive Angebote" },
+            { icon: CarFront, value: int.format(platform.generations), label: "Fahrzeugmodelle in der Datenbank" },
+            { icon: Store, value: int.format(platform.dealers), label: platform.dealers === 1 ? "Händler" : "Händler an Bord" },
+            { icon: Globe2, value: "3", label: "Länder: AT · DE · CH" },
+          ].map((s) => (
+            <div key={s.label} className="flex flex-col-reverse items-center justify-end bg-surface px-3 py-6 text-center sm:py-8">
+              <dt className="mt-2 text-sm text-muted">{s.label}</dt>
+              <dd className="flex flex-col items-center gap-3">
+                <s.icon className="h-6 w-6 text-brand" aria-hidden />
+                <span className="font-display text-3xl leading-none sm:text-4xl">{s.value}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-4 text-balance text-center text-sm text-muted">
+          <BadgeCheck className="mr-1.5 inline-block h-4 w-4 align-[-0.1875rem] text-brand" aria-hidden />
+          Kostenlos für Käufer und Verkäufer&nbsp;· Kontakt nur über den sicheren Chat
+        </p>
       </section>
     </>
   );
 }
 
-function SectionTitle({ eyebrow, title, href }: { eyebrow: string; title: string; href?: string }) {
+function SectionHeader({ id, title, sub, href }: { id: string; title: string; sub?: string; href?: string }) {
   return (
-    <div className="reveal mb-6 flex items-end justify-between gap-4">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand">{eyebrow}</p>
-        <h2 className="font-display mt-1 text-2xl font-bold uppercase sm:text-3xl">{title}</h2>
+    <div className="mb-4 flex items-end justify-between gap-4 sm:mb-6">
+      <div className="min-w-0">
+        <h2 id={id} className="font-display text-[1.375rem] uppercase leading-tight sm:text-[1.75rem]">
+          {title}
+        </h2>
+        {sub && <p className="mt-1 text-sm text-muted sm:text-[0.9375rem]">{sub}</p>}
       </div>
       {href && (
-        <Link href={href} className="group flex shrink-0 items-center gap-1 text-sm font-semibold text-muted hover:text-brand">
-          Alle ansehen <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        <Link href={href} className="group flex shrink-0 items-center gap-1 pb-0.5 text-sm font-semibold text-brand">
+          Alle ansehen
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
         </Link>
       )}
     </div>
