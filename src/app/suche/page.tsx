@@ -1,4 +1,4 @@
-import { Bike, CarFront, ChevronDown, CircleAlert, Info, X } from "lucide-react";
+import { Bike, CarFront, ChevronDown, Info, SearchX, X } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -96,7 +96,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
           </p>
         </div>
         <Suspense>
-          <SaveSearchButton compact className="h-10 shrink-0" />
+          <SaveSearchButton compact className="h-10 shrink-0 rounded-full" />
         </Suspense>
       </header>
 
@@ -116,16 +116,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
                 {gen.type === "auto" ? <CarFront className="h-6 w-6" aria-hidden /> : <Bike className="h-6 w-6" aria-hidden />}
               </div>
               <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider text-brand">
-                  {gen.type === "auto" ? "Dein Auto" : "Dein Motorrad"}
-                  <Link
-                    href={searchHref(f, { fahrzeug: undefined, modus: "streng" })}
-                    className="inline-flex items-center gap-1 font-semibold normal-case tracking-normal text-muted hover:text-red"
-                  >
-                    <X className="h-3.5 w-3.5" aria-hidden />
-                    Fahrzeug entfernen
-                  </Link>
-                </p>
+                <p className="text-xs font-bold uppercase tracking-wider text-brand">{gen.type === "auto" ? "Dein Auto" : "Dein Motorrad"}</p>
                 <p className="mt-1 font-semibold">
                   {gen.fullName} <span className="whitespace-nowrap font-normal text-muted">{yearRange(gen.yearFrom, gen.yearTo)}</span>
                 </p>
@@ -161,9 +152,15 @@ export default async function SearchPage(props: PageProps<"/suche">) {
                 </div>
               </div>
             </div>
-            <Suspense>
-              <FitModeToggle />
-            </Suspense>
+            <div className="flex flex-wrap items-center gap-2">
+              <Suspense>
+                <FitModeToggle />
+              </Suspense>
+              <Link href={searchHref(f, { fahrzeug: undefined, modus: "streng" })} className="btn btn-ghost btn-sm text-muted hover:text-red">
+                <X className="h-4 w-4" aria-hidden />
+                Fahrzeug entfernen
+              </Link>
+            </div>
           </div>
           <div className="flex items-start gap-2 border-t border-line bg-surface-2/60 px-4 py-2.5 text-xs leading-relaxed text-muted sm:px-5">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" aria-hidden />
@@ -250,7 +247,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
             ) : (
               <div className="animate-fade-up flex flex-col items-center rounded-2xl border border-line bg-surface px-6 py-12 text-center">
                 <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-soft text-brand">
-                  <CircleAlert className="h-7 w-7" aria-hidden />
+                  <SearchX className="h-7 w-7" aria-hidden />
                 </span>
                 <h2 className="mt-4 text-lg font-semibold">Keine passenden Angebote gefunden</h2>
                 <p className="mt-2 max-w-md text-sm text-muted">

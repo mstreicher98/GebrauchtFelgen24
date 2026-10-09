@@ -14,7 +14,7 @@ export default async function VehiclesPage() {
   const rows = await db.execute<{ id: number; type: "auto" | "motorrad"; name: string; slug: string; models: number; gens: number }>(sql`
     select mk.id, mk.type, mk.name, mk.slug, count(distinct m.id)::int as models, count(g.id)::int as gens
     from vehicle_make mk left join vehicle_model m on m.make_id = mk.id left join vehicle_generation g on g.model_id = m.id
-    group by mk.id order by mk.name`);
+    group by mk.id order by lower(mk.name), mk.name`);
   const cars = rows.filter((r) => r.type === "auto");
   const motos = rows.filter((r) => r.type === "motorrad");
   const total = rows.reduce((s, r) => s + r.gens, 0);
@@ -57,11 +57,16 @@ function Section({ title, icon, items }: { title: string; icon: React.ReactNode;
           >
             <p className="font-semibold group-hover:text-brand">{m.name}</p>
             <p className="mt-0.5 text-xs text-faint">
-              {m.models} Modelle · {m.gens} Baureihen
+              <span className="max-sm:hidden">{plural(m.models, "Modell", "Modelle")} · </span>
+              {plural(m.gens, "Baureihe", "Baureihen")}
             </p>
           </Link>
         ))}
       </div>
     </section>
   );
+}
+
+function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
 }

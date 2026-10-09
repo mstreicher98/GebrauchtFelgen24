@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { ArrowRight, Bike, Car, ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
@@ -66,13 +67,13 @@ export default async function MakePage(props: PageProps<"/fahrzeuge/[typ]/[marke
         {mk.name}
       </h1>
       <p className="mt-2 text-muted">
-        {models.length} Modelle · {gens.length} Baureihen
+        {models.length} {models.length === 1 ? "Modell" : "Modelle"} · {gens.length} {gens.length === 1 ? "Baureihe" : "Baureihen"}
       </p>
 
       {/* Sprungmarken */}
       <nav className="scrollbar-none sticky top-16 z-20 -mx-4 mt-6 flex gap-2 overflow-x-auto bg-bg/85 px-4 py-3 backdrop-blur" aria-label="Modelle">
         {models.map((m) => (
-          <a key={m.id} href={`#${m.slug}`} className="chip shrink-0">
+          <a key={m.id} href={`#${m.slug}`} className="chip min-h-11 shrink-0 sm:min-h-0">
             {m.name}
           </a>
         ))}
@@ -84,12 +85,13 @@ export default async function MakePage(props: PageProps<"/fahrzeuge/[typ]/[marke
             <h2 className="font-display mb-4 text-2xl font-bold uppercase">
               {mk.name} {m.name}
             </h2>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
               {gens
                 .filter((g) => g.modelId === m.id)
                 .map((g) => {
                   const gs = specs.filter((s) => s.generationId === g.id);
                   const n = countMap.get(g.id) ?? 0;
+                  const axle = !isCar || gs.some((x) => x.position !== "alle");
                   return (
                     <article key={g.id} className="card reveal overflow-hidden">
                       <div className="flex items-start justify-between gap-3 border-b border-line p-4">
@@ -118,19 +120,20 @@ export default async function MakePage(props: PageProps<"/fahrzeuge/[typ]/[marke
                         </dl>
                       )}
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        {/* Feste Spaltenbreiten, damit die Tabellen nebeneinanderliegender Karten fluchten */}
+                        <table className="w-full table-fixed text-sm">
                           <thead>
                             <tr className="text-left text-xs uppercase tracking-wider text-faint">
-                              {!isCar || gs.some((s) => s.position !== "alle") ? <th className="px-4 py-2 font-medium">Achse</th> : null}
-                              <th className="px-4 py-2 font-medium">Felge</th>
-                              {isCar && <th className="px-4 py-2 font-medium">ET</th>}
+                              {axle ? <th className="w-[22%] px-4 py-2 font-medium">Achse</th> : null}
+                              <th className={clsx("px-4 py-2 font-medium", axle ? "w-[30%]" : "w-[40%]")}>Felge</th>
+                              {isCar && <th className={clsx("px-4 py-2 font-medium", axle ? "w-[14%]" : "w-[18%]")}>ET</th>}
                               <th className="px-4 py-2 font-medium">Reifen</th>
                             </tr>
                           </thead>
                           <tbody>
                             {gs.map((s) => (
                               <tr key={s.id} className="border-t border-line/60">
-                                {!isCar || gs.some((x) => x.position !== "alle") ? (
+                                {axle ? (
                                   <td className="px-4 py-2 text-muted">{s.position === "vorne" ? "Vorne" : s.position === "hinten" ? "Hinten" : "V+H"}</td>
                                 ) : null}
                                 <td className="px-4 py-2 font-medium">

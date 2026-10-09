@@ -72,7 +72,7 @@ export function DetailSpecs({ l }: { l: Listing }) {
         Technische Daten
       </h2>
       <div className="mt-4 space-y-6">
-        <SpecGroup title={l.kind === "komplettrad" ? "Felge" : "Felgen-Daten"} rows={rim} />
+        <SpecGroup title="Felge" rows={rim} />
         <SpecGroup title="Reifen" rows={tire} />
       </div>
     </section>

@@ -96,7 +96,7 @@ export function LoginForm({ google, apple }: { google: boolean; apple: boolean }
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="label">Passwort</label>
-            <Link href="/passwort-vergessen" className="mb-1.5 text-xs text-muted hover:text-brand">Passwort vergessen?</Link>
+            <Link href="/passwort-vergessen" className="-my-2 inline-flex min-h-9 items-center text-sm font-medium text-brand hover:underline">Passwort vergessen?</Link>
           </div>
           <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="current-password" />
         </div>
@@ -118,7 +118,7 @@ export function LoginForm({ google, apple }: { google: boolean; apple: boolean }
 export function RegisterForm({ google, apple }: { google: boolean; apple: boolean }) {
   const sp = useSearchParams();
   const next = safeNext(sp.get("weiter"));
-  const [type, setType] = useState<"privat" | "haendler">("privat");
+  const [type, setType] = useState<"privat" | "haendler">(sp.get("typ") === "haendler" ? "haendler" : "privat");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
@@ -202,9 +202,12 @@ export function RegisterForm({ google, apple }: { google: boolean; apple: boolea
           <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="new-password" />
           <div className="mt-2 flex gap-1" aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={clsx("h-1 flex-1 rounded-full transition-colors", strength(password) > i ? (strength(password) > 2 ? "bg-green" : "bg-brand") : "bg-surface-3")} />
+              <span key={i} className={clsx("h-1.5 flex-1 rounded-full transition-colors", strength(password) > i ? (strength(password) > 2 ? "bg-green" : "bg-brand") : "bg-line-strong")} />
             ))}
           </div>
+          <p className="mt-1 min-h-4 text-xs text-muted" aria-live="polite">
+            {password ? `Passwortstärke: ${["zu kurz", "schwach", "mittel", "gut", "stark"][strength(password)]}` : ""}
+          </p>
         </div>
         <label className="flex cursor-pointer items-start gap-2.5 text-sm text-muted">
           <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--brand)]" checked={terms} onChange={(e) => setTerms(e.target.checked)} />

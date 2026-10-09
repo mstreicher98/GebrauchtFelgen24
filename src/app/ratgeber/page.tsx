@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -99,16 +100,16 @@ export default function GuidePage() {
         <h1 className="font-display mt-2 text-4xl font-bold uppercase sm:text-5xl">8Jx18 ET45 5x112 – was heißt das?</h1>
         <p className="mt-3 text-muted">Die wichtigsten Begriffe rund um Felgen und Reifen – kurz und verständlich erklärt.</p>
       </div>
-      <nav className="mt-8 flex flex-wrap gap-2">
+      <nav aria-label="Themen" className="scrollbar-none mt-8 flex gap-2 overflow-x-auto [mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] sm:flex-wrap sm:overflow-visible sm:[mask-image:none]">
         {TOPICS.map((t) => (
-          <a key={t.id} href={`#${t.id}`} className="chip">
+          <a key={t.id} href={`#${t.id}`} className="chip shrink-0">
             {t.t.split(":")[0]}
           </a>
         ))}
       </nav>
       <div className="mt-10 grid gap-4 lg:grid-cols-2">
         {TOPICS.map((t, i) => (
-          <section key={t.id} id={t.id} className="card reveal scroll-mt-24 p-6" style={{ ["--reveal-delay" as string]: `${(i % 2) * 80}ms` }}>
+          <section key={t.id} id={t.id} className={clsx("card reveal scroll-mt-24 p-6", i === TOPICS.length - 1 && TOPICS.length % 2 === 1 && "lg:col-span-2")} style={{ ["--reveal-delay" as string]: `${(i % 2) * 80}ms` }}>
             <h2 className="font-display text-xl uppercase tracking-wide text-brand">{t.t}</h2>
             <div className="mt-3 space-y-3 leading-relaxed text-muted [&_strong]:text-fg">{t.d}</div>
           </section>

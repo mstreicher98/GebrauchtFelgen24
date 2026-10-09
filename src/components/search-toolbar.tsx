@@ -9,7 +9,7 @@ export function ViewToggle({ view, gridHref, listHref }: { view: "grid" | "list"
     { key: "list", href: listHref, Icon: List, label: "Listenansicht" },
   ] as const;
   return (
-    <div className="inline-flex h-9 items-center rounded-full border border-line bg-surface p-[3px]" role="group" aria-label="Ansicht">
+    <div className="inline-flex h-10 items-center rounded-full border border-line bg-surface p-[3px]" role="group" aria-label="Ansicht">
       {items.map(({ key, href, Icon, label }) => {
         const active = view === key;
         return (
@@ -21,7 +21,7 @@ export function ViewToggle({ view, gridHref, listHref }: { view: "grid" | "list"
             title={label}
             aria-current={active ? "true" : undefined}
             className={clsx(
-              "grid h-7 w-8 place-items-center rounded-full transition-colors sm:w-9",
+              "grid h-8 w-9 place-items-center rounded-full transition-colors",
               active ? "bg-brand-soft text-brand" : "text-muted hover:bg-surface-2 hover:text-fg",
             )}
           >

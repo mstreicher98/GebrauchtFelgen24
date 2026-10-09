@@ -274,7 +274,17 @@ function Footer({ l, showSeller = false }: { l: CardListing; showSeller?: boolea
       {/* flex-1: feste Breite, damit Händlername und Ort in jeder Zeile gleich gekürzt werden */}
       <span className="flex min-w-0 flex-1 items-center gap-1.5">
         <SellerIcon className={clsx("h-3.5 w-3.5 shrink-0", dealer ? "text-brand" : "text-faint")} aria-hidden />
-        <span className={clsx("sr-only", showSeller && !dealer && "sm:hidden")}>{sellerLabel}: </span>
+        {/* Raster: Händler sichtbar kennzeichnen, Privat (Normalfall) nur per Symbol + Screenreader-Text */}
+        {!showSeller && dealer ? (
+          <>
+            <span className="shrink-0 font-semibold text-brand">Händler</span>
+            <span className="text-faint" aria-hidden>
+              ·
+            </span>
+          </>
+        ) : (
+          <span className={clsx("sr-only", showSeller && !dealer && "sm:hidden")}>{sellerLabel}: </span>
+        )}
         {showSeller && (
           <>
             <span className="hidden min-w-0 max-w-[55%] shrink-0 truncate font-semibold text-fg sm:block">{dealer && l.sellerCompany ? l.sellerCompany : sellerLabel}</span>

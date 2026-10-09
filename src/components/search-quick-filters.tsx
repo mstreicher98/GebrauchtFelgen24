@@ -89,8 +89,8 @@ export function QuickFilters({
   );
 
   return (
-    <nav aria-label="Schnellfilter" className="-mx-4 sm:-mx-6 lg:mx-0">
-      <ul className="scrollbar-none flex items-center gap-2 overflow-x-auto px-4 py-0.5 sm:px-6 lg:flex-wrap lg:overflow-visible lg:px-0">
+    <nav aria-label="Schnellfilter" className="-mx-4 sm:-mx-6 xl:mx-0">
+      <ul className="scrollbar-none flex items-center gap-2 overflow-x-auto px-4 py-0.5 sm:px-6 xl:flex-wrap xl:overflow-visible xl:px-0">
         {sizeChips.map(renderChip)}
         <li aria-hidden className="mx-1 h-5 w-px shrink-0 bg-line" />
         {otherChips.map(renderChip)}

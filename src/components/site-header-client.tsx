@@ -257,7 +257,7 @@ export function MobileTabBar({ loggedIn }: { loggedIn: boolean }) {
     { href: "/suche", label: "Suche", icon: Search },
     { href: "/inserat/neu", label: "Inserieren", icon: Plus, primary: true },
     { href: loggedIn ? "/nachrichten" : "/fahrzeuge", label: loggedIn ? "Chats" : "Fahrzeuge", icon: loggedIn ? MessageCircle : CarFront, badge: loggedIn ? unread : 0 },
-    { href: loggedIn ? "/konto" : "/anmelden", label: loggedIn ? "Konto" : "Login", icon: UserIcon },
+    { href: loggedIn ? "/konto" : "/anmelden", label: loggedIn ? "Konto" : "Anmelden", icon: UserIcon },
   ];
   return (
     <nav

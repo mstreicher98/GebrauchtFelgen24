@@ -47,18 +47,18 @@ export default async function AccountPage() {
       </div>
       <div className="card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold">Deine Inserate wurden {formatCount(stats.views)}× angesehen</h2>
-          <p className="mt-1 flex items-center gap-1 text-sm text-muted">
-            <Eye className="h-4 w-4" /> Mehr Fotos und genaue Daten (ET, Mittenloch) bringen mehr Anfragen.
-          </p>
+          <h2 className="flex items-center gap-2 font-semibold">
+            <Eye className="h-4 w-4 shrink-0 text-brand" aria-hidden /> Deine Inserate wurden {formatCount(stats.views)}× angesehen
+          </h2>
+          <p className="mt-1 text-sm text-muted">Tipp: Mehr Fotos und genaue Daten (ET, Mittenloch) bringen mehr Anfragen.</p>
         </div>
         <Link href="/inserat/neu" className="btn btn-brand">
           <Plus className="h-4 w-4" /> Neues Inserat
         </Link>
       </div>
       <PushOptIn />
-      <Link href="/konto/einstellungen" className="flex items-center justify-between rounded-2xl border border-line px-5 py-4 text-sm text-muted hover:border-brand hover:text-fg">
-        Profil, Händlerdaten und Benachrichtigungen bearbeiten <ArrowRight className="h-4 w-4" />
+      <Link href="/konto/einstellungen" className="card flex items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-fg transition-colors hover:border-brand hover:text-brand">
+        Profil, Händlerdaten und Benachrichtigungen bearbeiten <ArrowRight className="h-4 w-4 shrink-0 text-muted" />
       </Link>
     </div>
   );

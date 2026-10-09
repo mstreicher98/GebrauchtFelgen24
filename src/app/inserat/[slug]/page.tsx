@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { and, asc, count, desc, eq, ne, sql } from "drizzle-orm";
-import { ArrowRight, Bike, Car, ChevronRight, Eye, Info, Settings2 } from "lucide-react";
+import { ArrowRight, Bike, CalendarDays, Car, ChevronRight, Eye, Hash, Info, Settings2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -138,7 +138,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
   // Brotkrümel & Such-Links
   const typeBase = isCar ? (l.kind === "komplettrad" ? "/suche?typ=auto&art=komplettrad" : "/suche?typ=auto&art=felge") : "/suche?typ=motorrad";
   const crumbs = [
-    { href: "/", label: "Start" },
+    { href: "/", label: "Startseite" },
     { href: typeBase, label: isCar ? (l.kind === "komplettrad" ? "Kompletträder" : "Autofelgen") : "Motorradfelgen" },
     { href: `${typeBase}&zoll=${l.diameter}`, label: `${formatNumber(l.diameter)} Zoll` },
     ...(isCar && pcd ? [{ href: `${typeBase}&zoll=${l.diameter}&lk=${pcd}`, label: pcd }] : []),
@@ -208,7 +208,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
       <nav aria-label="Brotkrümel" className="mb-4">
-        <ol className="scrollbar-none flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-sm text-muted">
+        <ol className="scrollbar-none flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-xs text-muted">
           {crumbs.map((c, i) => (
             <li key={c.href} className="flex shrink-0 items-center gap-1">
               {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-faint" aria-hidden="true" />}
@@ -219,7 +219,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
           ))}
           <li className="hidden min-w-0 items-center gap-1 md:flex">
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-faint" aria-hidden="true" />
-            <span aria-current="page" className="truncate text-faint">
+            <span aria-current="page" className="truncate font-medium text-fg">
               {l.title}
             </span>
           </li>
@@ -306,11 +306,13 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
           <DetailSeller seller={seller} displayName={sellerName} location={`${place}, ${country}`} activeListings={sellerStats?.n ?? 0} phone={phone} />
 
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-1 text-xs text-faint">
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span>Anzeigen-Nr. {l.id}</span>
-              <span aria-hidden="true">·</span>
-              <span>Eingestellt {formatRelative(l.publishedAt)}</span>
-              <span aria-hidden="true">·</span>
+            <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="inline-flex items-center gap-1">
+                <Hash className="h-3.5 w-3.5" aria-hidden="true" /> Anzeigen-Nr. {l.id}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> Eingestellt {formatRelative(l.publishedAt)}
+              </span>
               <span className="inline-flex items-center gap-1">
                 <Eye className="h-3.5 w-3.5" aria-hidden="true" /> {l.viewCount} Aufrufe
               </span>

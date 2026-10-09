@@ -6,9 +6,10 @@ import { DetailContactButton } from "./detail-contact";
 
 /**
  * Feste Kaufleiste am Handy/Tablet (unter lg): Preis + „Nachricht“.
- * Sitzt über der mobilen Tab-Leiste (Höhe wird gemessen) und erscheint nur,
+ * Liegt über der mobilen Tab-Leiste (statt zusätzlich darüber gestapelt) und erscheint nur,
  * solange der Kontakt-Button der Kaufbox nicht sichtbar ist und das Seitenende
- * noch nicht erreicht wurde – so verdeckt sie weder Kaufbox noch Fußbereich.
+ * noch nicht erreicht wurde – so verdeckt sie weder Kaufbox noch Fußbereich, und die
+ * Tab-Leiste kommt wieder zum Vorschein, sobald sie ausgeblendet ist.
  */
 export function DetailMobileBar({
   price,
@@ -31,7 +32,6 @@ export function DetailMobileBar({
   existingConversation?: string | null;
 }) {
   const [show, setShow] = useState(false);
-  const [tabBar, setTabBar] = useState(0);
 
   useEffect(() => {
     const cta = document.getElementById(ctaId);
@@ -55,14 +55,11 @@ export function DetailMobileBar({
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
-    const ro = nav ? new ResizeObserver(() => setTabBar(Math.round(nav.getBoundingClientRect().height))) : null;
-    if (nav) ro?.observe(nav);
     schedule();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     return () => {
       cancelAnimationFrame(frame);
-      ro?.disconnect();
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
@@ -71,10 +68,10 @@ export function DetailMobileBar({
   return (
     <div
       className={clsx(
-        "fixed inset-x-0 z-40 border-t border-line bg-surface shadow-[0_-8px_24px_-12px_rgb(0_0_0/0.35)] transition-[transform,opacity,visibility] duration-300 lg:hidden",
+        "fixed inset-x-0 bottom-0 z-[60] border-t border-line bg-surface shadow-[0_-8px_24px_-12px_rgb(0_0_0/0.35)] transition-[transform,opacity,visibility] duration-300 lg:hidden",
         show ? "visible translate-y-0 opacity-100" : "invisible translate-y-3 opacity-0",
       )}
-      style={{ bottom: tabBar, paddingBottom: tabBar ? undefined : "env(safe-area-inset-bottom)" }}
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-hidden={!show}
       inert={!show}
     >

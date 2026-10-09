@@ -53,7 +53,7 @@ export function MobileFilterButton({ hasVehicle, vehicleType }: Props) {
       <button
         ref={trigger}
         type="button"
-        className="btn btn-outline btn-sm shrink-0 gap-1.5 px-3 lg:hidden"
+        className="btn btn-outline btn-sm h-10 shrink-0 gap-1.5 rounded-full px-3.5 lg:hidden"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-label={active > 0 ? `Filter (${active} aktiv)` : "Filter"}
@@ -200,7 +200,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
                 <button
                   type="button"
                   key={t}
-                  className="chip h-10 justify-center font-medium"
+                  className="chip h-9 justify-center font-medium"
                   data-active={typ === t}
                   aria-pressed={typ === t}
                   onClick={() => update({ typ: typ === t ? null : t, lk: null, zoll: null })}
@@ -222,7 +222,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
               <button
                 type="button"
                 key={v}
-                className="chip h-10 justify-center px-2 font-medium"
+                className="chip h-9 justify-center px-2 font-medium"
                 data-active={sp.get("art") === v}
                 aria-pressed={sp.get("art") === v}
                 onClick={() => update({ art: sp.get("art") === v ? null : v })}
@@ -321,7 +321,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
               <button
                 type="button"
                 key={v}
-                className="chip h-10 justify-center font-medium"
+                className="chip h-9 justify-center font-medium"
                 data-active={sp.get("anbieter") === v}
                 aria-pressed={sp.get("anbieter") === v}
                 onClick={() => update({ anbieter: sp.get("anbieter") === v ? null : v })}
@@ -334,7 +334,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
       </div>
 
       {/* Am Desktop klebt die Leiste erst, wenn Eingaben noch nicht übernommen sind */}
-      <div className={clsx("bottom-0 z-10 flex gap-2 border-t border-line bg-surface py-4", pad, (variant === "drawer" || dirty) && "sticky")}>
+      <div className={clsx("bottom-0 z-10 flex gap-2 border-t border-line bg-surface py-4", pad, (variant === "drawer" || dirty) && "sticky", variant === "drawer" && "pb-[calc(1rem+env(safe-area-inset-bottom))]")}>
         <button className="btn btn-brand flex-1" disabled={pending}>
           Filter anwenden
         </button>
@@ -392,7 +392,7 @@ function ChipSection({
           <button
             type="button"
             key={v}
-            className="chip h-8 px-3 text-[0.8125rem] font-medium"
+            className="chip h-9 px-3.5 text-sm font-medium"
             data-active={selected.includes(v)}
             aria-pressed={selected.includes(v)}
             onClick={() => onToggle(v)}

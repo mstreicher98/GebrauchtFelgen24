@@ -34,7 +34,7 @@ export function SortSelect({ hasOrigin }: { hasOrigin: boolean }) {
       {/* min-w-0: darf am Handy schmaler werden, damit Filter-Knopf und Ansicht-Umschalter Platz haben */}
       <select
         aria-label="Sortierung"
-        className="select h-9 w-auto min-w-0 max-w-full truncate rounded-full py-0 pl-3 pr-8 text-sm font-semibold bg-[position:right_0.625rem_center] sm:pl-3.5 sm:pr-10 sm:bg-[position:right_0.85rem_center]"
+        className="select h-10 w-auto min-w-0 max-w-full truncate rounded-full py-0 pl-3 pr-8 text-sm font-semibold bg-[position:right_0.625rem_center] sm:pl-3.5 sm:pr-10 sm:bg-[position:right_0.85rem_center]"
         value={sp.get("sort") ?? "neu"}
         onChange={(e) => update({ sort: e.target.value === "neu" ? null : e.target.value })}
       >
@@ -67,7 +67,7 @@ export function FitModeToggle() {
           aria-checked={loose === v}
           onClick={() => update({ modus: v ? "locker" : null })}
           className={clsx(
-            "flex-1 whitespace-nowrap rounded-full px-3.5 py-1.5 font-semibold transition-colors sm:flex-none",
+            "min-h-9 flex-1 whitespace-nowrap rounded-full px-3.5 py-2 font-semibold transition-colors sm:flex-none",
             loose === v ? "bg-brand-fill text-on-brand shadow-sm" : "text-muted hover:text-fg",
           )}
         >

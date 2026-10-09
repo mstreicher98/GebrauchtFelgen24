@@ -11,7 +11,7 @@ import { ACCOUNT_ITEMS, CATEGORIES, UserAvatar, accountLabel, useActiveCategory,
 import { ThemeToggle } from "./theme";
 
 const SERVICE = [
-  { href: "/registrieren", label: "Für Händler", icon: Store },
+  { href: "/registrieren?typ=haendler", label: "Für Händler", icon: Store },
   { href: "/sicherheit", label: "Sicher handeln", icon: ShieldCheck },
   { href: "/ratgeber", label: "Felgen-Ratgeber", icon: BookOpen },
 ];

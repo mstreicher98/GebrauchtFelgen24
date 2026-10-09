@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Datenschutzerklärung" };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Datenschutzerklärung" updated="Oktober 2026">
+    <LegalPage title="Datenschutzerklärung" updated="Oktober 2026" current="/datenschutz">
       <p>
         Der Schutz deiner Daten ist uns wichtig. Wir verarbeiten personenbezogene Daten ausschließlich auf Grundlage der Datenschutz-Grundverordnung (DSGVO) und des
         österreichischen Datenschutzgesetzes (DSG). Hier informieren wir dich, welche Daten wir zu welchen Zwecken verarbeiten.
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
         <li>Inserate: bis zur Löschung durch dich bzw. mit dem Konto; abgelaufene Inserate bleiben für dich sichtbar, bis du sie löschst</li>
         <li>Nicht zugeordnete Foto-Uploads: 24 Stunden</li>
         <li>Chat-Nachrichten: bis zur Löschung des Kontos eines der Teilnehmer bzw. des zugehörigen Inserats</li>
-        <li>Gesetzliche Aufbewahrungspflichten (z. B. § 132 BAO) bleiben unberührt</li>
+        <li>Gesetzliche Aufbewahrungspflichten (z. B. §&nbsp;132 BAO) bleiben unberührt</li>
       </ul>
 
       <h2>6. Deine Rechte</h2>

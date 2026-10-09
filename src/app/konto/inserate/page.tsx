@@ -1,5 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
-import { Eye, Plus } from "lucide-react";
+import { clsx } from "clsx";
+import { Eye, LayoutList, Plus } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
 import { listing, user } from "@/db/schema";
@@ -33,19 +34,43 @@ export default async function MyListingsPage(props: PageProps<"/konto/inserate">
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-full border border-line p-1 text-sm">
-          {TABS.map(([k, l]) => (
-            <Link key={k} href={`/konto/inserate?status=${k}`} className={`rounded-full px-3.5 py-1.5 font-semibold transition-colors ${tab === k ? "bg-brand-fill text-on-brand" : "text-muted hover:text-fg"}`}>
-              {l}
-            </Link>
-          ))}
-        </div>
+        <nav aria-label="Status" className="scrollbar-none max-w-full overflow-x-auto">
+          <div className="inline-flex rounded-full border border-line bg-surface p-[3px] text-sm">
+            {TABS.map(([k, l]) => (
+              <Link
+                key={k}
+                href={`/konto/inserate?status=${k}`}
+                aria-current={tab === k ? "page" : undefined}
+                className={clsx(
+                  "whitespace-nowrap rounded-full px-3.5 py-2 font-semibold transition-colors",
+                  tab === k ? "bg-brand-soft text-brand" : "text-muted hover:bg-surface-2 hover:text-fg",
+                )}
+              >
+                {l}
+              </Link>
+            ))}
+          </div>
+        </nav>
         <Link href="/inserat/neu" className="btn btn-brand btn-sm">
           <Plus className="h-4 w-4" /> Neues Inserat
         </Link>
       </div>
       {list.length === 0 ? (
-        <div className="card p-10 text-center text-muted">Hier ist noch nichts.</div>
+        <div className="card flex flex-col items-center p-10 text-center">
+          <LayoutList className="h-10 w-10 text-faint" aria-hidden />
+          <p className="mt-3 max-w-md text-muted">
+            {tab === "verkauft"
+              ? "Noch nichts verkauft."
+              : tab === "inaktiv"
+                ? "Keine inaktiven oder abgelaufenen Inserate."
+                : "Du hast noch keine aktiven Inserate – inseriere deine Felgen kostenlos."}
+          </p>
+          {tab === "aktiv" && (
+            <Link href="/inserat/neu" className="btn btn-brand btn-sm mt-4">
+              <Plus className="h-4 w-4" /> Neues Inserat
+            </Link>
+          )}
+        </div>
       ) : (
         <ul className="space-y-3">
           {list.map((l, i) => (

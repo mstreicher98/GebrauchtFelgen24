@@ -26,7 +26,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
   return (
     <div className={clsx("card relative overflow-hidden p-4 sm:p-6", !compact && "shadow-[var(--shadow)]")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-full border border-line p-1" role="tablist" aria-label="Fahrzeugart">
+        <div className="inline-flex rounded-xl bg-surface-2 p-1" role="tablist" aria-label="Fahrzeugart">
           {(["auto", "motorrad"] as const).map((t) => (
             <button
               key={t}
@@ -39,8 +39,8 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
                 if (t === "motorrad") setMode("auswahl");
               }}
               className={clsx(
-                "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all",
-                type === t ? "bg-brand-fill text-on-brand shadow" : "text-muted hover:text-fg",
+                "flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-all",
+                type === t ? "bg-surface text-fg shadow-card" : "text-muted hover:text-fg",
               )}
             >
               {t === "auto" ? <Car className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
@@ -108,7 +108,7 @@ export function FitmentFinder({ compact = false }: { compact?: boolean }) {
           </label>
           <button
             type="button"
-            className="btn btn-brand group"
+            className="btn btn-brand group disabled:bg-surface-3 disabled:text-muted disabled:opacity-100 disabled:shadow-none"
             disabled={!picked}
             onClick={() => picked && go(picked.generationId)}
           >

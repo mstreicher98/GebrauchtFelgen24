@@ -10,7 +10,7 @@ const USPS = [
 ];
 
 /** Bereiche, in denen die Vorteile-Leiste nur ablenken würde (Chat, Verwaltung). */
-const HIDDEN = ["/nachrichten", "/admin"];
+const HIDDEN = ["/nachrichten", "/admin", "/konto"];
 
 /** Vorteile-Leiste unter der Kopfzeile (Shop-Muster). Bis xl eine Zeile, horizontal wischbar (bei 1024 px passen die vier Punkte noch nicht nebeneinander). */
 export function UspBar() {

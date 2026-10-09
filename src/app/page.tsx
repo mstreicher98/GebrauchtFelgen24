@@ -224,7 +224,7 @@ export default async function HomePage() {
                 >
                   <span className="font-display text-2xl leading-none group-hover:text-brand sm:text-[2rem]">
                     {s.zoll}
-                    <span className="text-brand">&quot;</span>
+                    <span className="text-brand">″</span>
                   </span>
                   <span className={clsx("mt-1.5 whitespace-nowrap text-[0.6875rem] sm:text-xs", s.n ? "text-muted" : "text-faint")}>
                     {s.n ? offers(s.n) : "keine"}
@@ -339,7 +339,7 @@ export default async function HomePage() {
           <div className="min-w-0">
             <FitmentFinder />
             {popular.length > 0 && (
-              <div className="scrollbar-none mt-4 flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+              <div className="scrollbar-none mt-4 flex items-center gap-2 overflow-x-auto [mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] sm:flex-wrap sm:overflow-visible sm:[mask-image:none]">
                 <span className="mr-1 shrink-0 text-sm text-muted">Beliebt:</span>
                 {popular.map((p) => (
                   <Link key={p.href} href={p.href} className="chip shrink-0">
@@ -371,7 +371,7 @@ export default async function HomePage() {
                 Kostenlos inserieren
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
               </Link>
-              <Link href="/registrieren" className="text-sm font-semibold text-on-brand/90 underline-offset-4 hover:underline">
+              <Link href="/registrieren?typ=haendler" className="text-sm font-semibold text-on-brand/90 underline-offset-4 hover:underline">
                 Für Händler
               </Link>
             </div>

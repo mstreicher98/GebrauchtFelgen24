@@ -39,7 +39,7 @@ export function DetailSeller({
       </h2>
 
       <div className="mt-4 flex items-center gap-4">
-        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-soft text-xl font-bold text-brand">
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-brand-soft text-xl font-bold text-brand">
           {dealer ? <Store className="h-6 w-6" aria-hidden="true" /> : displayName.slice(0, 1).toUpperCase()}
         </span>
         <div className="min-w-0">

@@ -17,7 +17,7 @@ const LOCHKREISE = ["5x112", "5x120"];
 const SERVICE = [
   { href: "/ratgeber", label: "Felgen-Ratgeber" },
   { href: "/sicherheit", label: "Sicher handeln" },
-  { href: "/registrieren", label: "Für Händler" },
+  { href: "/registrieren?typ=haendler", label: "Für Händler" },
   { href: "/fahrzeuge", label: "Fahrzeug-Datenbank" },
 ];
 
