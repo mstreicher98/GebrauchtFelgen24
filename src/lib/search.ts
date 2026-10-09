@@ -147,6 +147,7 @@ export const listingCardColumns = {
   quantity: listing.quantity,
   wheelPosition: listing.wheelPosition,
   condition: listing.condition,
+  hasCertificate: listing.hasCertificate,
   season: listing.season,
   tireSize: listing.tireSize,
   priceCents: listing.priceCents,
