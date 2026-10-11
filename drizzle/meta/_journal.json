@@ -15,6 +15,13 @@
       "when": 1791709412343,
       "tag": "0001_admin_bereich",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791713435046,
+      "tag": "0002_rechtstexte",
+      "breakpoints": true
     }
   ]
 }

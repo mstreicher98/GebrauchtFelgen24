@@ -1,8 +1,8 @@
 "use client";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Download, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { adminCreateMake, adminCreateModel, adminDeleteGeneration, adminImportHsnTsn, adminSaveGeneration, type GenerationInput } from "@/app/actions/admin";
+import { adminCreateMake, adminCreateModel, adminDeleteGeneration, adminImportHsnTsn, adminImportVehicles, adminSaveGeneration, type GenerationInput } from "@/app/actions/admin";
 import { toast } from "./toaster";
 
 export function NewMakeForm() {
@@ -181,5 +181,139 @@ export function HsnImportForm() {
         </div>
       )}
     </form>
+  );
+}
+
+type ImportResult = Awaited<ReturnType<typeof adminImportVehicles>>;
+
+/** Liest eine CSV-Datei als UTF-8 bzw. – falls ungültig (Excel „CSV (Trennzeichen-getrennt)“) – als Windows-1252. */
+async function readCsvFile(file: File) {
+  const buf = await file.arrayBuffer();
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buf);
+  } catch {
+    return new TextDecoder("windows-1252").decode(buf);
+  }
+}
+
+/** Fahrzeugliste als CSV exportieren und (mit Vorschau) importieren. */
+export function VehicleTransfer({ exportHref }: { exportHref: string }) {
+  const [file, setFile] = useState<{ name: string; csv: string } | null>(null);
+  const [result, setResult] = useState<(ImportResult & { applied: boolean }) | null>(null);
+  const [pending, start] = useTransition();
+  const router = useRouter();
+
+  const run = (csv: string, apply: boolean) =>
+    start(async () => {
+      try {
+        const r = await adminImportVehicles(csv, apply);
+        setResult({ ...r, applied: apply && !!r.summary });
+        if (apply && r.summary) {
+          toast("Fahrzeugliste importiert");
+          setFile(null);
+          router.refresh();
+        }
+      } catch (e) {
+        toast((e as Error).message, "error");
+      }
+    });
+
+  const s = result?.summary;
+  return (
+    <section className="card p-5">
+      <h2 className="font-display text-lg uppercase">Export & Import</h2>
+      <p className="mt-1 text-sm text-muted">
+        CSV-Datei für Excel (eine Zeile pro Baureihe). Zum Ergänzen exportieren, in Excel bearbeiten und wieder importieren – es wird nichts gelöscht.
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {(
+          [
+            ["auto", "Autos"],
+            ["motorrad", "Motorräder"],
+            ["", "Alle"],
+          ] as const
+        ).map(([t, l]) => (
+          <a key={l} href={`${exportHref}${t ? `?typ=${t}` : ""}`} className="btn btn-outline btn-sm" download>
+            <Download className="h-4 w-4" aria-hidden="true" /> {l} exportieren
+          </a>
+        ))}
+      </div>
+
+      <div className="mt-5 border-t border-line pt-5">
+        <label className="label" htmlFor="vehicle-csv">
+          CSV importieren
+        </label>
+        <input
+          id="vehicle-csv"
+          type="file"
+          accept=".csv,text/csv,text/plain"
+          className="block w-full text-sm text-muted file:mr-3 file:rounded-xl file:border-0 file:bg-surface-2 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-fg hover:file:bg-surface-3"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            setResult(null);
+            if (!f) return;
+            const csv = await readCsvFile(f);
+            setFile({ name: f.name, csv });
+            run(csv, false);
+          }}
+        />
+        <p className="mt-1.5 text-xs text-faint">
+          Pflichtspalten: Typ (Auto/Motorrad), Marke, Modell. Weitere Spalten wie im Export; fehlende Spalten lassen vorhandene Werte unverändert. Radgrößen im
+          Format <code>7.5Jx18 ET51 225/40 R18</code>, mehrere mit <code>|</code> getrennt.
+        </p>
+
+        {pending && <p className="mt-3 text-sm text-muted">Wird geprüft …</p>}
+
+        {result && !pending && (
+          <div className="mt-4 rounded-xl bg-surface-2 p-4 text-sm" role="status">
+            {s ? (
+              <>
+                <p className="font-semibold">
+                  {result.applied ? "Importiert" : "Vorschau"}
+                  {file && !result.applied ? ` – ${file.name}` : ""}: {s.rows} gültige Zeilen
+                </p>
+                <ul className="mt-2 grid gap-1 text-muted sm:grid-cols-2">
+                  <li>Neue Marken: {s.makes}</li>
+                  <li>Neue Modelle: {s.models}</li>
+                  <li>Neue Baureihen: {s.generationsNew}</li>
+                  <li>Aktualisierte Baureihen: {s.generationsUpdated}</li>
+                </ul>
+              </>
+            ) : (
+              <p className="font-semibold text-red">Import nicht möglich</p>
+            )}
+            {result.errors.length > 0 && (
+              <div className="mt-3">
+                <p className="font-semibold text-red">{result.errors.length >= 50 ? "Mindestens 50" : result.errors.length} Zeile(n) mit Fehlern werden übersprungen:</p>
+                <ul className="mt-1 max-h-48 list-disc overflow-y-auto pl-5 text-xs text-muted">
+                  {result.errors.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {s && !result.applied && file && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" className="btn btn-brand btn-sm" disabled={pending} onClick={() => run(file.csv, true)}>
+                  Jetzt importieren
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    setFile(null);
+                    setResult(null);
+                  }}
+                >
+                  Abbrechen
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

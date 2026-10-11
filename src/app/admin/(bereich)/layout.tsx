@@ -26,6 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         { href: adminPath("/nutzer"), label: "Nutzer", icon: "users" },
         { href: adminPath("/fahrzeuge"), label: "Fahrzeuge", icon: "vehicles" },
         { href: adminPath("/hsn-tsn"), label: "HSN/TSN", icon: "keys" },
+        { href: adminPath("/rechtliches"), label: "Rechtliches", icon: "legal" },
         { href: adminPath("/protokoll"), label: "Protokoll", icon: "log" },
         { href: adminPath("/einstellungen"), label: "Einstellungen", icon: "settings" },
       ]}

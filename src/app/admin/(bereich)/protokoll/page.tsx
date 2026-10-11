@@ -19,6 +19,7 @@ function targetHref(type: string | null, id: string | null) {
   if (type === "listing") return adminPath(`/inserate?q=${id}`);
   if (type === "conversation") return adminPath(`/unterhaltungen/${id}`);
   if (type === "vehicle_make") return adminPath(`/fahrzeuge/${id}`);
+  if (type === "legal") return adminPath(`/rechtliches/${id}`);
   return null;
 }
 

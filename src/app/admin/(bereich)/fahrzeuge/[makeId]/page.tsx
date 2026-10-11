@@ -8,12 +8,8 @@ import { adminDeleteModel } from "@/app/actions/admin";
 import { ActionButton } from "@/components/admin-buttons";
 import { adminPath } from "@/lib/admin-url";
 import { formatPcd } from "@/lib/format";
+import { specToString } from "@/lib/vehicle-csv";
 
-function specToString(s: { position: string; diameter: number; width: number | null; et: number | null; tireSize: string | null }) {
-  const pos = s.position === "vorne" ? "V " : s.position === "hinten" ? "H " : "";
-  const rim = s.width != null ? `${s.width}Jx${s.diameter}` : `${s.diameter}`;
-  return `${pos}${rim}${s.et != null ? ` ET${s.et}` : ""}${s.tireSize ? ` ${s.tireSize}` : ""}`;
-}
 
 export default async function AdminMakePage(props: PageProps<"/admin/fahrzeuge/[makeId]">) {
   const makeId = Number((await props.params).makeId);
@@ -62,7 +58,7 @@ export default async function AdminMakePage(props: PageProps<"/admin/fahrzeuge/[
                       fastener: g.fastener ?? "",
                       etMin: g.etMin?.toString() ?? "",
                       etMax: g.etMax?.toString() ?? "",
-                      specs: specs.filter((s) => s.generationId === g.id).map(specToString).join("\n"),
+                      specs: specs.filter((s) => s.generationId === g.id).map((s) => specToString(s, mk.type)).join("\n"),
                       notes: g.notes ?? "",
                     }}
                   />

@@ -122,4 +122,5 @@ export const TARGET_LABEL: Record<string, string> = {
   vehicle_model: "Modell",
   vehicle_generation: "Baureihe",
   hsn_tsn: "HSN/TSN",
+  legal: "Rechtstext",
 };

@@ -3,13 +3,17 @@ import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { adminLog, hsnTsn, listing, listingImage, message, report, session, user, vehicleGeneration, vehicleMake, vehicleModel, vehicleWheelSpec } from "@/db/schema";
+import { adminLog, hsnTsn, legalVersion, listing, listingImage, message, report, session, user, vehicleGeneration, vehicleMake, vehicleModel, vehicleWheelSpec } from "@/db/schema";
 import { emailLayout, escapeHtml, sendMail } from "@/lib/email";
 import { env } from "@/lib/env";
 import { slugify } from "@/lib/format";
+import { getLegalDoc, isLegalSlug, LEGAL_DOCS } from "@/lib/legal";
+import { findPlaceholders } from "@/lib/legal-markdown";
 import { deleteStoredImage } from "@/lib/images";
 import { getCurrentUser } from "@/lib/session";
 import { fromViennaInput, writeSiteBanner } from "@/lib/site-banner";
+import { parseVehicleCsv } from "@/lib/vehicle-csv";
+import { importVehicleRows, type ImportSummary } from "@/lib/vehicle-transfer";
 import { parseSpec } from "../../../data/vehicles/types";
 
 type Admin = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
@@ -153,6 +157,25 @@ export async function adminDeleteUser(userId: string) {
   for (const i of imgs) void deleteStoredImage(i.key);
   if (u.logo) void deleteStoredImage(u.logo);
   await log(me, "Nutzer gelöscht", "user", userId, u.email);
+  revalidatePath("/admin", "layout");
+  return {};
+}
+
+/* ---------------- Rechtstexte ---------------- */
+
+/** Speichert eine neue Fassung von Impressum, Datenschutz oder AGB (jede Fassung bleibt im Verlauf erhalten). */
+export async function adminSaveLegal(slug: string, content: string): Promise<{ error?: string; unchanged?: boolean }> {
+  const me = await admin();
+  if (!isLegalSlug(slug)) return { error: "Unbekannte Seite" };
+  const text = content.replace(/\r\n?/g, "\n").trim();
+  if (text.length < 20) return { error: "Der Text ist zu kurz." };
+  if (text.length > 100_000) return { error: "Der Text ist zu lang (max. 100.000 Zeichen)." };
+  const current = await getLegalDoc(slug);
+  if (current.versionId && current.content === text) return { unchanged: true };
+  await db.insert(legalVersion).values({ slug, content: text, createdById: me.id });
+  const open = findPlaceholders(text).length;
+  await log(me, `${LEGAL_DOCS[slug].title} geändert`, "legal", slug, open ? `${open} Platzhalter offen` : null);
+  revalidatePath(LEGAL_DOCS[slug].path);
   revalidatePath("/admin", "layout");
   return {};
 }
@@ -306,6 +329,27 @@ export async function adminDeleteGeneration(makeId: number, id: number) {
   await db.delete(vehicleGeneration).where(eq(vehicleGeneration.id, id));
   await log(me, "Baureihe gelöscht", "vehicle_generation", id);
   revalidatePath(`/admin/fahrzeuge/${makeId}`);
+}
+
+/** Fahrzeugliste (CSV) importieren – mit apply=false nur prüfen und zählen (Vorschau). */
+export async function adminImportVehicles(csv: string, apply: boolean): Promise<{ summary?: ImportSummary; errors: string[] }> {
+  const me = await admin();
+  if (csv.length > 1_900_000) return { errors: ["Die Datei ist zu groß (max. ca. 1,9 MB). Bitte in mehrere Dateien aufteilen."] };
+  const { rows, errors, columns } = parseVehicleCsv(csv);
+  if (!rows.length) return { errors: errors.length ? errors.slice(0, 50) : ["Keine gültigen Zeilen gefunden."] };
+  const summary = await importVehicleRows(rows, columns, apply);
+  if (apply) {
+    await log(
+      me,
+      "Fahrzeugliste importiert",
+      "vehicle_make",
+      null,
+      `${summary.makes} Marken, ${summary.models} Modelle, ${summary.generationsNew} neue / ${summary.generationsUpdated} aktualisierte Baureihen`,
+    );
+    revalidatePath("/admin", "layout");
+    revalidatePath("/fahrzeuge", "layout");
+  }
+  return { summary, errors: errors.slice(0, 50) };
 }
 
 /** CSV-Import: HSN;TSN;Generation-ID;Beschreibung (eine Zeile pro Eintrag) */

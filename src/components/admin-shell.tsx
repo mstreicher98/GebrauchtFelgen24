@@ -1,6 +1,6 @@
 "use client";
 import { clsx } from "clsx";
-import { Car, ExternalLink, Flag, KeyRound, LayoutDashboard, LogOut, ScrollText, Settings, Tag, Users } from "lucide-react";
+import { Car, ExternalLink, Flag, KeyRound, LayoutDashboard, LogOut, Scale, ScrollText, Settings, Tag, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -14,6 +14,7 @@ const ICONS = {
   users: Users,
   vehicles: Car,
   keys: KeyRound,
+  legal: Scale,
   log: ScrollText,
   settings: Settings,
 } as const;

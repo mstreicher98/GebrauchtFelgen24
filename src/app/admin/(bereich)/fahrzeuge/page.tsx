@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import Link from "next/link";
 import { db } from "@/db";
 import { AdminPageHeader } from "@/components/admin-ui";
-import { NewMakeForm } from "@/components/admin-vehicle-forms";
+import { NewMakeForm, VehicleTransfer } from "@/components/admin-vehicle-forms";
 import { adminPath } from "@/lib/admin-url";
 
 export const metadata = { title: "Fahrzeuge" };
@@ -15,7 +15,10 @@ export default async function AdminVehiclesPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader title="Fahrzeuge" sub="Marken, Modelle und Baureihen der Fahrzeugdatenbank (Passungsprüfung)." />
-      <NewMakeForm />
+      <div className="grid gap-4 xl:grid-cols-[1fr_1.4fr] xl:items-start">
+        <NewMakeForm />
+        <VehicleTransfer exportHref={adminPath("/fahrzeuge/export")} />
+      </div>
       {(["auto", "motorrad"] as const).map((t) => (
         <section key={t}>
           <h2 className="font-display mb-3 text-xl uppercase">{t === "auto" ? "Autos" : "Motorräder"}</h2>

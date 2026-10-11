@@ -19,10 +19,10 @@ Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Comp
 | **Chat** | wie bei willhaben: Echtzeit (Server-Sent Events über PostgreSQL LISTEN/NOTIFY), Bilder senden, Lesebestätigung, Ungelesen-Zähler, Archivieren, Blockieren, Melden (Nutzer, einzelne Nachrichten und ganze Unterhaltungen). E-Mail-Adresse und Telefonnummer bleiben privat (Telefon optional pro Inserat freigebbar) |
 | **Benachrichtigungen** | E-Mail und Web-Push (PWA) bei neuen Nachrichten (max. 1 Mail / 15 Min. pro Chat), **Suchaufträge** mit Benachrichtigung bei neuen Treffern, Ablauferinnerung – alles in den Einstellungen abschaltbar |
 | **Merkliste** | Herz auf jeder Karte, Übersicht im Konto |
-| **Admin** | Eigene Subdomain **admin.gebrauchtfelgen24.at** mit eigenem Layout und Login. Dashboard mit Kennzahlen und 30-Tage-Verlauf, Meldungen mit Filtern und Notiz, Einsicht in **gemeldete Unterhaltungen** (nur bei Meldung, jede Einsicht protokolliert), Inserate filtern / sperren / löschen / **TOP** für 7–30 Tage, Nutzer-Detailseite (Statistik, Meldungen, interne Notiz, sperren, E-Mail bestätigen, Abmelden erzwingen, Konto löschen), **Protokoll** aller Admin-Aktionen, **Website-Hinweis** (z. B. Wartung) mit Ablaufzeit, Systemstatus mit Test-E-Mail, Fahrzeugdatenbank, HSN/TSN-CSV-Import |
+| **Admin** | Eigene Subdomain **admin.gebrauchtfelgen24.at** mit eigenem Layout und Login. Dashboard mit Kennzahlen und 30-Tage-Verlauf, Meldungen mit Filtern und Notiz, Einsicht in **gemeldete Unterhaltungen** (nur bei Meldung, jede Einsicht protokolliert), Inserate filtern / sperren / löschen / **TOP** für 7–30 Tage, Nutzer-Detailseite (Statistik, Meldungen, interne Notiz, sperren, E-Mail bestätigen, Abmelden erzwingen, Konto löschen), **Protokoll** aller Admin-Aktionen, **Website-Hinweis** (z. B. Wartung) mit Ablaufzeit, Systemstatus mit Test-E-Mail, **Rechtstexte bearbeiten** (mit Vorschau und Versionsverlauf), Fahrzeugdatenbank mit **CSV-Export/-Import** (Excel), HSN/TSN-CSV-Import |
 | **Design** | Premium in Markenfarbe Königsblau #0D47A1 (aus dem Logo) mit Blau-Schwarz und Chrom, Überschriften in der Logo-Schrift Saira, Hell/Dunkel automatisch nach System (umschaltbar), animierte Chrom-Felge im Hero, sanfte Scroll-Einblendungen, Felgen-Ladeanimation, respektiert „Bewegung reduzieren“ |
 | **Performance** | Server-Rendering, kaum Client-JS, selbst gehostete Schriften, WebP in passenden Größen, PWA mit Offline-Seite. Lighthouse (Mobil): Performance 88–99, Best Practices 100, SEO 100, CLS 0 |
-| **Rechtliches** | Vorlagen für Impressum (ECG/UGB/MedienG + DSA-Kontaktstelle), Datenschutzerklärung (DSGVO), AGB – Platzhalter sind gelb markiert |
+| **Rechtliches** | Vorlagen für Impressum (ECG/UGB/MedienG + DSA-Kontaktstelle), Datenschutzerklärung (DSGVO), AGB – im Admin-Bereich unter *Rechtliches* bearbeitbar (einfaches Textformat, Live-Vorschau, jede Fassung bleibt im Verlauf); offene `[[Platzhalter]]` sind blau markiert |
 
 ## Technik
 
@@ -164,6 +164,8 @@ Die Buttons erscheinen automatisch, sobald die Variablen gesetzt sind.
 - Als Tabelle (Excel): `data/vehicles/fahrzeugliste.csv` – neu erzeugen mit `npm run export:fahrzeuge`.
 - Auf der Website: `/fahrzeuge` (Übersicht) und `/fahrzeuge/auto/<marke>` mit allen Werten und Link „Passende Felgen“.
 - Pflege im Admin-Bereich (Marken, Modelle, Baureihen, Radgrößen im Format `7.5Jx18 ET51 225/40 R18`).
+- **Export/Import** im Admin-Bereich unter *Fahrzeuge*: CSV für Excel (eine Zeile pro Baureihe, Spalten `Typ;Marke;Modell;Baureihe;Baujahr von;Baujahr bis;Lochkreis;Mittenloch (mm);Gewinde;Befestigung;ET min;ET max;Radgrößen;Hinweis`).
+  Der Import zeigt erst eine Vorschau, legt Fehlendes an, aktualisiert Baureihen anhand des Namens und löscht nichts.
 - **Wichtig:** Die Werte sind sorgfältig zusammengestellt, aber ohne Gewähr. Vor dem Livegang stichprobenartig prüfen.
 - **HSN/TSN**: Die Zuordnung Schlüsselnummer → Baureihe ist leer und wird per CSV im Admin-Bereich importiert (`HSN;TSN;Baureihen-ID;Beschreibung`).
   Eine vollständige Liste ist lizenzpflichtig (z. B. KBA-Daten oder kommerzielle Anbieter).
@@ -228,7 +230,7 @@ Admin-Subdomain lokal testen: `ADMIN_URL=http://admin.localhost:3000` setzen und
 
 ## Noch offen / nächste Schritte
 
-- **Firmendaten** in Impressum, Datenschutz und AGB eintragen (gelb markierte Platzhalter) und rechtlich prüfen lassen.
+- **Firmendaten** in Impressum, Datenschutz und AGB eintragen (Admin → *Rechtliches*, offene Platzhalter werden angezeigt) und rechtlich prüfen lassen.
 - **Telefonnummer-Verifizierung** (SMS) – vorgesehen (`phone_verified` existiert bereits), Umsetzung später.
 - **Bezahlte TOP-Inserate** – technisch vorbereitet (`featured_until`, Admin kann TOP setzen), Zahlungsanbieter folgt.
 - **Bewertungen** nach dem Kauf – bei Bedarf als nächster Ausbauschritt.

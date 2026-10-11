@@ -465,6 +465,19 @@ export const pushSubscription = pgTable(
   (t) => [index("push_subscription_user_idx").on(t.userId)],
 );
 
+/** Rechtstexte (Impressum, Datenschutz, AGB) – jede Änderung ist eine neue Version, die neueste gilt. */
+export const legalVersion = pgTable(
+  "legal_version",
+  {
+    id: serial("id").primaryKey(),
+    slug: text("slug").notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdById: text("created_by_id").references(() => user.id, { onDelete: "set null" }),
+  },
+  (t) => [index("legal_version_slug_idx").on(t.slug, t.id)],
+);
+
 export const appSetting = pgTable("app_setting", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
