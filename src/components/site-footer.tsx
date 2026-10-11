@@ -5,10 +5,11 @@ import { Logo } from "./logo";
 const MARKTPLATZ = [
   { href: "/suche?typ=auto&art=felge", label: "Autofelgen" },
   { href: "/suche?art=komplettrad", label: "Kompletträder" },
+  { href: "/suche?art=reifen", label: "Reifen" },
   { href: "/suche?saison=winter", label: "Winterräder" },
   { href: "/suche?saison=sommer", label: "Sommerräder" },
   { href: "/suche?typ=motorrad", label: "Motorradfelgen" },
-  { href: "/inserat/neu", label: "Felgen verkaufen" },
+  { href: "/inserat/neu", label: "Felgen & Reifen verkaufen" },
 ];
 
 const ZOLL = [16, 17, 18, 19, 20];

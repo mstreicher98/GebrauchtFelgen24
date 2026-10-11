@@ -57,7 +57,11 @@ export async function generateMetadata(props: PageProps<"/inserat/[slug]">): Pro
   const data = id ? await getListing(id) : null;
   if (!data) return { title: "Inserat nicht gefunden" };
   const { l, images } = data;
-  const desc = `${formatPrice(l.priceCents)} · ${formatRimSize(l.width, l.diameter)}${l.et != null ? ` ET${l.et}` : ""}${l.boltCount ? ` · ${formatPcd(l.boltCount, l.boltCircle)}` : ""} · ${l.zip} ${l.city}. ${l.description.slice(0, 120)}`;
+  const size =
+    l.kind === "reifen" || l.width == null
+      ? `Reifen ${l.tireSize ?? ""}`.trim()
+      : `${formatRimSize(l.width, l.diameter)}${l.et != null ? ` ET${l.et}` : ""}${l.boltCount ? ` · ${formatPcd(l.boltCount, l.boltCircle)}` : ""}`;
+  const desc = `${formatPrice(l.priceCents)} · ${size} · ${l.zip} ${l.city}. ${l.description.slice(0, 120)}`;
   return {
     title: l.title,
     description: desc,
@@ -109,8 +113,14 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
           eq(listing.status, "aktiv"),
           ne(listing.id, l.id),
           eq(listing.vehicleType, l.vehicleType),
-          eq(listing.diameter, l.diameter),
-          l.boltCount && l.boltCircle ? and(eq(listing.boltCount, l.boltCount), eq(listing.boltCircle, l.boltCircle)) : undefined,
+          // Reifen: gleiche Reifengröße · Felgen/Kompletträder: gleiche Zollgröße und gleicher Lochkreis
+          ...(l.kind === "reifen"
+            ? [eq(listing.kind, "reifen"), l.tireSizeNorm ? eq(listing.tireSizeNorm, l.tireSizeNorm) : eq(listing.diameter, l.diameter)]
+            : [
+                ne(listing.kind, "reifen"),
+                eq(listing.diameter, l.diameter),
+                l.boltCount && l.boltCircle ? and(eq(listing.boltCount, l.boltCount), eq(listing.boltCircle, l.boltCircle)) : undefined,
+              ]),
         ),
       )
       .orderBy(desc(listing.publishedAt))
@@ -136,15 +146,27 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
     : null;
 
   // Brotkrümel & Such-Links
-  const typeBase = isCar ? (l.kind === "komplettrad" ? "/suche?typ=auto&art=komplettrad" : "/suche?typ=auto&art=felge") : "/suche?typ=motorrad";
+  const tiresOnly = l.kind === "reifen";
+  const typeBase = tiresOnly
+    ? `/suche?typ=${l.vehicleType}&art=reifen`
+    : isCar
+      ? l.kind === "komplettrad"
+        ? "/suche?typ=auto&art=komplettrad"
+        : "/suche?typ=auto&art=felge"
+      : "/suche?typ=motorrad";
   const crumbs = [
     { href: "/", label: "Startseite" },
-    { href: typeBase, label: isCar ? (l.kind === "komplettrad" ? "Kompletträder" : "Autofelgen") : "Motorradfelgen" },
+    {
+      href: typeBase,
+      label: tiresOnly ? (isCar ? "Autoreifen" : "Motorradreifen") : isCar ? (l.kind === "komplettrad" ? "Kompletträder" : "Autofelgen") : "Motorradfelgen",
+    },
     { href: `${typeBase}&zoll=${l.diameter}`, label: `${formatNumber(l.diameter)} Zoll` },
     ...(isCar && pcd ? [{ href: `${typeBase}&zoll=${l.diameter}&lk=${pcd}`, label: pcd }] : []),
   ];
   // „Ähnliche Felgen“ = gleiche Größe und gleicher Lochkreis, egal ob Felge oder Komplettrad (wie die Abfrage oben)
-  const similarHref = `/suche?typ=${l.vehicleType}&zoll=${l.diameter}${isCar && pcd ? `&lk=${pcd}` : ""}`;
+  const similarHref = tiresOnly
+    ? `/suche?typ=${l.vehicleType}&art=reifen${l.tireSize ? `&reifen=${encodeURIComponent(l.tireSize)}` : `&zoll=${l.diameter}`}`
+    : `/suche?typ=${l.vehicleType}&zoll=${l.diameter}${isCar && pcd ? `&lk=${pcd}` : ""}`;
 
   const jsonLd = [
     {
@@ -153,7 +175,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
       name: l.title,
       description: l.description,
       image: images.map((i) => `${env.appUrl}${imageUrl(i.key, 1600)}`),
-      brand: { "@type": "Brand", name: l.rimBrand },
+      brand: { "@type": "Brand", name: (tiresOnly ? l.tireBrand : l.rimBrand) ?? "" },
       itemCondition: l.condition === "neu" ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
       offers: {
         "@type": "Offer",
@@ -236,7 +258,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
               <>
                 {" "}
                 <a href="#aehnliche" className="link font-semibold">
-                  Ähnliche Felgen ansehen
+                  {tiresOnly ? "Ähnliche Reifen ansehen" : "Ähnliche Felgen ansehen"}
                 </a>
               </>
             )}
@@ -253,8 +275,8 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
             overlay={
               l.status === "verkauft" ? (
                 <span className="badge bg-black/75 text-white">Verkauft</span>
-              ) : l.kind === "komplettrad" ? (
-                <span className="badge bg-black/65 text-white backdrop-blur-sm">Komplettrad</span>
+              ) : l.kind !== "felge" ? (
+                <span className="badge bg-black/65 text-white backdrop-blur-sm">{tiresOnly ? "Reifen" : "Komplettrad"}</span>
               ) : null
             }
           />
@@ -327,7 +349,7 @@ export default async function ListingPage(props: PageProps<"/inserat/[slug]">) {
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2 id="aehnliche-title" className="font-display text-2xl uppercase">
-                Ähnliche Felgen
+                {tiresOnly ? "Ähnliche Reifen" : "Ähnliche Felgen"}
               </h2>
               <p className="mt-1 text-sm text-muted">
                 {formatNumber(l.diameter)} Zoll{isCar && pcd ? ` · Lochkreis ${pcd}` : ""} – gleiche Größe, andere Angebote

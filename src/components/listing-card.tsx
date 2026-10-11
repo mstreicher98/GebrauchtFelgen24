@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { Bike, FileCheck2, Images, Snowflake, Store, Sun, SunSnow, Truck, UserRound } from "lucide-react";
+import { Bike, FileCheck2, Images, Ruler, Snowflake, Store, Sun, SunSnow, Truck, UserRound } from "lucide-react";
 import Link from "next/link";
 import { CONDITIONS, SEASONS } from "@/lib/constants";
 import { FIT_LEVEL_LABEL, type FitResult } from "@/lib/fitment";
@@ -102,6 +102,16 @@ const SEASON_ICON = { sommer: Sun, winter: Snowflake, ganzjahr: SunSnow } as con
 type Fact = { label: string; value: string; Icon: React.ComponentType<IconProps> };
 
 function getFacts(l: CardListing): Fact[] {
+  if (l.kind === "reifen") {
+    // „225/45 R17“ → Breite/Querschnitt, Zoll, Profiltiefe
+    const size = l.tireSize?.match(/\d{2,3}(?:[.,]\d+)?\/\d{2,3}/)?.[0];
+    const facts: Fact[] = [];
+    if (size) facts.push({ label: "Reifengröße", value: size, Icon: IconTire });
+    facts.push({ label: "Zoll", value: `R${formatNumber(l.diameter)}`, Icon: IconDiameter });
+    if (l.treadDepth != null) facts.push({ label: "Profiltiefe", value: `${formatNumber(l.treadDepth)} mm`, Icon: Ruler });
+    if (l.vehicleType === "motorrad" && l.wheelPosition !== "alle") facts.push({ label: "Position", value: POSITION_SHORT[l.wheelPosition], Icon: Bike });
+    return facts;
+  }
   const facts: Fact[] = [
     { label: "Zoll", value: `${formatNumber(l.diameter)}″`, Icon: IconDiameter },
     { label: "Breite", value: `${formatNumber(l.width)}J`, Icon: IconWidth },
@@ -153,8 +163,8 @@ function Stage({ l, priority, sizes, compact = false, className }: { l: CardList
       )}
       <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
         {featured && <span className="badge badge-top">TOP</span>}
-        {l.kind === "komplettrad" && (
-          <span className={clsx("badge bg-black/65 text-white backdrop-blur-sm", compact && "max-sm:hidden")}>Komplettrad</span>
+        {l.kind !== "felge" && (
+          <span className={clsx("badge bg-black/65 text-white backdrop-blur-sm", compact && "max-sm:hidden")}>{l.kind === "reifen" ? "Reifen" : "Komplettrad"}</span>
         )}
         {inactive && <span className="badge bg-black/75 text-white">{l.status === "verkauft" ? "Verkauft" : "Inaktiv"}</span>}
       </div>
@@ -205,6 +215,16 @@ function FactInline({ facts }: { facts: Fact[] }) {
 }
 
 function TireLine({ l }: { l: CardListing }) {
+  if (l.kind === "reifen") {
+    const name = [l.tireBrand, l.tireModel].filter(Boolean).join(" ");
+    if (!name) return null;
+    return (
+      <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+        <IconTire className="h-4 w-4 shrink-0 text-faint" />
+        <span className="truncate font-semibold text-fg">{name}</span>
+      </p>
+    );
+  }
   if (l.kind !== "komplettrad" || !l.tireSize) return null;
   return (
     <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted">

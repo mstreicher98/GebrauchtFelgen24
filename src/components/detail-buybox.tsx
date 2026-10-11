@@ -5,7 +5,7 @@ import type { listing } from "@/db/schema";
 import { CONDITIONS, MATERIALS, PRICE_TYPES, SEASONS } from "@/lib/constants";
 import { formatNumber, formatPcd, formatPrice } from "@/lib/format";
 import { DetailContactButton, DetailShareButton } from "./detail-contact";
-import { DetailIconDiameter, DetailIconOffset, DetailIconPcd, DetailIconTire, DetailIconWidth } from "./detail-icons";
+import { DetailIconDiameter, DetailIconOffset, DetailIconPcd, DetailIconTire, DetailIconTread, DetailIconWidth } from "./detail-icons";
 import { FavoriteButton } from "./favorite-button";
 
 type Listing = typeof listing.$inferSelect;
@@ -21,6 +21,15 @@ export function perPiecePrice(l: Pick<Listing, "priceCents" | "quantity">) {
 }
 
 function factCells(l: Listing): { label: string; value: string; Icon: IconType }[] {
+  if (l.kind === "reifen") {
+    const size = l.tireSize?.match(/\d{2,3}(?:[.,]\d+)?\/\d{2,3}/)?.[0];
+    const tire: { label: string; value: string; Icon: IconType }[] = [];
+    if (size) tire.push({ label: "Reifengröße", value: size, Icon: DetailIconTire });
+    tire.push({ label: "Zoll", value: `R${formatNumber(l.diameter)}`, Icon: DetailIconDiameter });
+    if (l.treadDepth != null) tire.push({ label: "Profiltiefe", value: `${formatNumber(l.treadDepth)} mm`, Icon: DetailIconTread });
+    if (l.wheelPosition !== "alle") tire.push({ label: "Position", value: POSITION_SHORT[l.wheelPosition], Icon: Bike });
+    return tire;
+  }
   const cells: { label: string; value: string; Icon: IconType }[] = [
     { label: "Zoll", value: `${formatNumber(l.diameter)}″`, Icon: DetailIconDiameter },
     { label: "Breite", value: `${formatNumber(l.width)} J`, Icon: DetailIconWidth },
@@ -82,13 +91,15 @@ export function DetailBuyBox({
       {/* Kopf */}
       <div className="flex flex-wrap items-center gap-2">
         {featured && <span className="badge badge-top">TOP</span>}
-        <span className="truncate text-xs font-semibold uppercase tracking-wider text-brand">{[l.rimBrand, l.rimModel].filter(Boolean).join(" ")}</span>
+        <span className="truncate text-xs font-semibold uppercase tracking-wider text-brand">
+          {(l.kind === "reifen" ? [l.tireBrand, l.tireModel] : [l.rimBrand, l.rimModel]).filter(Boolean).join(" ")}
+        </span>
       </div>
       <h1 className="mt-1.5 text-xl font-bold leading-snug text-balance sm:text-[1.375rem] sm:leading-tight">{l.title}</h1>
 
       {/* Abzeichen */}
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {l.kind === "komplettrad" && <span className="badge badge-brand">Komplettrad</span>}
+        {l.kind !== "felge" && <span className="badge badge-brand">{l.kind === "reifen" ? "Nur Reifen" : "Komplettrad"}</span>}
         <span className="badge">{CONDITIONS[l.condition]}</span>
         {l.season && SeasonIcon && (
           <span className="badge">
@@ -96,7 +107,7 @@ export function DetailBuyBox({
             {SEASONS[l.season]}
           </span>
         )}
-        <span className="badge">{MATERIALS[l.material]}</span>
+        {l.material && <span className="badge">{MATERIALS[l.material]}</span>}
       </div>
 
       {/* Fakten-Chips */}
@@ -116,7 +127,7 @@ export function DetailBuyBox({
           <DetailIconTire className="h-5 w-5 shrink-0 text-faint" />
           <span className="min-w-0">
             Reifen <span className="font-semibold text-fg">{l.tireSize}</span>
-            {l.tireBrand && <> · {l.tireBrand}</>}
+            {l.tireBrand && <> · {[l.tireBrand, l.tireModel].filter(Boolean).join(" ")}</>}
           </span>
         </p>
       )}
@@ -177,7 +188,7 @@ export function DetailBuyBox({
           <>
             <p className="text-center text-sm text-muted">Dieses Angebot ist nicht mehr verfügbar.</p>
             <Link href={similarHref} className="btn btn-brand h-12 w-full text-base">
-              Ähnliche Felgen ansehen
+              {l.kind === "reifen" ? "Ähnliche Reifen ansehen" : "Ähnliche Felgen ansehen"}
               <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
           </>

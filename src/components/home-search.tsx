@@ -1,21 +1,22 @@
 "use client";
 import { clsx } from "clsx";
-import { Bike, Car, CircleCheck, KeyRound, Search, SlidersHorizontal } from "lucide-react";
+import { Bike, Car, CircleCheck, KeyRound, LifeBuoy, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
-import { CAR_DIAMETERS, COMMON_PCDS, MATERIALS, MOTO_DIAMETERS } from "@/lib/constants";
+import { CAR_DIAMETERS, COMMON_PCDS, MATERIALS, MOTO_DIAMETERS, SEASONS } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { RimMark } from "./logo";
 import { PlzInput } from "./plz-input";
 import { VehiclePicker, type PickedVehicle } from "./vehicle-picker";
 
-type Tab = "felge" | "komplettrad" | "motorrad";
+type Tab = "felge" | "komplettrad" | "reifen" | "motorrad";
 type Mode = "fahrzeug" | "groesse";
 
-const TABS: { id: Tab; label: string; icon: "rim" | "car" | "bike" }[] = [
+const TABS: { id: Tab; label: string; icon: "rim" | "car" | "tire" | "bike" }[] = [
   { id: "felge", label: "Felgen", icon: "rim" },
   { id: "komplettrad", label: "Kompletträder", icon: "car" },
+  { id: "reifen", label: "Reifen", icon: "tire" },
   { id: "motorrad", label: "Motorrad", icon: "bike" },
 ];
 
@@ -49,6 +50,8 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
   const [lk, setLk] = useState("");
   const [pos, setPos] = useState("");
   const [material, setMaterial] = useState("");
+  const [reifen, setReifen] = useState("");
+  const [saison, setSaison] = useState("");
   const [preis, setPreis] = useState("");
   const [plz, setPlz] = useState("");
   const [land, setLand] = useState<string | undefined>();
@@ -56,6 +59,7 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
   const [counted, setCounted] = useState<{ q: string; total: number | null }>({ q: HOME_SEARCH_INITIAL_QUERY, total: initialTotal });
 
   const moto = tab === "motorrad";
+  const tires = tab === "reifen";
   const vehicleType = moto ? "motorrad" : "auto";
   const showHsn = mode === "fahrzeug" && hsnMode && !moto;
   const hsnKey = `${hsn.trim()}/${tsn.trim().toUpperCase()}`;
@@ -72,7 +76,11 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
       p.set("art", tab);
     }
     if (vehicleId) p.set("fahrzeug", String(vehicleId));
-    if (mode === "groesse") {
+    if (mode === "groesse" && tires) {
+      if (reifen.trim()) p.set("reifen", reifen.trim());
+      if (zoll) p.set("zoll", zoll);
+      if (saison) p.set("saison", saison);
+    } else if (mode === "groesse") {
       if (zoll) p.set("zoll", zoll);
       if (!moto && lk) p.set("lk", lk);
       if (moto && pos) p.set("pos", pos);
@@ -85,7 +93,7 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
       if (umkreis) p.set("umkreis", umkreis);
     }
     return p.toString();
-  }, [moto, tab, vehicleId, mode, zoll, lk, pos, material, preis, plz, land, umkreis]);
+  }, [moto, tires, tab, vehicleId, mode, zoll, lk, pos, material, reifen, saison, preis, plz, land, umkreis]);
 
   /* Live-Zählung (entprellt) */
   useEffect(() => {
@@ -151,7 +159,7 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
       <div
         role="tablist"
         aria-label="Was suchst du?"
-        className="flex border-b border-line"
+        className="scrollbar-none flex overflow-x-auto border-b border-line"
         onKeyDown={(e) => {
           if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
           const i = TABS.findIndex((t) => t.id === tab);
@@ -173,7 +181,7 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
               tabIndex={active ? 0 : -1}
               onClick={() => switchTab(t.id)}
               className={clsx(
-                "relative flex flex-1 items-center justify-center gap-2 px-2 py-3.5 text-sm font-semibold transition-colors sm:flex-none sm:px-6 sm:text-[0.9375rem]",
+                "relative flex flex-1 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 py-3.5 text-sm font-semibold transition-colors sm:flex-none sm:px-6 sm:text-[0.9375rem]",
                 active ? "text-brand" : "text-muted hover:bg-surface-2 hover:text-fg",
               )}
             >
@@ -181,6 +189,8 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
                 <RimMark className="hidden h-4 w-4 sm:block" />
               ) : t.icon === "car" ? (
                 <Car className="hidden h-4 w-4 sm:block" aria-hidden />
+              ) : t.icon === "tire" ? (
+                <LifeBuoy className="hidden h-4 w-4 sm:block" aria-hidden />
               ) : (
                 <Bike className="hidden h-4 w-4 sm:block" aria-hidden />
               )}
@@ -226,7 +236,7 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
           </div>
           <p className="hidden items-center gap-1.5 text-sm text-faint sm:flex">
             <CircleCheck className="h-4 w-4 text-brand" aria-hidden />
-            {mode === "fahrzeug" ? "Wir zeigen dir nur Felgen, die passen" : "Alle Maße frei kombinierbar"}
+            {mode === "fahrzeug" ? `Wir zeigen dir nur ${tires ? "Reifen" : "Felgen"}, die passen` : "Alle Maße frei kombinierbar"}
           </p>
         </div>
 
@@ -285,7 +295,41 @@ export function HomeSearch({ initialTotal, className }: { initialTotal: number; 
               </p>
             </div>
           )}
-          {mode === "groesse" && (
+          {mode === "groesse" && tires && (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field id={`${uid}-reifen`} label="Reifengröße">
+                <input
+                  id={`${uid}-reifen`}
+                  className="input"
+                  placeholder="Reifengröße, z. B. 225/45 R17"
+                  autoComplete="off"
+                  value={reifen}
+                  onChange={(e) => setReifen(e.target.value)}
+                />
+              </Field>
+              <Field id={`${uid}-zoll`} label="Zoll">
+                <select id={`${uid}-zoll`} className="select" value={zoll} onChange={(e) => setZoll(e.target.value)}>
+                  <option value="">Zoll (alle)</option>
+                  {CAR_DIAMETERS.map((d) => (
+                    <option key={d} value={d}>
+                      R{d}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field id={`${uid}-saison`} label="Saison">
+                <select id={`${uid}-saison`} className="select" value={saison} onChange={(e) => setSaison(e.target.value)}>
+                  <option value="">Saison (alle)</option>
+                  {Object.entries(SEASONS).map(([k, l]) => (
+                    <option key={k} value={k}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          )}
+          {mode === "groesse" && !tires && (
             <div className="grid gap-3 sm:grid-cols-3">
               <Field id={`${uid}-zoll`} label="Zoll">
                 <select id={`${uid}-zoll`} className="select" value={zoll} onChange={(e) => setZoll(e.target.value)}>

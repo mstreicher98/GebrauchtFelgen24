@@ -1,12 +1,13 @@
 import { clsx } from "clsx";
 
-export type CategoryArtKind = "felge" | "komplettrad" | "winter" | "sommer" | "motorrad" | "stahl";
+export type CategoryArtKind = "felge" | "komplettrad" | "reifen" | "motorradreifen" | "winter" | "sommer" | "motorrad" | "stahl";
 
 /**
  * Kleine Felgen-Illustrationen für die Kategorie-Kacheln der Startseite.
  * Reines SVG, Farben ausschließlich über Design-Tokens (funktioniert hell und dunkel).
  */
 export function CategoryArt({ kind, className }: { kind: CategoryArtKind; className?: string }) {
+  if (kind === "reifen" || kind === "motorradreifen") return <TireOnly slim={kind === "motorradreifen"} className={className} />;
   const tire = kind === "komplettrad" || kind === "winter" || kind === "sommer";
   return (
     <svg viewBox="0 0 120 120" className={clsx("overflow-visible", className)} aria-hidden="true">
@@ -32,6 +33,17 @@ const RUBBER = "fill-[#16191f] dark:fill-[#2c323e]";
 const TREAD = "stroke-[#2a2f38] dark:stroke-[#4a5363]";
 /** Außenkontur: hell nur fein, dunkel als Lichtkante, damit sich der Reifen von der Bühne löst */
 const SIDEWALL = "stroke-line-strong dark:stroke-[#596276]";
+
+/** Reifen ohne Felge (innen leer, Bühne scheint durch); „slim“ = schmaler Motorradreifen */
+function TireOnly({ slim, className }: { slim: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 120 120" className={clsx("overflow-visible", className)} aria-hidden="true">
+      <Tire />
+      <circle cx="60" cy="60" r={slim ? 44 : 36} className="fill-surface-2 stroke-line-strong dark:stroke-[#596276]" strokeWidth="1" />
+      <circle cx="60" cy="60" r={slim ? 44 : 36} fill="none" className={TREAD} strokeWidth="2" strokeDasharray="1.5 4" />
+    </svg>
+  );
+}
 
 /** Reifen mit Profilrillen */
 function Tire() {

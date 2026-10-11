@@ -21,6 +21,13 @@ import { getGeneration } from "@/lib/vehicles";
 /** Überschrift passend zur Kategorie (Kopf-Navigation verlinkt auf diese Kombinationen). */
 function headline(f: SearchFilters) {
   const onlySeason = f.saison?.length === 1 ? f.saison[0] : null;
+  if (f.art === "reifen") {
+    if (f.typ === "motorrad") return "Motorradreifen kaufen";
+    if (onlySeason === "winter") return "Winterreifen kaufen";
+    if (onlySeason === "sommer") return "Sommerreifen kaufen";
+    if (onlySeason === "ganzjahr") return "Ganzjahresreifen kaufen";
+    return f.reifen ? `Reifen ${f.reifen} kaufen` : "Reifen kaufen";
+  }
   if (f.typ === "motorrad") return f.art === "komplettrad" ? "Motorrad-Kompletträder kaufen" : "Motorradfelgen kaufen";
   if (onlySeason === "winter") return "Winterräder kaufen";
   if (onlySeason === "sommer") return "Sommerräder kaufen";
@@ -32,7 +39,7 @@ function headline(f: SearchFilters) {
 export async function generateMetadata(props: PageProps<"/suche">): Promise<Metadata> {
   const f = parseFilters(await props.searchParams);
   const gen = f.fahrzeug ? await getGeneration(f.fahrzeug) : null;
-  const title = gen ? `Felgen für ${gen.fullName}` : `${describeFilters(f)} – gebraucht kaufen`;
+  const title = gen ? `${f.art === "reifen" ? "Reifen" : "Felgen"} für ${gen.fullName}` : `${describeFilters(f)} – gebraucht kaufen`;
   return {
     title,
     description: `Gebrauchte ${gen ? `Felgen und Kompletträder passend für ${gen.fullName}` : "Felgen und Kompletträder"} in Österreich, Deutschland und der Schweiz.`,
@@ -79,7 +86,7 @@ export default async function SearchPage(props: PageProps<"/suche">) {
           <h1 className="font-display text-[1.75rem] uppercase leading-tight sm:text-4xl">
             {gen ? (
               <>
-                Felgen für <span className="text-brand">{gen.fullName}</span>
+                {f.art === "reifen" ? "Reifen" : "Felgen"} für <span className="text-brand">{gen.fullName}</span>
               </>
             ) : (
               title
@@ -164,7 +171,12 @@ export default async function SearchPage(props: PageProps<"/suche">) {
           </div>
           <div className="flex items-start gap-2 border-t border-line bg-surface-2/60 px-4 py-2.5 text-xs leading-relaxed text-muted sm:px-5">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" aria-hidden />
-            {gen.type === "auto" ? (
+            {f.art === "reifen" ? (
+              <p>
+                Geprüft wird die Reifengröße gegen die Serienbereifung. „Auch eventuell passende“ zeigt zusätzlich Reifen in gleicher Zollgröße. Angaben ohne
+                Gewähr – maßgeblich sind die Fahrzeugpapiere.
+              </p>
+            ) : gen.type === "auto" ? (
               <p>
                 <span className="sm:hidden">Geprüft gegen die Serienwerte: Lochkreis, Mittenloch, Zoll, Breite und ET. Ohne Gewähr.</span>
                 <span className="hidden sm:inline">

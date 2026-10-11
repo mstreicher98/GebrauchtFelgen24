@@ -48,6 +48,7 @@ export function QuickFilters({
     ...(moto
       ? []
       : [{ key: "kr", label: "Kompletträder", href: searchHref(f, { art: f.art === "komplettrad" ? undefined : "komplettrad" }), active: f.art === "komplettrad" }]),
+    { key: "rf", label: "Nur Reifen", href: searchHref(f, { art: f.art === "reifen" ? undefined : "reifen" }), active: f.art === "reifen" },
     {
       key: "winter",
       label: "Winter",
@@ -112,7 +113,8 @@ export function ActiveFilters({ f }: { f: SearchFilters }) {
 
   if (f.q) add("q", `„${f.q}“`, { q: undefined });
   if (f.typ) add("typ", f.typ === "auto" ? "Auto" : "Motorrad", { typ: undefined, lk: undefined, zoll: undefined });
-  if (f.art) add("art", f.art === "felge" ? "Nur Felgen" : "Kompletträder", { art: undefined });
+  if (f.art) add("art", f.art === "felge" ? "Nur Felgen" : f.art === "reifen" ? "Nur Reifen" : "Kompletträder", { art: undefined });
+  if (f.reifen) add("reifen", `Reifen ${f.reifen}`, { reifen: undefined });
   f.zoll?.forEach((z) => add(`zoll${z}`, `${z} Zoll`, { zoll: toggle(f.zoll, z) }));
   if (f.lk) add("lk", `LK ${f.lk.boltCount}x${f.lk.boltCircle}`, { lk: undefined });
   if (f.breiteMin != null || f.breiteMax != null) add("breite", `Breite ${range(f.breiteMin, f.breiteMax, " J")}`, { breiteMin: undefined, breiteMax: undefined });

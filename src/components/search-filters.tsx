@@ -13,7 +13,7 @@ const NON_FILTER_KEYS = ["seite", "sort", "fahrzeug", "modus", "ansicht"];
 /** Beim Zurücksetzen bleiben Fahrzeug, Modus, Sortierung und Ansicht erhalten */
 const KEEP_ON_RESET = ["fahrzeug", "modus", "sort", "ansicht"];
 /** Freitext-Felder (werden erst mit „Filter anwenden“ übernommen) */
-const TEXT_KEYS = ["q", "breite_min", "breite_max", "et_min", "et_max", "preis_min", "preis_max", "umkreis", "plz"];
+const TEXT_KEYS = ["q", "reifen", "breite_min", "breite_max", "et_min", "et_max", "preis_min", "preis_max", "umkreis", "plz"];
 
 function useActiveCount() {
   const sp = useSearchParams();
@@ -115,6 +115,8 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
   }
 
   const typ = (vehicleType ?? sp.get("typ") ?? "") as "" | "auto" | "motorrad";
+  const art = sp.get("art");
+  const tiresOnly = art === "reifen";
   const list = (k: string) => (sp.get(k) ?? "").split(",").filter(Boolean);
 
   const update = (patch: Record<string, string | null>, close = false) => {
@@ -162,7 +164,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
         const patch: Record<string, string | null> = {};
-        for (const k of ["q", "preis_min", "preis_max", "breite_min", "breite_max", "et_min", "et_max", "umkreis"]) {
+        for (const k of ["q", "reifen", "preis_min", "preis_max", "breite_min", "breite_max", "et_min", "et_max", "umkreis"]) {
           patch[k] = String(fd.get(k) ?? "").trim() || null;
         }
         patch.plz = plz.trim() || null;
@@ -214,10 +216,11 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
         )}
 
         <Section title="Art" pad={pad}>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[
-              ["felge", "Nur Felgen"],
-              ["komplettrad", "Kompletträder"],
+              ["felge", "Felgen"],
+              ["komplettrad", "Räder"],
+              ["reifen", "Reifen"],
             ].map(([v, l]) => (
               <button
                 type="button"
@@ -225,7 +228,8 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
                 className="chip h-9 justify-center px-2 font-medium"
                 data-active={sp.get("art") === v}
                 aria-pressed={sp.get("art") === v}
-                onClick={() => update({ art: sp.get("art") === v ? null : v })}
+                title={v === "komplettrad" ? "Kompletträder (Felge mit Reifen)" : v === "reifen" ? "Nur Reifen, ohne Felge" : "Nur Felgen, ohne Reifen"}
+                onClick={() => update({ art: sp.get("art") === v ? null : v, ...(v === "reifen" && sp.get("art") !== v ? { lk: null, breite_min: null, breite_max: null, et_min: null, et_max: null, material: null } : {}) })}
               >
                 {l}
               </button>
@@ -251,7 +255,13 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
           </div>
         </Section>
 
-        {typ !== "motorrad" && !hasVehicle && (
+        {art !== "felge" && (
+          <Section title="Reifengröße" pad={pad}>
+            <input key={textKey} name="reifen" aria-label="Reifengröße" className={field} defaultValue={sp.get("reifen") ?? ""} placeholder="z. B. 225/45 R17" autoComplete="off" />
+          </Section>
+        )}
+
+        {typ !== "motorrad" && !hasVehicle && !tiresOnly && (
           <Section title="Lochkreis" pad={pad}>
             <select aria-label="Lochkreis" className="select h-10 py-0" value={sp.get("lk") ?? ""} onChange={(e) => update({ lk: e.target.value || null })}>
               <option value="">Alle Lochkreise</option>
@@ -264,11 +274,13 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
           </Section>
         )}
 
-        <Section title="Breite (J)" pad={pad}>
-          <Range key={textKey} field={field} names={["breite_min", "breite_max"]} label="Breite" inputMode="decimal" sp={sp} />
-        </Section>
+        {!tiresOnly && (
+          <Section title="Breite (J)" pad={pad}>
+            <Range key={textKey} field={field} names={["breite_min", "breite_max"]} label="Breite" inputMode="decimal" sp={sp} />
+          </Section>
+        )}
 
-        {typ !== "motorrad" && (
+        {typ !== "motorrad" && !tiresOnly && (
           <Section title="Einpresstiefe (ET)" pad={pad}>
             <Range key={textKey} field={field} names={["et_min", "et_max"]} label="Einpresstiefe" inputMode="numeric" sp={sp} />
           </Section>
@@ -310,7 +322,7 @@ function FilterForm({ hasVehicle, vehicleType, variant, onApplied }: Props & { v
 
         <ChipSection title="Saison" pad={pad} options={SEASONS} selected={list("saison")} onToggle={(v) => toggleList("saison", v)} />
         <ChipSection title="Zustand" pad={pad} options={CONDITIONS} selected={list("zustand")} onToggle={(v) => toggleList("zustand", v)} />
-        <ChipSection title="Material" pad={pad} options={MATERIALS} selected={list("material")} onToggle={(v) => toggleList("material", v)} />
+        {!tiresOnly && <ChipSection title="Material" pad={pad} options={MATERIALS} selected={list("material")} onToggle={(v) => toggleList("material", v)} />}
 
         <Section title="Anbieter" pad={pad}>
           <div className="grid grid-cols-2 gap-2">

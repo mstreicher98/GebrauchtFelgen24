@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { checkFitment, levelVisible, normalizeTireSize, type FitGeneration, type FitListing } from "../src/lib/fitment";
+import { checkFitment, levelVisible, normalizeTireSize, parseTireSize, type FitGeneration, type FitListing } from "../src/lib/fitment";
 
 const golf7: FitGeneration = {
   boltCount: 5,
@@ -109,5 +109,31 @@ describe("normalizeTireSize", () => {
     assert.equal(normalizeTireSize("225/45R17"), "225/45r17");
     assert.equal(normalizeTireSize("150/80B16"), "150/80r16");
     assert.equal(normalizeTireSize("90/90-21"), "90/90r21");
+  });
+});
+
+describe("checkFitment (nur Reifen)", () => {
+  const tire = (o: Partial<FitListing> = {}): FitListing =>
+    rim({ kind: "reifen", boltCount: null, boltCircle: null, centerBore: null, width: null, et: null, diameter: 16, tireSize: "205/55 R16 91V", ...o });
+  it("Serien-Reifengröße passt perfekt – Lochkreis und ET spielen keine Rolle", () => {
+    assert.equal(checkFitment(golf7, tire()).level, "perfekt");
+    assert.equal(checkFitment(golf7, tire({ tireSize: "225/40ZR18", diameter: 18 })).level, "perfekt");
+  });
+  it("gleiche Zollgröße, andere Reifengröße → prüfen", () => {
+    const r = checkFitment(golf7, tire({ tireSize: "215/55 R16" }));
+    assert.equal(r.level, "pruefen");
+    assert.equal(levelVisible(r.level, "streng"), false);
+  });
+  it("andere Zollgröße passt nicht", () => {
+    assert.equal(checkFitment(golf7, tire({ tireSize: "195/65 R15", diameter: 15 })).level, "nein");
+  });
+});
+
+describe("parseTireSize", () => {
+  it("zerlegt Auto- und Motorradgrößen", () => {
+    assert.deepEqual(parseTireSize("225/45 ZR17 94W"), { width: 225, aspect: 45, diameter: 17 });
+    assert.deepEqual(parseTireSize("150/80-16"), { width: 150, aspect: 80, diameter: 16 });
+    assert.deepEqual(parseTireSize("205/75 R17,5"), { width: 205, aspect: 75, diameter: 17.5 });
+    assert.equal(parseTireSize("Michelin"), null);
   });
 });

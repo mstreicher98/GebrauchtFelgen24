@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { listing, listingFitment, listingImage } from "@/db/schema";
 import { env } from "@/lib/env";
+import { normalizeTireSize, parseTireSize } from "@/lib/fitment";
 import { listingUrl, parsePcd } from "@/lib/format";
 import { deleteStoredImage } from "@/lib/images";
 import { fieldErrors, listingSchema } from "@/lib/listing-schema";
@@ -53,32 +54,38 @@ export async function saveListing(id: number | null, input: unknown): Promise<Sa
   const pc = await lookupPostalCode(d.zip, d.country);
   if (!pc) return { ok: false, errors: { zip: "Postleitzahl nicht gefunden" } };
 
-  const pcd = d.vehicleType === "auto" ? parsePcd(d.pcd) : null;
-  const isKomplett = d.kind === "komplettrad";
+  const tiresOnly = d.kind === "reifen";
+  const hasRim = !tiresOnly;
+  const hasTire = d.kind !== "felge";
+  const pcd = hasRim && d.vehicleType === "auto" ? parsePcd(d.pcd) : null;
+  const tireSize = hasTire ? d.tireSize || null : null;
   const values = {
     vehicleType: d.vehicleType,
     kind: d.kind,
     title: d.title,
     description: d.description,
-    material: d.material,
-    rimBrand: d.rimBrand,
-    rimModel: d.rimModel || null,
-    diameter: d.diameter,
-    width: d.width,
+    material: hasRim ? d.material || null : null,
+    rimBrand: hasRim ? d.rimBrand || null : null,
+    rimModel: hasRim ? d.rimModel || null : null,
+    // Bei Reifen ergibt sich die Zollgröße aus der Reifengröße (R17 → 17)
+    diameter: tiresOnly ? parseTireSize(tireSize)!.diameter : d.diameter!,
+    width: hasRim ? (d.width ?? null) : null,
     boltCount: pcd?.boltCount ?? null,
     boltCircle: pcd?.boltCircle ?? null,
-    et: d.vehicleType === "auto" ? (d.et ?? null) : null,
-    centerBore: d.vehicleType === "auto" ? (d.centerBore ?? null) : null,
+    et: hasRim && d.vehicleType === "auto" ? (d.et ?? null) : null,
+    centerBore: hasRim && d.vehicleType === "auto" ? (d.centerBore ?? null) : null,
     quantity: d.quantity,
-    wheelPosition: d.vehicleType === "motorrad" ? d.wheelPosition : ("alle" as const),
+    wheelPosition: d.vehicleType === "motorrad" || tiresOnly ? d.wheelPosition : ("alle" as const),
     condition: d.condition,
-    hasCertificate: d.hasCertificate,
-    tireSize: isKomplett ? d.tireSize || null : null,
-    tireBrand: isKomplett ? d.tireBrand || null : null,
-    season: isKomplett && d.season ? d.season : null,
-    treadDepth: isKomplett ? (d.treadDepth ?? null) : null,
-    dot: isKomplett ? d.dot || null : null,
-    tpms: isKomplett ? d.tpms : null,
+    hasCertificate: hasRim && d.hasCertificate,
+    tireSize,
+    tireSizeNorm: normalizeTireSize(tireSize),
+    tireBrand: hasTire ? d.tireBrand || null : null,
+    tireModel: hasTire ? d.tireModel || null : null,
+    season: hasTire && d.season ? d.season : null,
+    treadDepth: hasTire ? (d.treadDepth ?? null) : null,
+    dot: hasTire ? d.dot || null : null,
+    tpms: d.kind === "komplettrad" ? d.tpms : null,
     priceCents: Math.round(d.price * 100),
     priceType: d.priceType,
     shipping: d.shipping,

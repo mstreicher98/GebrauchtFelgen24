@@ -51,6 +51,8 @@ async function getHomeData() {
         total: n,
         felge: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'auto' and ${listing.kind} = 'felge'))::int`,
         komplettrad: sql<number>`(count(*) filter (where ${listing.kind} = 'komplettrad'))::int`,
+        reifen: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'auto' and ${listing.kind} = 'reifen'))::int`,
+        motorradreifen: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'motorrad' and ${listing.kind} = 'reifen'))::int`,
         winter: sql<number>`(count(*) filter (where ${listing.season} = 'winter'))::int`,
         sommer: sql<number>`(count(*) filter (where ${listing.season} = 'sommer'))::int`,
         motorrad: sql<number>`(count(*) filter (where ${listing.vehicleType} = 'motorrad'))::int`,
@@ -72,10 +74,10 @@ async function getHomeData() {
       .where(and(active, isNotNull(listing.boltCount), isNotNull(listing.boltCircle)))
       .groupBy(listing.boltCount, listing.boltCircle),
     db
-      .select({ brand: listing.rimBrand, n })
+      .select({ brand: sql<string>`${listing.rimBrand}`, n })
       .from(listing)
       .innerJoin(user, eq(user.id, listing.userId))
-      .where(active)
+      .where(and(active, isNotNull(listing.rimBrand)))
       .groupBy(listing.rimBrand)
       .orderBy(desc(n), asc(listing.rimBrand))
       .limit(12),
@@ -137,9 +139,11 @@ export default async function HomePage() {
   const categories: { kind: CategoryArtKind; label: string; href: string; n: number }[] = [
     { kind: "felge", label: "Autofelgen", href: "/suche?typ=auto&art=felge", n: counts.felge },
     { kind: "komplettrad", label: "Kompletträder", href: "/suche?art=komplettrad", n: counts.komplettrad },
+    { kind: "reifen", label: "Autoreifen", href: "/suche?typ=auto&art=reifen", n: counts.reifen },
     { kind: "winter", label: "Winterräder", href: "/suche?saison=winter", n: counts.winter },
     { kind: "sommer", label: "Sommerräder", href: "/suche?saison=sommer", n: counts.sommer },
     { kind: "motorrad", label: "Motorradfelgen", href: "/suche?typ=motorrad", n: counts.motorrad },
+    { kind: "motorradreifen", label: "Motorradreifen", href: "/suche?typ=motorrad&art=reifen", n: counts.motorradreifen },
     { kind: "stahl", label: "Stahlfelgen", href: "/suche?material=stahl", n: counts.stahl },
   ];
 
@@ -154,7 +158,7 @@ export default async function HomePage() {
         <div className="container-page relative grid gap-12 pb-10 pt-8 sm:pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-center lg:pb-16 xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="min-w-0">
             <h1 id="hero-title" className="font-display text-[1.875rem] uppercase leading-[1.05] tracking-tight sm:text-[2.75rem] lg:text-5xl">
-              Gebrauchte Felgen &amp; Kompletträder
+              Gebrauchte Felgen, Reifen &amp; Kompletträder
             </h1>
             <p className="mt-3 max-w-2xl text-base text-on-brand/80 sm:text-lg">
               <strong className="font-semibold text-on-brand">{offers(counts.total)}</strong> von Privat und Händlern in Österreich,
@@ -171,8 +175,8 @@ export default async function HomePage() {
 
       {/* 2 · KATEGORIEN */}
       <section aria-labelledby="kat-title" className="container-page mt-10 sm:mt-14">
-        <SectionHeader id="kat-title" title="Kategorien" sub="Felgen und Räder für jeden Einsatz" />
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+        <SectionHeader id="kat-title" title="Kategorien" sub="Felgen, Reifen und Räder für jeden Einsatz" />
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           {categories.map((c) => (
             <li key={c.kind}>
               <Link

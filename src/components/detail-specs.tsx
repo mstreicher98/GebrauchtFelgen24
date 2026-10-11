@@ -35,14 +35,22 @@ function SpecGroup({ title, rows }: { title: string; rows: Row[] }) {
 /** Technische Daten als zweispaltige Tabelle mit Icons. */
 export function DetailSpecs({ l }: { l: Listing }) {
   const isCar = l.vehicleType === "auto";
+  const tiresOnly = l.kind === "reifen";
+  const general: Row[] = [
+    { label: "Art", value: LISTING_KIND_SINGULAR[l.kind], Icon: Shapes },
+    { label: "Fahrzeug", value: isCar ? "Auto" : "Motorrad", Icon: isCar ? CarFront : Bike },
+    { label: "Anzahl", value: `${l.quantity} Stück`, Icon: Hash },
+    { label: "Zustand", value: CONDITIONS[l.condition], Icon: Sparkles },
+    { label: "Position", value: l.wheelPosition !== "alle" ? WHEEL_POSITIONS[l.wheelPosition] : null, Icon: ArrowLeftRight },
+  ];
   const rim: Row[] = [
     { label: "Art", value: LISTING_KIND_SINGULAR[l.kind], Icon: Shapes },
     { label: "Fahrzeug", value: isCar ? "Auto" : "Motorrad", Icon: isCar ? CarFront : Bike },
     { label: "Felgenmarke", value: [l.rimBrand, l.rimModel].filter(Boolean).join(" "), Icon: Tag },
-    { label: "Material", value: MATERIALS[l.material], Icon: Layers },
-    { label: "Felgengröße", value: formatRimSize(l.width, l.diameter), Icon: Ruler },
+    { label: "Material", value: l.material ? MATERIALS[l.material] : null, Icon: Layers },
+    { label: "Felgengröße", value: l.width != null ? formatRimSize(l.width, l.diameter) : null, Icon: Ruler },
     { label: "Durchmesser", value: `${formatNumber(l.diameter)} Zoll`, Icon: DetailIconDiameter },
-    { label: "Breite", value: `${formatNumber(l.width)} J`, Icon: DetailIconWidth },
+    { label: "Breite", value: l.width != null ? `${formatNumber(l.width)} J` : null, Icon: DetailIconWidth },
     ...(isCar
       ? [
           { label: "Lochkreis", value: formatPcd(l.boltCount, l.boltCircle), Icon: DetailIconPcd },
@@ -55,10 +63,12 @@ export function DetailSpecs({ l }: { l: Listing }) {
     { label: "Gutachten / ABE", value: l.hasCertificate ? "Vorhanden" : "Nicht angegeben", Icon: FileCheck2 },
   ];
   const tire: Row[] =
-    l.kind === "komplettrad"
+    l.kind !== "felge"
       ? [
           { label: "Reifengröße", value: l.tireSize, Icon: DetailIconTire },
+          ...(tiresOnly ? [{ label: "Felgendurchmesser", value: `${formatNumber(l.diameter)} Zoll`, Icon: DetailIconDiameter }] : []),
           { label: "Reifenmarke", value: l.tireBrand, Icon: Tag },
+          { label: "Modell / Profil", value: l.tireModel, Icon: Tag },
           { label: "Saison", value: l.season ? SEASONS[l.season] : null, Icon: l.season ? SEASON_ICON[l.season] : Sun },
           { label: "Profiltiefe", value: l.treadDepth != null ? `${formatNumber(l.treadDepth)} mm` : null, Icon: DetailIconTread },
           { label: "DOT", value: formatDot(l.dot), Icon: CalendarDays },
@@ -72,8 +82,17 @@ export function DetailSpecs({ l }: { l: Listing }) {
         Technische Daten
       </h2>
       <div className="mt-4 space-y-6">
-        <SpecGroup title="Felge" rows={rim} />
-        <SpecGroup title="Reifen" rows={tire} />
+        {tiresOnly ? (
+          <>
+            <SpecGroup title="Reifen" rows={tire} />
+            <SpecGroup title="Allgemein" rows={general} />
+          </>
+        ) : (
+          <>
+            <SpecGroup title="Felge" rows={rim} />
+            <SpecGroup title="Reifen" rows={tire} />
+          </>
+        )}
       </div>
     </section>
   );

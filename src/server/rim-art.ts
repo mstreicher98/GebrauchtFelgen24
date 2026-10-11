@@ -7,12 +7,15 @@ export type RimStyle = {
   accent: string;
   bg: [string, string];
   tire: boolean;
+  /** Nur Reifen ohne Felge (Innenseite leer) */
+  tireOnly?: boolean;
   split?: boolean;
   angle?: number;
 };
 
 export function rimSvg(s: RimStyle, size = 1200) {
   const c = size / 2;
+  if (s.tireOnly) return tireSvg(s, size);
   const rOuter = s.tire ? size * 0.36 : size * 0.44;
   const rTire = size * 0.47;
   const rHub = rOuter * 0.2;
@@ -67,6 +70,34 @@ export function rimSvg(s: RimStyle, size = 1200) {
   ${bolts.join("")}
   <circle cx="${c}" cy="${c}" r="${rHub * 0.3}" fill="#121214" stroke="${s.accent}" stroke-width="3"/>
   <circle cx="${c - rOuter * 0.3}" cy="${c - rOuter * 0.35}" r="${rOuter * 0.9}" fill="url(#glow)"/>
+</svg>`;
+}
+
+/** Einzelner Reifen ohne Felge, leicht schräg gestellt (Profil sichtbar) */
+function tireSvg(s: RimStyle, size: number) {
+  const c = size / 2;
+  const r = size * 0.42;
+  const inner = r * 0.62;
+  const grooves = Array.from({ length: 36 }, (_, i) => {
+    const a = ((360 / 36) * i + (s.angle ?? 0)) * (Math.PI / 180);
+    const x1 = c + Math.cos(a) * r * 0.9;
+    const y1 = c + Math.sin(a) * r * 0.9 * 0.92;
+    const x2 = c + Math.cos(a + 0.05) * r * 0.99;
+    const y2 = c + Math.sin(a + 0.05) * r * 0.99 * 0.92;
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#2c2c32" stroke-width="${size * 0.012}" stroke-linecap="round"/>`;
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size * 0.75}" viewBox="0 ${size * 0.125} ${size} ${size * 0.75}">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.bg[0]}"/><stop offset="1" stop-color="${s.bg[1]}"/></linearGradient>
+    <radialGradient id="rubber" cx=".45" cy=".4" r=".6"><stop offset="0" stop-color="#2b2b31"/><stop offset="1" stop-color="#0d0d10"/></radialGradient>
+  </defs>
+  <rect x="0" y="0" width="${size}" height="${size}" fill="url(#bg)"/>
+  <ellipse cx="${c}" cy="${c + r * 0.95}" rx="${r * 0.85}" ry="${size * 0.03}" fill="#000" opacity=".45"/>
+  <ellipse cx="${c}" cy="${c}" rx="${r}" ry="${r * 0.92}" fill="url(#rubber)"/>
+  ${grooves.join("\n  ")}
+  <ellipse cx="${c}" cy="${c}" rx="${inner * 1.12}" ry="${inner * 1.12 * 0.92}" fill="none" stroke="#202026" stroke-width="${size * 0.02}"/>
+  <ellipse cx="${c}" cy="${c}" rx="${inner}" ry="${inner * 0.92}" fill="url(#bg)" stroke="#3a3a42" stroke-width="${size * 0.006}"/>
+  <text x="${c}" y="${c - inner * 1.2}" fill="#6b6b75" font-family="Arial, sans-serif" font-weight="700" font-size="${size * 0.03}" text-anchor="middle" letter-spacing="${size * 0.004}">${s.accent === "#2563eb" ? "WINTER" : "TYRE"}</text>
 </svg>`;
 }
 

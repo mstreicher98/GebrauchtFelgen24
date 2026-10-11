@@ -30,7 +30,7 @@ export const listingStatusEnum = pgEnum("listing_status", [
   "abgelaufen",
   "gesperrt",
 ]);
-export const listingKindEnum = pgEnum("listing_kind", ["felge", "komplettrad"]);
+export const listingKindEnum = pgEnum("listing_kind", ["felge", "komplettrad", "reifen"]);
 export const materialEnum = pgEnum("material", [
   "alu",
   "stahl",
@@ -231,6 +231,11 @@ export const postalCode = pgTable(
 /* Inserate                                                            */
 /* ------------------------------------------------------------------ */
 
+/** Volltext eines Inserats (Titel, Felgen- und Reifenmarke) – gleicher Ausdruck im Index und in der Suche */
+export const LISTING_SEARCH_TEXT = sql.raw(
+  `"title" || ' ' || coalesce("rim_brand", '') || ' ' || coalesce("rim_model", '') || ' ' || coalesce("tire_brand", '') || ' ' || coalesce("tire_model", '')`,
+);
+
 export const listing = pgTable(
   "listing",
   {
@@ -243,11 +248,13 @@ export const listing = pgTable(
     kind: listingKindEnum("kind").notNull(),
     title: text("title").notNull(),
     description: text("description").notNull().default(""),
-    material: materialEnum("material").notNull(),
-    rimBrand: text("rim_brand").notNull(),
+    // Felge (bei „reifen“ leer)
+    material: materialEnum("material"),
+    rimBrand: text("rim_brand"),
     rimModel: text("rim_model"),
+    /** Zollgröße – bei Reifen aus der Reifengröße (z. B. R17 → 17) */
     diameter: numeric("diameter", { precision: 4, scale: 1, mode: "number" }).notNull(),
-    width: numeric("width", { precision: 4, scale: 2, mode: "number" }).notNull(),
+    width: numeric("width", { precision: 4, scale: 2, mode: "number" }),
     boltCount: integer("bolt_count"),
     boltCircle: numeric("bolt_circle", { precision: 5, scale: 1, mode: "number" }),
     et: integer("et"),
@@ -256,9 +263,12 @@ export const listing = pgTable(
     wheelPosition: wheelPositionEnum("wheel_position").notNull().default("alle"),
     condition: conditionEnum("condition").notNull(),
     hasCertificate: boolean("has_certificate").notNull().default(false),
-    // Komplettrad
+    // Reifen (Komplettrad oder nur Reifen)
     tireSize: text("tire_size"),
+    /** Vereinheitlichte Reifengröße für Suche und Passung, z. B. „225/45r17“ */
+    tireSizeNorm: text("tire_size_norm"),
     tireBrand: text("tire_brand"),
+    tireModel: text("tire_model"),
     season: seasonEnum("season"),
     treadDepth: numeric("tread_depth", { precision: 3, scale: 1, mode: "number" }),
     dot: text("dot"),
@@ -288,10 +298,8 @@ export const listing = pgTable(
     index("listing_status_idx").on(t.status, t.publishedAt),
     index("listing_user_idx").on(t.userId),
     index("listing_pcd_idx").on(t.boltCount, t.boltCircle, t.diameter),
-    index("listing_search_idx").using(
-      "gin",
-      sql`to_tsvector('german', ${t.title} || ' ' || ${t.rimBrand} || ' ' || coalesce(${t.rimModel}, ''))`,
-    ),
+    index("listing_tire_idx").on(t.tireSizeNorm),
+    index("listing_search_idx").using("gin", sql`to_tsvector('german', ${LISTING_SEARCH_TEXT})`),
   ],
 );
 

@@ -2,7 +2,7 @@ export type FitmentItem = { id: number; label: string };
 
 export type ListingFormValues = {
   vehicleType: "auto" | "motorrad" | "";
-  kind: "felge" | "komplettrad" | "";
+  kind: "felge" | "komplettrad" | "reifen" | "";
   title: string;
   description: string;
   material: string;
@@ -19,6 +19,7 @@ export type ListingFormValues = {
   hasCertificate: boolean;
   tireSize: string;
   tireBrand: string;
+  tireModel: string;
   season: string;
   treadDepth: string;
   dot: string;
@@ -55,6 +56,7 @@ export const emptyListingForm = (zip = "", country: "AT" | "DE" | "CH" = "AT", z
   hasCertificate: false,
   tireSize: "",
   tireBrand: "",
+  tireModel: "",
   season: "",
   treadDepth: "",
   dot: "",

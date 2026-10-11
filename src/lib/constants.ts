@@ -1,6 +1,12 @@
 export const VEHICLE_TYPES = { auto: "Auto", motorrad: "Motorrad" } as const;
-export const LISTING_KINDS = { felge: "Felgen", komplettrad: "Kompletträder" } as const;
-export const LISTING_KIND_SINGULAR = { felge: "Felge", komplettrad: "Komplettrad" } as const;
+export const LISTING_KINDS = { felge: "Felgen", komplettrad: "Kompletträder", reifen: "Reifen" } as const;
+export const LISTING_KIND_SINGULAR = { felge: "Felge", komplettrad: "Komplettrad", reifen: "Reifen" } as const;
+/** Gängige Reifenmarken für Vorschläge im Formular */
+export const TIRE_BRANDS = [
+  "Michelin", "Continental", "Bridgestone", "Pirelli", "Goodyear", "Dunlop", "Hankook", "Nokian", "Vredestein", "Falken",
+  "Yokohama", "Toyo", "Kumho", "Nexen", "Firestone", "Semperit", "Uniroyal", "BFGoodrich", "Barum", "Kleber",
+  "Fulda", "General Tire", "Cooper", "Maxxis", "Metzeler", "Avon", "Heidenau", "Mitas", "Kenda",
+];
 export const MATERIALS = {
   alu: "Aluminium",
   stahl: "Stahl",

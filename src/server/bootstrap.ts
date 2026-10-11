@@ -1,10 +1,11 @@
 import "server-only";
 import path from "node:path";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { db, pg } from "@/db";
-import { user } from "@/db/schema";
+import { listing, user } from "@/db/schema";
 import { env } from "@/lib/env";
+import { normalizeTireSize } from "@/lib/fitment";
 import { getVapid } from "@/lib/push";
 import { runCleanupJob } from "./cleanup-job";
 import { runExpiryJob } from "./notify";
@@ -23,6 +24,16 @@ async function withLock<T>(fn: () => Promise<T>) {
   } finally {
     await pg`select pg_advisory_unlock(${LOCK_ID})`;
   }
+}
+
+/** Ältere Inserate: vereinheitlichte Reifengröße für Suche/Passung nachtragen */
+async function backfillTireSizes() {
+  const rows = await db
+    .select({ id: listing.id, tireSize: listing.tireSize })
+    .from(listing)
+    .where(and(isNotNull(listing.tireSize), isNull(listing.tireSizeNorm)));
+  for (const r of rows) await db.update(listing).set({ tireSizeNorm: normalizeTireSize(r.tireSize) }).where(eq(listing.id, r.id));
+  if (rows.length) console.info(`[bootstrap] Reifengrößen für ${rows.length} Inserate vereinheitlicht`);
 }
 
 async function waitForDb(retries = 30) {
@@ -57,6 +68,7 @@ export async function bootstrap() {
       await db.update(user).set({ role: "admin" }).where(eq(sql`lower(${user.email})`, env.adminEmail));
     }
     await seedDemo();
+    await backfillTireSizes();
   } finally {
     await pg`select pg_advisory_unlock(${LOCK_ID})`;
   }

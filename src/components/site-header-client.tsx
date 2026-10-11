@@ -1,24 +1,6 @@
 "use client";
 import { clsx } from "clsx";
-import {
-  Bell,
-  CarFront,
-  ChevronDown,
-  CircleDot,
-  Heart,
-  Home,
-  LayoutList,
-  LogOut,
-  MessageCircle,
-  Motorbike,
-  Plus,
-  Search,
-  Settings,
-  Shield,
-  Snowflake,
-  User as UserIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { Bell, CarFront, ChevronDown, CircleDot, Heart, Home, LayoutList, LifeBuoy, LogOut, type LucideIcon, MessageCircle, Motorbike, Plus, Search, Settings, Shield, Snowflake, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -27,19 +9,21 @@ import { HeaderActionLabel, HeaderIconLink, headerActionClass } from "./header-i
 import { RimMark } from "./logo";
 import { useUnread } from "./realtime-provider";
 
-export type CategoryKey = "auto" | "komplettrad" | "winter" | "motorrad" | "fahrzeuge";
+export type CategoryKey = "auto" | "komplettrad" | "reifen" | "winter" | "motorrad" | "fahrzeuge";
 
 function RimIcon({ className }: { className?: string }) {
   return <RimMark className={className} />;
 }
 
 /** Kategorien der Hauptnavigation (Desktop-Leiste + Menü am Handy). */
-export const CATEGORIES: { key: CategoryKey; href: string; label: string; hint: string; icon: LucideIcon | typeof RimIcon }[] = [
+/** shortLabel: kürzere Beschriftung für die Desktop-Leiste (dort ist der Platz bei 1280 px knapp) */
+export const CATEGORIES: { key: CategoryKey; href: string; label: string; shortLabel?: string; hint: string; icon: LucideIcon | typeof RimIcon }[] = [
   { key: "auto", href: "/suche?typ=auto&art=felge", label: "Autofelgen", hint: "Alu-, Stahl- & Originalfelgen", icon: RimIcon },
   { key: "komplettrad", href: "/suche?art=komplettrad", label: "Kompletträder", hint: "Felge + Reifen, fertig montiert", icon: CircleDot },
+  { key: "reifen", href: "/suche?art=reifen", label: "Reifen", hint: "Nur Reifen – Sommer, Winter, Ganzjahr", icon: LifeBuoy },
   { key: "winter", href: "/suche?saison=winter", label: "Winterräder", hint: "Für die kalte Jahreszeit", icon: Snowflake },
   { key: "motorrad", href: "/suche?typ=motorrad", label: "Motorrad", hint: "Vorder- & Hinterradfelgen", icon: Motorbike },
-  { key: "fahrzeuge", href: "/fahrzeuge", label: "Fahrzeug-Datenbank", hint: "Lochkreis, ET & Größen je Modell", icon: CarFront },
+  { key: "fahrzeuge", href: "/fahrzeuge", label: "Fahrzeug-Datenbank", shortLabel: "Fahrzeuge", hint: "Lochkreis, ET & Größen je Modell", icon: CarFront },
 ];
 
 /** Welche Kategorie passt zur aktuellen URL? (genau eine oder keine) */
@@ -48,6 +32,7 @@ export function useActiveCategory(): CategoryKey | null {
   const sp = useSearchParams();
   if (pathname.startsWith("/fahrzeuge")) return "fahrzeuge";
   if (pathname !== "/suche") return null;
+  if (sp.get("art") === "reifen") return "reifen";
   if ((sp.get("saison") ?? "").split(",").includes("winter")) return "winter";
   if (sp.get("typ") === "motorrad") return "motorrad";
   if (sp.get("art") === "komplettrad") return "komplettrad";
@@ -70,8 +55,9 @@ export function CategoryLinks({ active = null }: { active?: CategoryKey | null }
               "relative flex items-center whitespace-nowrap px-2 text-[0.9375rem] font-semibold transition-colors",
               on ? "text-brand" : "text-fg hover:text-brand",
             )}
+            title={c.shortLabel ? c.label : undefined}
           >
-            {c.label}
+            {c.shortLabel ?? c.label}
             <span
               aria-hidden="true"
               className={clsx(

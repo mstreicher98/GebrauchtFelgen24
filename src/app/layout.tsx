@@ -20,11 +20,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
   title: {
-    default: "GebrauchtFelgen24 – Gebrauchte Felgen & Kompletträder kaufen und verkaufen",
+    default: "GebrauchtFelgen24 – Gebrauchte Felgen, Reifen & Kompletträder kaufen und verkaufen",
     template: "%s | GebrauchtFelgen24",
   },
   description:
-    "Der Marktplatz für gebrauchte Felgen und Kompletträder für Auto und Motorrad in Österreich, Deutschland und der Schweiz – mit Passungsprüfung für dein Fahrzeug.",
+    "Der Marktplatz für gebrauchte Felgen, Reifen und Kompletträder für Auto und Motorrad in Österreich, Deutschland und der Schweiz – mit Passungsprüfung für dein Fahrzeug.",
   applicationName: "GebrauchtFelgen24",
   appleWebApp: { capable: true, title: "Felgen24", statusBarStyle: "black-translucent" },
   openGraph: {

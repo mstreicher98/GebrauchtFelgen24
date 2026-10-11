@@ -5,7 +5,7 @@ import { emptyListingForm } from "@/lib/listing-form-values";
 import { VerifyEmailNotice } from "@/components/verify-email-notice";
 import { requireUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Felgen inserieren", robots: { index: false } };
+export const metadata: Metadata = { title: "Felgen & Reifen inserieren", robots: { index: false } };
 
 export default async function NewListingPage() {
   const me = await requireUser("/inserat/neu");
@@ -21,7 +21,7 @@ export default async function NewListingPage() {
     <div className="container-page py-8">
       <div className="mx-auto mb-8 max-w-3xl">
         <h1 className="font-display text-3xl font-bold uppercase sm:text-4xl">
-          Felgen <span className="text-gradient-brand">inserieren</span>
+          Felgen &amp; Reifen <span className="text-gradient-brand">inserieren</span>
         </h1>
         <p className="mt-2 text-muted">Kostenlos, in wenigen Minuten online und {env.listingLifetimeDays} Tage sichtbar.</p>
       </div>

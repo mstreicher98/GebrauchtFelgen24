@@ -3,7 +3,9 @@ import { parsePcd } from "./format";
 /** Such-Filter, wie sie in der URL stehen (deutsche Parameternamen). */
 export type SearchFilters = {
   typ?: "auto" | "motorrad";
-  art?: "felge" | "komplettrad";
+  art?: "felge" | "komplettrad" | "reifen";
+  /** Reifengröße, z. B. „225/45 R17“ (für Kompletträder und Reifen) */
+  reifen?: string;
   q?: string;
   zoll?: number[];
   breiteMin?: number;
@@ -53,7 +55,8 @@ export function parseFilters(p: Params): SearchFilters {
     .filter((n) => Number.isFinite(n) && n > 0 && n < 40);
   return {
     typ: oneOf(get(p, "typ"), ["auto", "motorrad"] as const),
-    art: oneOf(get(p, "art"), ["felge", "komplettrad"] as const),
+    art: oneOf(get(p, "art"), ["felge", "komplettrad", "reifen"] as const),
+    reifen: get(p, "reifen")?.trim().slice(0, 30) || undefined,
     q: get(p, "q")?.trim().slice(0, 100) || undefined,
     zoll: zoll?.length ? zoll : undefined,
     breiteMin: numOrUndef(get(p, "breite_min")),
@@ -89,6 +92,7 @@ export function filtersToParams(f: Partial<SearchFilters>): URLSearchParams {
   };
   set("typ", f.typ);
   set("art", f.art);
+  set("reifen", f.reifen);
   set("q", f.q);
   set("zoll", f.zoll?.join(","));
   set("breite_min", f.breiteMin);
@@ -119,7 +123,8 @@ export function filtersToParams(f: Partial<SearchFilters>): URLSearchParams {
 export function describeFilters(f: SearchFilters, vehicleName?: string) {
   const parts: string[] = [];
   if (vehicleName) parts.push(vehicleName);
-  if (f.art) parts.push(f.art === "felge" ? "Felgen" : "Kompletträder");
+  if (f.art) parts.push(f.art === "felge" ? "Felgen" : f.art === "reifen" ? "Reifen" : "Kompletträder");
+  if (f.reifen) parts.push(f.reifen);
   if (f.typ && !vehicleName) parts.push(f.typ === "auto" ? "Auto" : "Motorrad");
   if (f.zoll) parts.push(f.zoll.map((z) => `${z}"`).join("/"));
   if (f.lk) parts.push(`LK ${f.lk.boltCount}x${f.lk.boltCircle}`);

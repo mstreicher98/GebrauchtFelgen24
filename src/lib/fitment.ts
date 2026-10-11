@@ -36,12 +36,13 @@ export type FitGeneration = {
 
 export type FitListing = {
   vehicleType: "auto" | "motorrad";
-  kind: "felge" | "komplettrad";
+  kind: "felge" | "komplettrad" | "reifen";
   boltCount: number | null;
   boltCircle: number | null;
   centerBore: number | null;
   diameter: number;
-  width: number;
+  /** Felgenbreite – bei „nur Reifen“ null */
+  width: number | null;
   et: number | null;
   tireSize: string | null;
   wheelPosition: "alle" | "vorne" | "hinten";
@@ -65,8 +66,30 @@ export function normalizeTireSize(s: string | null | undefined) {
   return `${m[1].replace(",", ".")}/${m[2]}r${m[3].replace(",", ".")}`;
 }
 
+/** Zerlegt eine Reifengröße: „225/45 R17 94W“ → { width: 225, aspect: 45, diameter: 17 } (auch Motorrad „120/70 ZR17“, „150/80-16“) */
+export function parseTireSize(s: string | null | undefined) {
+  const n = normalizeTireSize(s);
+  const m = n ? /^(\d{2,3}(?:\.\d{1,2})?)\/(\d{2,3})r(\d{2}(?:\.5)?)$/.exec(n) : null;
+  return m ? { width: Number(m[1]), aspect: Number(m[2]), diameter: Number(m[3]) } : null;
+}
+
+/** Passt ein Reifen (ohne Felge) aufs Fahrzeug? Maßgeblich ist die Reifengröße laut Serienbereifung. */
+function checkTireOnly(gen: FitGeneration, l: FitListing): FitResult {
+  const t = normalizeTireSize(l.tireSize);
+  const posOk = (p: "alle" | "vorne" | "hinten") => l.wheelPosition === "alle" || p === "alle" || p === l.wheelPosition;
+  const approved = !!t && gen.specs.some((s) => posOk(s.position) && s.tireSize && normalizeTireSize(s.tireSize) === t);
+  if (approved) return { level: "perfekt", hints: ["Entspricht einer Serien-Reifengröße"] };
+  if (l.explicitFit) return { level: "passend", hints: ["Vom Verkäufer als passend angegeben"] };
+  const sameDiameter = gen.specs.length
+    ? gen.specs.some((s) => posOk(s.position) && s.diameter === l.diameter)
+    : inRange(l.diameter, gen.diameterMin, gen.diameterMax);
+  if (!sameDiameter) return { level: "nein", hints: [] };
+  return { level: "pruefen", hints: ["Gleiche Zollgröße, aber andere Reifengröße – Fahrzeugpapiere bzw. Freigabe prüfen"] };
+}
+
 export function checkFitment(gen: FitGeneration, l: FitListing): FitResult {
   const hints: string[] = [];
+  if (l.kind === "reifen") return checkTireOnly(gen, l);
 
   if (l.vehicleType === "motorrad") {
     if (l.explicitFit) return { level: "perfekt", hints: ["Vom Verkäufer als passend angegeben"] };
@@ -106,7 +129,8 @@ export function checkFitment(gen: FitGeneration, l: FitListing): FitResult {
   }
 
   const strictDiameter = inRange(l.diameter, gen.diameterMin, gen.diameterMax);
-  const strictWidth = inRange(l.width, gen.widthMin, gen.widthMax);
+  const width = l.width ?? 0;
+  const strictWidth = inRange(width, gen.widthMin, gen.widthMax);
   const strictEt = l.et != null && inRange(l.et, gen.etMin, gen.etMax);
 
   if (!strictDiameter) {
@@ -116,7 +140,7 @@ export function checkFitment(gen: FitGeneration, l: FitListing): FitResult {
     hints.push("Zollgröße außerhalb der Serienfreigabe – Eintragung prüfen");
   }
   if (!strictWidth) {
-    if (!inRange(l.width, gen.widthMin, gen.widthMax, LOOSE_TOLERANCE.width) && !l.explicitFit)
+    if (!inRange(width, gen.widthMin, gen.widthMax, LOOSE_TOLERANCE.width) && !l.explicitFit)
       return { level: "nein", hints };
     uncertain = true;
     hints.push("Felgenbreite außerhalb der Serienfreigabe – Freigängigkeit prüfen");

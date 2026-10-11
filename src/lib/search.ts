@@ -1,10 +1,10 @@
 import "server-only";
-import { and, asc, desc, eq, gt, gte, inArray, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { listing, listingFitment, listingImage, postalCode, user, vehicleWheelSpec } from "@/db/schema";
+import { LISTING_SEARCH_TEXT, listing, listingFitment, listingImage, postalCode, user, vehicleWheelSpec } from "@/db/schema";
 import { PAGE_SIZE } from "./constants";
-import { checkFitment, LOOSE_TOLERANCE, type FitResult } from "./fitment";
+import { checkFitment, LOOSE_TOLERANCE, normalizeTireSize, type FitResult } from "./fitment";
 import type { SearchFilters } from "./filters";
 import { getGeneration, toFitGeneration, type GenerationWithContext } from "./vehicles";
 
@@ -24,8 +24,26 @@ const between = (col: SQL | AnyPgColumn, min: number | null, max: number | null,
   return parts.length ? and(...parts)! : sql`true`;
 };
 
-/** SQL-Bedingung „passt auf Fahrzeug" – spiegelt die Logik aus fitment.ts. */
+/** SQL-Bedingung „passt auf Fahrzeug" – spiegelt die Logik aus fitment.ts (Felgen/Kompletträder bzw. nur Reifen). */
 function fitmentCondition(gen: NonNullable<GenerationWithContext>, mode: "streng" | "locker", pos?: "vorne" | "hinten") {
+  const isTire = eq(listing.kind, "reifen");
+  return or(and(ne(listing.kind, "reifen"), rimFitCondition(gen, mode, pos)), and(isTire, tireFitCondition(gen, mode, pos)))!;
+}
+
+/** Reifen ohne Felge: Serien-Reifengröße (streng) bzw. zusätzlich gleiche Zollgröße (locker) */
+function tireFitCondition(gen: NonNullable<GenerationWithContext>, mode: "streng" | "locker", pos?: "vorne" | "hinten") {
+  const posOk = (p: string) => !pos || p === "alle" || p === pos;
+  const specs = gen.specs.filter((s) => posOk(s.position));
+  const sizes = [...new Set(specs.map((s) => normalizeTireSize(s.tireSize)).filter((t): t is string => !!t))];
+  const approved = sizes.length ? inArray(listing.tireSizeNorm, sizes) : sql`false`;
+  if (mode === "streng") return approved;
+  const diameters = [...new Set(specs.map((s) => s.diameter))];
+  const sameDiameter = diameters.length ? inArray(listing.diameter, diameters) : between(listing.diameter, gen.diameterMin, gen.diameterMax);
+  const explicit = sql`exists (select 1 from ${listingFitment} lf where lf.listing_id = ${listing.id} and lf.generation_id = ${gen.id})`;
+  return or(approved, sameDiameter, explicit)!;
+}
+
+function rimFitCondition(gen: NonNullable<GenerationWithContext>, mode: "streng" | "locker", pos?: "vorne" | "hinten") {
   const explicit = sql`exists (select 1 from ${listingFitment} lf where lf.listing_id = ${listing.id} and lf.generation_id = ${gen.id})`;
 
   if (gen.type === "motorrad") {
@@ -91,12 +109,18 @@ export async function buildConditions(f: SearchFilters, opts: { includeInactive?
     const like = `%${f.q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`;
     conds.push(
       or(
-        sql`to_tsvector('german', ${listing.title} || ' ' || ${listing.rimBrand} || ' ' || coalesce(${listing.rimModel}, '')) @@ websearch_to_tsquery('german', ${f.q})`,
+        sql`to_tsvector('german', ${LISTING_SEARCH_TEXT}) @@ websearch_to_tsquery('german', ${f.q})`,
         sql`${listing.title} ilike ${like}`,
         sql`${listing.rimBrand} ilike ${like}`,
         sql`${listing.rimModel} ilike ${like}`,
+        sql`${listing.tireBrand} ilike ${like}`,
+        sql`${listing.tireModel} ilike ${like}`,
       )!,
     );
+  }
+  if (f.reifen) {
+    const t = normalizeTireSize(f.reifen);
+    if (t) conds.push(eq(listing.tireSizeNorm, t));
   }
   if (f.zoll) conds.push(inArray(listing.diameter, f.zoll));
   if (f.breiteMin != null) conds.push(gte(listing.width, f.breiteMin));
@@ -150,6 +174,9 @@ export const listingCardColumns = {
   hasCertificate: listing.hasCertificate,
   season: listing.season,
   tireSize: listing.tireSize,
+  tireBrand: listing.tireBrand,
+  tireModel: listing.tireModel,
+  treadDepth: listing.treadDepth,
   priceCents: listing.priceCents,
   priceType: listing.priceType,
   shipping: listing.shipping,

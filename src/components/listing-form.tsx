@@ -1,10 +1,11 @@
 "use client";
 import { clsx } from "clsx";
-import { ArrowLeft, ArrowRight, Bike, Car, Check, CircleDot, Disc3, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bike, Car, Check, CircleDot, Disc3, LifeBuoy, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { saveListing } from "@/app/actions/listings";
-import { CAR_DIAMETERS, COMMON_PCDS, CONDITIONS, MATERIALS, MOTO_DIAMETERS, RIM_BRANDS, SEASONS } from "@/lib/constants";
+import { CAR_DIAMETERS, COMMON_PCDS, CONDITIONS, MATERIALS, MOTO_DIAMETERS, RIM_BRANDS, SEASONS, TIRE_BRANDS } from "@/lib/constants";
+import { parseTireSize } from "@/lib/fitment";
 import { formatNumber } from "@/lib/format";
 import { fieldErrors, listingSchema } from "@/lib/listing-schema";
 import type { ListingFormValues } from "@/lib/listing-form-values";
@@ -16,11 +17,26 @@ import { toast } from "./toaster";
 const STEPS = [
   { key: "art", label: "Art", fields: ["vehicleType", "kind"] },
   { key: "fotos", label: "Fotos", fields: ["imageKeys"] },
-  { key: "felge", label: "Felge", fields: ["rimBrand", "rimModel", "material", "diameter", "width", "pcd", "et", "centerBore", "quantity", "condition", "fitments", "tireSize", "tireBrand", "season", "treadDepth", "dot"] },
+  { key: "details", label: "Details", fields: ["rimBrand", "rimModel", "material", "diameter", "width", "pcd", "et", "centerBore", "quantity", "condition", "fitments", "tireSize", "tireBrand", "tireModel", "season", "treadDepth", "dot"] },
   { key: "preis", label: "Preis & Text", fields: ["price", "priceType", "shipping", "pickup", "shippingCost", "zip", "title", "description"] },
 ] as const;
 
+function suggestTireTitle(v: ListingFormValues) {
+  const season = v.season ? SEASONS[v.season as keyof typeof SEASONS] : "";
+  const noun =
+    v.vehicleType === "motorrad" && v.wheelPosition !== "alle"
+      ? v.wheelPosition === "vorne"
+        ? "Vorderreifen"
+        : "Hinterreifen"
+      : season
+        ? `${season}reifen`
+        : "Reifen";
+  const qty = Number(v.quantity) > 1 ? `${v.quantity}x` : "";
+  return [qty, v.tireBrand, v.tireModel, v.tireSize.trim(), noun].filter(Boolean).join(" ").replace(/\s+/g, " ").slice(0, 90);
+}
+
 function suggestTitle(v: ListingFormValues) {
+  if (v.kind === "reifen") return suggestTireTitle(v);
   const size = v.width && v.diameter ? `${formatNumber(Number(v.width.replace(",", ".")))}x${v.diameter}` : v.diameter ? `${v.diameter} Zoll` : "";
   const parts = [
     v.rimBrand && v.rimBrand !== "Original (OEM)" ? v.rimBrand : v.rimBrand ? "Original" : "",
@@ -101,6 +117,7 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
   };
 
   const isCar = v.vehicleType === "auto";
+  const tireDiameter = parseTireSize(v.tireSize)?.diameter;
   const diameters = v.vehicleType === "motorrad" ? MOTO_DIAMETERS : CAR_DIAMETERS;
 
   return (
@@ -143,9 +160,10 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
               </div>
             </Block>
             <Block title="Was verkaufst du?" error={errors.kind}>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <BigChoice active={v.kind === "felge"} onClick={() => set("kind", "felge")} icon={<Disc3 className="h-8 w-8" />} label="Felgen" sub="ohne Reifen" />
                 <BigChoice active={v.kind === "komplettrad"} onClick={() => set("kind", "komplettrad")} icon={<CircleDot className="h-8 w-8" />} label="Kompletträder" sub="Felge mit Reifen" />
+                <BigChoice active={v.kind === "reifen"} onClick={() => set("kind", "reifen")} icon={<LifeBuoy className="h-8 w-8" />} label="Reifen" sub="ohne Felge" />
               </div>
             </Block>
           </div>
@@ -159,7 +177,70 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
         )}
 
         {/* SCHRITT 3 */}
-        {step === 2 && (
+        {step === 2 && v.kind === "reifen" && (
+          <div className="space-y-8">
+            <Block title="Reifen" sub="Die Größe steht auf der Reifenflanke, z. B. „225/45 R17 94W“.">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <Field label="Reifengröße" error={errors.tireSize} hint={tireDiameter ? `= ${formatNumber(tireDiameter)} Zoll` : undefined} className="col-span-2 sm:col-span-1">
+                  <input className="input" value={v.tireSize} onChange={(e) => set("tireSize", e.target.value)} placeholder={isCar ? "z. B. 225/45 R17 94W" : "z. B. 180/55 ZR17"} aria-invalid={!!errors.tireSize} />
+                </Field>
+                <Field label="Reifenmarke" error={errors.tireBrand}>
+                  <input className="input" list="tire-brands" value={v.tireBrand} onChange={(e) => set("tireBrand", e.target.value)} placeholder="z. B. Michelin" aria-invalid={!!errors.tireBrand} />
+                </Field>
+                <Field label="Modell / Profil (optional)">
+                  <input className="input" value={v.tireModel} onChange={(e) => set("tireModel", e.target.value)} placeholder="z. B. Pilot Sport 4" />
+                </Field>
+                <Field label="Saison" error={errors.season}>
+                  <select className="select" value={v.season} onChange={(e) => set("season", e.target.value)} aria-invalid={!!errors.season}>
+                    <option value="">Bitte wählen</option>
+                    {Object.entries(SEASONS).map(([k, l]) => (
+                      <option key={k} value={k}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Profiltiefe (mm)" error={errors.treadDepth}>
+                  <input className="input" inputMode="decimal" value={v.treadDepth} onChange={(e) => set("treadDepth", e.target.value)} placeholder="z. B. 6" aria-invalid={!!errors.treadDepth} />
+                </Field>
+                <Field label="DOT (Produktionswoche)" error={errors.dot} hint="4 Ziffern, z. B. 2321">
+                  <input className="input" inputMode="numeric" maxLength={4} value={v.dot} onChange={(e) => set("dot", e.target.value.replace(/\D/g, ""))} placeholder="KWJJ" />
+                </Field>
+                <Field label="Anzahl" error={errors.quantity}>
+                  <select className="select" value={v.quantity} onChange={(e) => set("quantity", e.target.value)}>
+                    {[1, 2, 3, 4, 5, 6, 8].map((n) => (
+                      <option key={n} value={n}>
+                        {n} Stück
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Zustand" error={errors.condition}>
+                  <select className="select" value={v.condition} onChange={(e) => set("condition", e.target.value)}>
+                    {Object.entries(CONDITIONS).map(([k, l]) => (
+                      <option key={k} value={k}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Position">
+                  <select className="select" value={v.wheelPosition} onChange={(e) => set("wheelPosition", e.target.value as ListingFormValues["wheelPosition"])}>
+                    <option value="alle">{isCar ? "Alle / Satz" : "Satz (vorne + hinten)"}</option>
+                    <option value="vorne">{isCar ? "Vorderachse" : "Vorderreifen"}</option>
+                    <option value="hinten">{isCar ? "Hinterachse" : "Hinterreifen"}</option>
+                  </select>
+                </Field>
+              </div>
+            </Block>
+
+            <Block title="Passend für (optional)" sub="Von welchem Fahrzeug stammen die Reifen? Käufer finden sie zusätzlich über die Reifengröße ihres Fahrzeugs.">
+              <FitmentSelector type={v.vehicleType || "auto"} value={v.fitments} onChange={(f) => set("fitments", f)} />
+            </Block>
+          </div>
+        )}
+
+        {step === 2 && v.kind !== "reifen" && (
           <div className="space-y-8">
             <Block title="Felge">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -270,7 +351,10 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                     <input className="input" value={v.tireSize} onChange={(e) => set("tireSize", e.target.value)} placeholder={isCar ? "z. B. 225/45 R18 95Y" : "z. B. 180/55 ZR17"} aria-invalid={!!errors.tireSize} />
                   </Field>
                   <Field label="Reifenmarke">
-                    <input className="input" value={v.tireBrand} onChange={(e) => set("tireBrand", e.target.value)} placeholder="z. B. Michelin" />
+                    <input className="input" list="tire-brands" value={v.tireBrand} onChange={(e) => set("tireBrand", e.target.value)} placeholder="z. B. Michelin" />
+                  </Field>
+                  <Field label="Modell / Profil (optional)">
+                    <input className="input" value={v.tireModel} onChange={(e) => set("tireModel", e.target.value)} placeholder="z. B. Alpin 6" />
                   </Field>
                   <Field label="Saison" error={errors.season}>
                     <select className="select" value={v.season} onChange={(e) => set("season", e.target.value)} aria-invalid={!!errors.season}>
@@ -374,13 +458,23 @@ export function ListingForm({ initial, listingId, userPhone }: { initial: Listin
                   maxLength={4000}
                   value={v.description}
                   onChange={(e) => set("description", e.target.value)}
-                  placeholder="Zustand, Schäden, Grund des Verkaufs, Zubehör (Zentrierringe, Schrauben, Nabendeckel) …"
+                  placeholder={
+                    v.kind === "reifen"
+                      ? "Zustand, Laufleistung, Reparaturen, Lagerung, Grund des Verkaufs …"
+                      : "Zustand, Schäden, Grund des Verkaufs, Zubehör (Zentrierringe, Schrauben, Nabendeckel) …"
+                  }
                 />
               </Field>
             </Block>
           </div>
         )}
       </div>
+
+      <datalist id="tire-brands">
+        {TIRE_BRANDS.map((b) => (
+          <option key={b} value={b} />
+        ))}
+      </datalist>
 
       {errors._ && <p className="mt-6 rounded-xl bg-red-soft px-4 py-3 text-sm text-red">{errors._}</p>}
 

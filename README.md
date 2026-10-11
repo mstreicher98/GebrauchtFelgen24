@@ -1,6 +1,6 @@
 # GebrauchtFelgen24
 
-Marktplatz für gebrauchte **Felgen und Kompletträder** für Auto und Motorrad in Österreich, Deutschland und der Schweiz – mit
+Marktplatz für gebrauchte **Felgen, Reifen und Kompletträder** für Auto und Motorrad in Österreich, Deutschland und der Schweiz – mit
 Passungsprüfung („Welche Felgen passen auf mein Fahrzeug?“), Echtzeit-Chat zwischen Käufer und Verkäufer und
 einer Fahrzeugdatenbank mit Lochkreis, Mittenloch, Einpresstiefe und Rad-/Reifengrößen.
 
@@ -13,9 +13,9 @@ Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Comp
 | Bereich | Umfang |
 | --- | --- |
 | **Konto** | Registrierung mit E-Mail-Bestätigung, Login mit E-Mail/Passwort, Google und Apple (optional), Passwort vergessen, Privat- oder Händlerkonto (Firmenname, UID, Website, Firmenlogo auf Verkäuferkarte und Profilseite), Konto löschen (DSGVO) |
-| **Inserate** | Felgen & Kompletträder, bis zu 12 Fotos (werden im Browser verkleinert, auf dem Server in 3 Größen als WebP gespeichert, GPS/EXIF entfernt), alle Pflichtfelder (Material, Marke, Zoll, Breite, Lochkreis, ET, Mittenloch, Anzahl, Zustand, Reifengröße, -marke, Saison, Profiltiefe, DOT, RDKS, Preis, Festpreis/VB, Versand/Abholung, PLZ), „Passend für“-Fahrzeuge, automatischer Titelvorschlag, Laufzeit 60 Tage mit Erinnerung & Verlängerung, verkauft/deaktiviert |
-| **Suche** | Volltext, Zoll, Breite, Lochkreis, ET, Preis, Zustand, Material, Saison, Händler/Privat, **Umkreissuche** (44.000 PLZ in AT/DE/CH), Sortierung inkl. Entfernung |
-| **Fahrzeugsuche** | Marke → Modell → Baureihe oder **HSN/TSN**; Modus „Nur passende“ (streng) oder „Auch eventuell passende“ (locker); jedes Inserat bekommt ein Badge *Passt perfekt / Passt / Passt mit Zentrierring / Eventuell passend* mit Hinweisen |
+| **Inserate** | Felgen, Kompletträder und **nur Reifen** (Reifengröße, Marke, Profil, Saison, Profiltiefe, DOT – Zollgröße wird aus der Reifengröße erkannt), bis zu 12 Fotos (werden im Browser verkleinert, auf dem Server in 3 Größen als WebP gespeichert, GPS/EXIF entfernt), alle Pflichtfelder (Material, Marke, Zoll, Breite, Lochkreis, ET, Mittenloch, Anzahl, Zustand, Reifengröße, -marke, Saison, Profiltiefe, DOT, RDKS, Preis, Festpreis/VB, Versand/Abholung, PLZ), „Passend für“-Fahrzeuge, automatischer Titelvorschlag, Laufzeit 60 Tage mit Erinnerung & Verlängerung, verkauft/deaktiviert |
+| **Suche** | Volltext, Art (Felgen/Kompletträder/Reifen), **Reifengröße**, Zoll, Breite, Lochkreis, ET, Preis, Zustand, Material, Saison, Händler/Privat, **Umkreissuche** (44.000 PLZ in AT/DE/CH), Sortierung inkl. Entfernung |
+| **Fahrzeugsuche** | Marke → Modell → Baureihe oder **HSN/TSN**; Modus „Nur passende“ (streng) oder „Auch eventuell passende“ (locker); Reifen passen, wenn ihre Größe zur Serienbereifung gehört; jedes Inserat bekommt ein Badge *Passt perfekt / Passt / Passt mit Zentrierring / Eventuell passend* mit Hinweisen |
 | **Chat** | wie bei willhaben: Echtzeit (Server-Sent Events über PostgreSQL LISTEN/NOTIFY), Bilder senden, Lesebestätigung, Ungelesen-Zähler, Archivieren, Blockieren, Melden (Nutzer, einzelne Nachrichten und ganze Unterhaltungen). E-Mail-Adresse und Telefonnummer bleiben privat (Telefon optional pro Inserat freigebbar) |
 | **Benachrichtigungen** | E-Mail und Web-Push (PWA) bei neuen Nachrichten (max. 1 Mail / 15 Min. pro Chat), **Suchaufträge** mit Benachrichtigung bei neuen Treffern, Ablauferinnerung – alles in den Einstellungen abschaltbar |
 | **Merkliste** | Herz auf jeder Karte, Übersicht im Konto |

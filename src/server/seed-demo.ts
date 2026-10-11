@@ -14,6 +14,7 @@ import {
   vehicleModel,
 } from "@/db/schema";
 import { env } from "@/lib/env";
+import { normalizeTireSize } from "@/lib/fitment";
 import { processAndStoreImage } from "@/lib/images";
 import { lookupPostalCode } from "@/lib/search";
 import { DEMO_STYLES, rimSvg } from "./rim-art";
@@ -21,14 +22,14 @@ import { DEMO_STYLES, rimSvg } from "./rim-art";
 type DemoListing = {
   seller: 0 | 1 | 2;
   vehicleType: "auto" | "motorrad";
-  kind: "felge" | "komplettrad";
+  kind: "felge" | "komplettrad" | "reifen";
   title: string;
   description: string;
-  material: "alu" | "stahl" | "geschmiedet" | "speiche";
-  rimBrand: string;
+  material?: "alu" | "stahl" | "geschmiedet" | "speiche";
+  rimBrand?: string;
   rimModel?: string;
   diameter: number;
-  width: number;
+  width?: number;
   pcd?: [number, number];
   et?: number;
   centerBore?: number;
@@ -38,6 +39,7 @@ type DemoListing = {
   hasCertificate?: boolean;
   tireSize?: string;
   tireBrand?: string;
+  tireModel?: string;
   season?: "sommer" | "winter" | "ganzjahr";
   treadDepth?: number;
   dot?: string;
@@ -74,12 +76,17 @@ const DEMO: DemoListing[] = [
   { seller: 2, vehicleType: "motorrad", kind: "felge", title: "KTM 1290 Super Duke R Vorderrad 3,50x17", description: "Vorderradfelge, schwarz, ohne Scheiben. Wurde auf Rennstrecke gegen Schmiedefelge getauscht.", material: "alu", rimBrand: "Original (OEM)", diameter: 17, width: 3.5, quantity: 1, wheelPosition: "vorne", condition: "neuwertig", price: 240, priceType: "fest", shipping: true, zip: "50667", country: "DE", style: 7, daysAgo: 3, fits: [["KTM", "1290 Super Duke R", "1290 Super Duke R"]] },
   { seller: 0, vehicleType: "motorrad", kind: "felge", title: "Marchesini M10RS Kompe Schmiederäder Kawasaki Z900", hasCertificate: true, description: "Satz Marchesini Schmiederäder 3,50x17 / 5,50x17, ABE vorhanden. Spart ca. 2,5 kg.", material: "geschmiedet", rimBrand: "Marchesini", rimModel: "M10RS Kompe", diameter: 17, width: 5.5, quantity: 2, wheelPosition: "alle", condition: "neuwertig", price: 1650, priceType: "vb", shipping: true, zip: "8020", country: "AT", style: 2, daysAgo: 5, fits: [["Kawasaki", "Z900", "Z900"]] },
   { seller: 1, vehicleType: "motorrad", kind: "komplettrad", title: "Ducati Monster 937 Hinterrad mit Pirelli Rosso IV", description: "Originales Hinterrad 5,50x17 mit Pirelli Diablo Rosso IV 180/55 ZR17, ca. 70 %.", material: "alu", rimBrand: "Original (OEM)", diameter: 17, width: 5.5, quantity: 1, wheelPosition: "hinten", condition: "gebraucht", tireSize: "180/55 ZR17", tireBrand: "Pirelli", season: "sommer", treadDepth: 4.5, dot: "0824", price: 390, priceType: "vb", shipping: true, zip: "1100", country: "AT", style: 3, daysAgo: 6, fits: [["Ducati", "Monster", "Monster (937)"]] },
+  // Nur Reifen
+  { seller: 1, vehicleType: "auto", kind: "reifen", title: "4x Continental WinterContact TS 870 205/55 R16 Winterreifen", description: "Satz Winterreifen, eine Saison gefahren, ca. 7 mm Profil. Gelagert im Reifenhotel. Passend z. B. für Golf, Octavia, Leon.", diameter: 16, quantity: 4, condition: "neuwertig", tireSize: "205/55 R16 91H", tireBrand: "Continental", tireModel: "WinterContact TS 870", season: "winter", treadDepth: 7, dot: "3623", price: 280, priceType: "vb", shipping: true, zip: "1100", country: "AT", style: 5, daysAgo: 1 },
+  { seller: 0, vehicleType: "auto", kind: "reifen", title: "4x Michelin Pilot Sport 4 225/40 R18 Sommerreifen", description: "Sommerreifen vom Golf GTI, ca. 5 mm Profil, keine Reparaturen.", diameter: 18, quantity: 4, condition: "gebraucht", tireSize: "225/40 ZR18 92Y", tireBrand: "Michelin", tireModel: "Pilot Sport 4", season: "sommer", treadDepth: 5, dot: "1422", price: 240, priceType: "vb", shipping: false, zip: "8010", country: "AT", style: 0, daysAgo: 3 },
+  { seller: 2, vehicleType: "auto", kind: "reifen", title: "2x Goodyear Vector 4Seasons 235/45 R18 Ganzjahresreifen", description: "Zwei Ganzjahresreifen als Ersatz, 6 mm Profil.", diameter: 18, quantity: 2, condition: "gebraucht", tireSize: "235/45 R18 98Y", tireBrand: "Goodyear", tireModel: "Vector 4Seasons Gen-3", season: "ganzjahr", treadDepth: 6, dot: "2822", price: 140, priceType: "fest", shipping: true, zip: "80331", country: "DE", style: 1, daysAgo: 4 },
+  { seller: 1, vehicleType: "motorrad", kind: "reifen", title: "Pirelli Diablo Rosso IV 180/55 ZR17 Hinterreifen – neu", description: "Neuer Hinterreifen, falsch bestellt. Nie montiert.", diameter: 17, quantity: 1, wheelPosition: "hinten", condition: "neu", tireSize: "180/55 ZR17", tireBrand: "Pirelli", tireModel: "Diablo Rosso IV", season: "sommer", treadDepth: 6, dot: "1024", price: 150, priceType: "fest", shipping: true, zip: "1100", country: "AT", style: 7, daysAgo: 2 },
   { seller: 2, vehicleType: "motorrad", kind: "felge", title: "Honda CB650R Vorderradfelge 3,50x17", description: "Originale Vorderradfelge, minimale Gebrauchsspuren.", material: "alu", rimBrand: "Original (OEM)", diameter: 17, width: 3.5, quantity: 1, wheelPosition: "vorne", condition: "gebraucht", price: 130, priceType: "vb", shipping: true, zip: "80331", country: "DE", style: 1, daysAgo: 9, fits: [["Honda", "CB650R / CBR650R", "CB650R / CBR650R"]] },
 ];
 
-async function demoImage(styleIdx: number, variant: number, tire: boolean) {
+async function demoImage(styleIdx: number, variant: number, tire: boolean, tireOnly = false) {
   const base = DEMO_STYLES[styleIdx % DEMO_STYLES.length];
-  const svg = rimSvg({ ...base, tire, angle: variant * 17 });
+  const svg = rimSvg({ ...base, tire, tireOnly, angle: variant * 17 });
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
   return processAndStoreImage(png);
 }
@@ -139,11 +146,11 @@ export async function seedDemo() {
         kind: d.kind,
         title: d.title,
         description: d.description,
-        material: d.material,
-        rimBrand: d.rimBrand,
+        material: d.material ?? null,
+        rimBrand: d.rimBrand ?? null,
         rimModel: d.rimModel ?? null,
         diameter: d.diameter,
-        width: d.width,
+        width: d.width ?? null,
         boltCount: d.pcd?.[0] ?? null,
         boltCircle: d.pcd?.[1] ?? null,
         et: d.et ?? null,
@@ -153,7 +160,9 @@ export async function seedDemo() {
         condition: d.condition,
         hasCertificate: d.hasCertificate ?? false,
         tireSize: d.tireSize ?? null,
+        tireSizeNorm: normalizeTireSize(d.tireSize),
         tireBrand: d.tireBrand ?? null,
+        tireModel: d.tireModel ?? null,
         season: d.season ?? null,
         treadDepth: d.treadDepth ?? null,
         dot: d.dot ?? null,
@@ -178,7 +187,7 @@ export async function seedDemo() {
 
     const count = 2 + (row.id % 3);
     for (let i = 0; i < count; i++) {
-      const img = await demoImage(d.style, i, d.kind === "komplettrad");
+      const img = await demoImage(d.style, i, d.kind === "komplettrad", d.kind === "reifen");
       await db.insert(listingImage).values({ ...img, userId: sellers[d.seller], listingId: row.id, position: i });
     }
     for (const [mk, md, gn] of d.fits ?? []) {
