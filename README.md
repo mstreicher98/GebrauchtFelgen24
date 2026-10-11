@@ -4,7 +4,7 @@ Marktplatz für gebrauchte **Felgen und Kompletträder** für Auto und Motorrad 
 Passungsprüfung („Welche Felgen passen auf mein Fahrzeug?“), Echtzeit-Chat zwischen Käufer und Verkäufer und
 einer Fahrzeugdatenbank mit Lochkreis, Mittenloch, Einpresstiefe und Rad-/Reifengrößen.
 
-Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Compose)
+Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Compose) hinter einem **Cloudflare Tunnel**
 
 ---
 
@@ -57,7 +57,26 @@ Bei jedem Push baut GitHub Actions (`.github/workflows/docker.yml`) das Image:
 Ist das Repository privat, ist auch das Image privat. Dann in Portainer unter **Registries → Add registry → Custom registry**
 eintragen: URL `ghcr.io`, Benutzer = GitHub-Name, Passwort = GitHub *Personal Access Token* mit Recht `read:packages`.
 
-### 2. Stack anlegen
+### 2. Cloudflare Tunnel anlegen
+
+Die Seite wird über einen **Cloudflare Tunnel** veröffentlicht: Der Container `cloudflared` im Stack verbindet sich ausgehend mit Cloudflare –
+am Server sind **keine offenen Ports**, kein Reverse Proxy und kein eigenes SSL-Zertifikat nötig. Voraussetzung: die Domain liegt bei Cloudflare
+(Nameserver auf Cloudflare umgestellt).
+
+1. Cloudflare **Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared**, Name z. B. `gebrauchtfelgen24`.
+2. Den **Token** kopieren (die lange Zeichenkette nach `--token` im angezeigten Docker-Befehl) – er kommt in Portainer als `TUNNEL_TOKEN`.
+3. Unter **Public Hostnames** drei Einträge anlegen, jeweils Type `HTTP`, URL `app:3000`:
+
+   | Subdomain | Domain | Service |
+   | --- | --- | --- |
+   | *(leer)* | `gebrauchtfelgen24.at` | `http://app:3000` |
+   | `www` | `gebrauchtfelgen24.at` | `http://app:3000` |
+   | `admin` | `gebrauchtfelgen24.at` | `http://app:3000` |
+
+   Cloudflare legt die DNS-Einträge automatisch an (vorhandene A-Records für diese Namen vorher löschen).
+   **Wichtig:** unter *Additional settings* **keinen** „HTTP Host Header“ setzen – die App erkennt den Admin-Bereich am Host-Namen.
+
+### 3. Stack anlegen
 
 Portainer → **Stacks → Add stack**:
 
@@ -70,40 +89,43 @@ Unter **Environment variables** mindestens setzen (Vorlage: `.env.example`):
 | --- | --- |
 | `APP_URL` | `https://gebrauchtfelgen24.at` |
 | `ADMIN_URL` | `https://admin.gebrauchtfelgen24.at` (leer = Admin-Bereich unter `/admin`) |
+| `TUNNEL_TOKEN` | Token aus Schritt 2 |
 | `POSTGRES_PASSWORD` | langes Zufallspasswort |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `ADMIN_EMAIL` | E-Mail, die automatisch Admin wird |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | E-Mail-Versand (ohne SMTP werden Mails nur ins Log geschrieben) |
-| `APP_PORT` | Port auf dem Server, Standard `3000` |
 | `IMAGE_TAG` | Standard `latest` |
 | `SEED_DEMO` | `true` legt Testnutzer + 20 Demo-Inserate an – **in Produktion `false`** |
 
-Optional: `GOOGLE_CLIENT_ID/SECRET`, `APPLE_CLIENT_ID/SECRET`, `VAPID_*` (werden sonst automatisch erzeugt).
+Optional: `GOOGLE_CLIENT_ID/SECRET`, `APPLE_CLIENT_ID/SECRET`, `VAPID_*` (werden sonst automatisch erzeugt), `APP_PORT` / `APP_BIND` (siehe unten).
 
-Der Stack startet drei Container: **app**, **db** (PostgreSQL 16) und **backup** (tägliche Datenbank-Sicherung, 7 Tage / 4 Wochen / 6 Monate).
+Der Stack startet vier Container: **app**, **cloudflared** (Tunnel, startet sobald die App bereit ist), **db** (PostgreSQL 16) und
+**backup** (tägliche Datenbank-Sicherung, 7 Tage / 4 Wochen / 6 Monate).
 Beim ersten Start werden automatisch die Tabellen angelegt sowie Fahrzeugdatenbank und Postleitzahlen importiert.
 
-### 3. Reverse Proxy & HTTPS
+### 4. Cloudflare-Einstellungen
 
-Die App lauscht auf Port `3000`. Davor gehört ein Reverse Proxy mit SSL, z. B. **Nginx Proxy Manager**:
+- **Rules → Redirect Rules**: `www.gebrauchtfelgen24.at/*` → `https://gebrauchtfelgen24.at/${1}` (301, Query-String beibehalten).
+  Nötig, weil der Login nur Anfragen von `APP_URL` (und `ADMIN_URL`) akzeptiert.
+- **SSL/TLS**: Modus „Full“, **Edge Certificates → Always Use HTTPS** an.
+- **Speed → Optimization → Rocket Loader**: **aus** (stört das JavaScript von Next.js).
+- **Scrape Shield → Email Address Obfuscation**: **aus** (verändert das HTML und führt zu Darstellungsfehlern).
+- Optional **Caching → Cache Rules**: Pfad beginnt mit `/bilder/` → „Eligible for cache“ (Fotos ändern sich nie). HTML-Seiten nicht cachen.
+- Empfohlen **Zero Trust → Access → Applications → Self-hosted** für `admin.gebrauchtfelgen24.at` mit einer Regel „Emails“
+  (nur eure Adressen, Einmal-Code per E-Mail): Dann ist schon die Admin-Anmeldeseite nur für das Team erreichbar.
 
-- Proxy Host `gebrauchtfelgen24.at` (+ `www`) → `http://<server-ip>:3000`, SSL mit Let's Encrypt, „Force SSL“
-- Proxy Host `admin.gebrauchtfelgen24.at` → **derselbe** Container `http://<server-ip>:3000`, ebenfalls mit SSL. Die App erkennt die Subdomain am Host-Namen
-  und liefert dort nur den Admin-Bereich aus; `gebrauchtfelgen24.at/admin` leitet automatisch dorthin um. Die Anmeldung gilt für beide Adressen.
-- Unter *Advanced* eintragen (für Foto-Uploads und den Echtzeit-Chat):
+Echtzeit-Chat (Server-Sent Events, Lebenszeichen alle 25 s) und Foto-Uploads (max. 15 MB) funktionieren ohne weitere Einstellungen.
 
-  ```nginx
-  client_max_body_size 20m;
-  proxy_buffering off;
-  proxy_read_timeout 1h;
-  ```
-
+**Alternative ohne Cloudflare (Nginx Proxy Manager):** den Dienst `cloudflared` aus `docker-compose.yml` entfernen, `APP_BIND=0.0.0.0` setzen und
+Proxy Hosts für `gebrauchtfelgen24.at` (+ `www`) und `admin.gebrauchtfelgen24.at` → `http://<server-ip>:3000` mit Let's-Encrypt-SSL anlegen.
+Unter *Advanced* `client_max_body_size 20m; proxy_buffering off; proxy_read_timeout 1h;` eintragen. DNS: A-Records für die drei Namen auf den Server.
 Für **Traefik** sind Labels in `docker-compose.yml` vorbereitet (auskommentiert).
-DNS: A-Record (und ggf. AAAA) von `gebrauchtfelgen24.at`, `www` und `admin` auf den Server.
 
-### 4. Erster Login
+### 5. Erster Login
 
-Auf der Seite mit der unter `ADMIN_EMAIL` eingetragenen Adresse registrieren → E-Mail bestätigen → im Menü erscheint **Admin-Bereich** (bzw. direkt **admin.gebrauchtfelgen24.at** öffnen).
+`https://gebrauchtfelgen24.at/api/health` muss `{"ok":true}` liefern. Dann auf der Seite mit der unter `ADMIN_EMAIL` eingetragenen Adresse registrieren →
+E-Mail bestätigen → **admin.gebrauchtfelgen24.at** öffnen (oder im Menü **Admin-Bereich**). Unter *Einstellungen → Systemstatus* lässt sich eine
+Test-E-Mail verschicken.
 
 ### Updates
 

@@ -6,3 +6,6 @@ services:
     build: .
   backup:
     profiles: ["backup"]
+  # Tunnel nur bei Bedarf: --profile tunnel
+  cloudflared:
+    profiles: ["tunnel"]

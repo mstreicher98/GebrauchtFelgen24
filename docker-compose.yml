@@ -4,6 +4,9 @@
 # Portainer → Stacks → Add stack → "Repository" (dieses Git-Repo, Compose-Pfad: docker-compose.yml)
 # oder Inhalt in den Web-Editor kopieren. Variablen unter "Environment variables" setzen
 # (siehe .env.example). Das Image wird per GitHub Actions nach ghcr.io gebaut.
+#
+# Zugriff von außen über Cloudflare Tunnel (Dienst „cloudflared“, TUNNEL_TOKEN setzen) –
+# keine offenen Ports nötig. Alternative mit Nginx Proxy Manager: siehe README.
 # ---------------------------------------------------------------
 name: gebrauchtfelgen24
 
@@ -39,8 +42,9 @@ services:
     volumes:
       - uploads:/data
     ports:
-      # Für Nginx Proxy Manager / Traefik / Caddy davor. Ohne Reverse-Proxy: "80:3000"
-      - "${APP_PORT:-3000}:3000"
+      # Mit Cloudflare Tunnel nur lokal erreichbar (z. B. für curl am Server).
+      # Für Nginx Proxy Manager / Traefik / Caddy auf einem anderen Rechner: APP_BIND=0.0.0.0
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:3000"
     # Traefik (optional) – Kommentare entfernen und Netzwerk anpassen:
     # labels:
     #   - traefik.enable=true
@@ -48,6 +52,20 @@ services:
     #   - traefik.http.routers.gf24.entrypoints=websecure
     #   - traefik.http.routers.gf24.tls.certresolver=letsencrypt
     #   - traefik.http.services.gf24.loadbalancer.server.port=3000
+
+  # Cloudflare Tunnel: verbindet die App ausgehend mit Cloudflare (HTTPS, DNS, DDoS-Schutz).
+  # Public Hostnames im Tunnel: gebrauchtfelgen24.at, www und admin → http://app:3000
+  # Ohne Cloudflare (z. B. Nginx Proxy Manager) diesen Dienst entfernen.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      # Token aus Cloudflare Zero Trust → Networks → Tunnels (ohne Token startet der Tunnel nicht)
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
