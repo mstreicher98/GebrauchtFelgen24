@@ -224,10 +224,10 @@ export function UserMenu({
               </Link>
             ))}
             {isAdmin && (
-              <Link href="/admin" role="menuitem" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand hover:bg-surface-2">
+              <a href="/admin" role="menuitem" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand hover:bg-surface-2">
                 <Shield className="h-4 w-4" aria-hidden="true" />
                 Admin-Bereich
-              </Link>
+              </a>
             )}
           </div>
           <div className="border-t border-line pt-1">

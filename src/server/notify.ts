@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, isNull, lt, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, or } from "drizzle-orm";
 import { db } from "@/db";
 import { conversation, listing, user } from "@/db/schema";
 import { emailLayout, escapeHtml, sendMail } from "@/lib/email";
@@ -40,10 +40,8 @@ export async function notifyNewMessage(opts: {
       .update(conversation)
       .set({ [colName]: new Date() })
       .where(
-        and(
-          eq(conversation.id, opts.conversationId),
-          sql`(${col} is null or ${col} < ${new Date(Date.now() - EMAIL_THROTTLE_MS)})`,
-        ),
+        // Datum über lt() vergleichen – ein Date in rohem sql`` kann der Treiber nicht serialisieren
+        and(eq(conversation.id, opts.conversationId), or(isNull(col), lt(col, new Date(Date.now() - EMAIL_THROTTLE_MS)))),
       )
       .returning({ id: conversation.id });
     if (updated.length) {

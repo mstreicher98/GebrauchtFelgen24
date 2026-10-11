@@ -32,6 +32,7 @@ export default async function SettingsPage() {
           country: (me.country as "AT" | "DE" | "CH") ?? "AT",
           bio: me.bio ?? "",
         }}
+        logoKey={me.companyLogoKey}
       />
       <NotificationSettings notifyEmail={me.notifyEmail} notifyPush={me.notifyPush} />
       {hasPassword && <PasswordSettings />}

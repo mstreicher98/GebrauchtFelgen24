@@ -1,11 +1,14 @@
 "use client";
 import { clsx } from "clsx";
-import { Building2, User } from "lucide-react";
+import { Building2, ImagePlus, Store, Trash2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
-import { updateNotifications, updateProfile } from "@/app/actions/account";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { updateCompanyLogo, updateNotifications, updateProfile } from "@/app/actions/account";
 import { setBlocked } from "@/app/actions/chat";
 import { authClient } from "@/lib/auth-client";
+import { imageUrl } from "@/lib/image-url";
+import { uploadImage } from "./image-uploader";
+import { Spinner } from "./logo";
 import { PlzInput } from "./plz-input";
 import { subscribePush, unsubscribePush } from "./push-opt-in";
 import { toast } from "./toaster";
@@ -34,7 +37,7 @@ type Profile = {
   bio: string;
 };
 
-export function ProfileSettings({ initial }: { initial: Profile }) {
+export function ProfileSettings({ initial, logoKey }: { initial: Profile; logoKey: string | null }) {
   const [v, setV] = useState(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
@@ -81,6 +84,14 @@ export function ProfileSettings({ initial }: { initial: Profile }) {
             <F label="Website (optional)" error={errors.companyWebsite} className="sm:col-span-2">
               <input className="input" value={v.companyWebsite} onChange={(e) => set("companyWebsite", e.target.value)} placeholder="https://" />
             </F>
+            <div className="sm:col-span-2">
+              <span className="label">Firmenlogo (optional)</span>
+              {initial.accountType === "haendler" ? (
+                <CompanyLogoField logoKey={logoKey} />
+              ) : (
+                <p className="text-sm text-muted">Nach dem Speichern als Händlerkonto kannst du hier ein Logo hochladen.</p>
+              )}
+            </div>
           </>
         )}
         <F label={v.accountType === "haendler" ? "Ansprechpartner" : "Name"} error={errors.name}>
@@ -105,6 +116,75 @@ export function ProfileSettings({ initial }: { initial: Profile }) {
         </div>
       </form>
     </Card>
+  );
+}
+
+/** Logo wird sofort gespeichert (unabhängig vom Profil-Formular) und auf Verkäuferkarte und Profilseite gezeigt. */
+function CompanyLogoField({ logoKey }: { logoKey: string | null }) {
+  const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const save = async (key: string | null) => {
+    const r = await updateCompanyLogo(key);
+    if (r.error) toast(r.error, "error");
+    else {
+      toast(key ? "Logo gespeichert" : "Logo entfernt");
+      router.refresh();
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-line bg-white">
+        {logoKey ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageUrl(logoKey, 400)} alt="Firmenlogo" className="h-full w-full object-contain p-1.5" />
+        ) : (
+          <Store className="h-6 w-6 text-faint" aria-hidden="true" />
+        )}
+      </span>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="btn btn-outline btn-sm" disabled={busy} onClick={() => fileRef.current?.click()}>
+          {busy ? <Spinner className="h-4 w-4" /> : <ImagePlus className="h-4 w-4" aria-hidden="true" />}
+          {logoKey ? "Logo ändern" : "Logo hochladen"}
+        </button>
+        {logoKey && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm text-muted hover:text-red"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              await save(null);
+              setBusy(false);
+            }}
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" /> Entfernen
+          </button>
+        )}
+      </div>
+      <p className="w-full text-xs text-faint">PNG mit transparentem Hintergrund oder JPG, am besten quadratisch.</p>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (!f) return;
+          setBusy(true);
+          try {
+            const img = await uploadImage(f, "logo");
+            await save(img.key);
+          } catch (err) {
+            toast((err as Error).message, "error");
+          }
+          setBusy(false);
+        }}
+      />
+    </div>
   );
 }
 

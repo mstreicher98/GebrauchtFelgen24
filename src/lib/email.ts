@@ -43,17 +43,20 @@ export function emailLayout(opts: { title: string; bodyHtml: string; cta?: { lab
   </table></td></tr></table></body></html>`;
 }
 
+/** Versendet eine E-Mail; liefert false, wenn SMTP fehlt oder der Versand scheitert (Fehler landen im Log). */
 export async function sendMail(to: string, subject: string, html: string) {
   const t = getTransporter();
   if (!t) {
     console.info(`[mail] SMTP nicht konfiguriert – E-Mail an ${to}: "${subject}"`);
     const link = html.match(/href="([^"]+(?:token|verify|reset)[^"]*)"/i)?.[1];
     if (link) console.info(`[mail] Link: ${link}`);
-    return;
+    return false;
   }
   try {
     await t.sendMail({ from: env.smtp.from, to, subject, html });
+    return true;
   } catch (err) {
     console.error("[mail] Versand fehlgeschlagen", err);
+    return false;
   }
 }

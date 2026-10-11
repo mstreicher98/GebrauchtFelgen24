@@ -10,12 +10,15 @@ export function ActionButton({
   confirmText,
   className = "btn btn-outline btn-sm",
   success,
+  redirectTo,
 }: {
   action: () => Promise<unknown>;
   children: React.ReactNode;
   confirmText?: string;
   className?: string;
   success?: string;
+  /** Nach Erfolg dorthin wechseln (z. B. nach dem Löschen) statt neu zu laden */
+  redirectTo?: string;
 }) {
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -29,8 +32,9 @@ export function ActionButton({
         start(async () => {
           try {
             const r = (await action()) as { error?: string } | undefined;
-            if (r?.error) toast(r.error, "error");
-            else if (success) toast(success);
+            if (r?.error) return toast(r.error, "error");
+            if (success) toast(success);
+            if (redirectTo) router.push(redirectTo);
             router.refresh();
           } catch (e) {
             toast((e as Error).message, "error");

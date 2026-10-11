@@ -37,8 +37,8 @@ export default function PrivacyPage() {
       <h3>Chat-Nachrichten</h3>
       <p>
         Nachrichten zwischen Käufern und Verkäufern werden gespeichert, um die Kommunikation zu ermöglichen. Deine E-Mail-Adresse wird dabei nicht an das Gegenüber
-        weitergegeben. Wir lesen Nachrichten nicht mit; eine Einsicht erfolgt nur, wenn eine Nachricht gemeldet wird oder dies zur Missbrauchsbekämpfung erforderlich
-        ist (Art. 6 Abs. 1 lit. f DSGVO).
+        weitergegeben. Wir lesen Nachrichten nicht mit; eine Einsicht erfolgt nur, wenn eine Nachricht oder Unterhaltung gemeldet wird oder dies zur
+        Missbrauchsbekämpfung erforderlich ist (Art. 6 Abs. 1 lit. f DSGVO). Jede Einsicht durch unser Team wird protokolliert.
       </p>
       <h3>Benachrichtigungen</h3>
       <p>

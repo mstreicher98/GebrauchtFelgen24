@@ -1,7 +1,11 @@
 import { sql } from "drizzle-orm";
 import Link from "next/link";
 import { db } from "@/db";
+import { AdminPageHeader } from "@/components/admin-ui";
 import { NewMakeForm } from "@/components/admin-vehicle-forms";
+import { adminPath } from "@/lib/admin-url";
+
+export const metadata = { title: "Fahrzeuge" };
 
 export default async function AdminVehiclesPage() {
   const rows = await db.execute<{ id: number; type: string; name: string; gens: number }>(sql`
@@ -10,6 +14,7 @@ export default async function AdminVehiclesPage() {
     group by mk.id order by mk.type, mk.name`);
   return (
     <div className="space-y-6">
+      <AdminPageHeader title="Fahrzeuge" sub="Marken, Modelle und Baureihen der Fahrzeugdatenbank (Passungsprüfung)." />
       <NewMakeForm />
       {(["auto", "motorrad"] as const).map((t) => (
         <section key={t}>
@@ -18,7 +23,7 @@ export default async function AdminVehiclesPage() {
             {rows
               .filter((r) => r.type === t)
               .map((r) => (
-                <Link key={r.id} href={`/admin/fahrzeuge/${r.id}`} className="card p-3 text-sm hover:border-brand">
+                <Link key={r.id} href={adminPath(`/fahrzeuge/${r.id}`)} className="card p-3 text-sm hover:border-brand">
                   <span className="font-semibold">{r.name}</span>
                   <span className="block text-xs text-faint">{r.gens} Baureihen</span>
                 </Link>

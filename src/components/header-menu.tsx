@@ -227,10 +227,10 @@ function MenuAccount({ user }: { user: HeaderMenuUser }) {
         ))}
         {user.isAdmin && (
           <li>
-            <Link href="/admin" className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-brand hover:bg-surface-2">
+            <a href="/admin" className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-brand hover:bg-surface-2">
               <Shield className="h-[1.125rem] w-[1.125rem] shrink-0" aria-hidden="true" />
               <span className="truncate">Admin-Bereich</span>
-            </Link>
+            </a>
           </li>
         )}
       </ul>

@@ -21,9 +21,3 @@ export async function requireUser(next?: string) {
   if (!u) redirect(`/anmelden${next ? `?weiter=${encodeURIComponent(next)}` : ""}`);
   return u;
 }
-
-export async function requireAdmin() {
-  const u = await requireUser("/admin");
-  if (u.role !== "admin") redirect("/");
-  return u;
-}

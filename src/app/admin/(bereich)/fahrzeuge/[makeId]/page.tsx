@@ -6,6 +6,7 @@ import { vehicleGeneration, vehicleMake, vehicleModel, vehicleWheelSpec } from "
 import { GenerationEditor, NewModelForm } from "@/components/admin-vehicle-forms";
 import { adminDeleteModel } from "@/app/actions/admin";
 import { ActionButton } from "@/components/admin-buttons";
+import { adminPath } from "@/lib/admin-url";
 import { formatPcd } from "@/lib/format";
 
 function specToString(s: { position: string; diameter: number; width: number | null; et: number | null; tireSize: string | null }) {
@@ -24,7 +25,7 @@ export default async function AdminMakePage(props: PageProps<"/admin/fahrzeuge/[
 
   return (
     <div>
-      <Link href="/admin/fahrzeuge" className="text-sm text-muted hover:text-brand">← Alle Marken</Link>
+      <Link href={adminPath("/fahrzeuge")} className="text-sm text-muted hover:text-brand">← Alle Marken</Link>
       <h2 className="font-display mt-2 text-2xl uppercase">{mk.name}</h2>
       <p className="mb-6 mt-1 text-sm text-muted">
         Radgrößen bitte eine pro Zeile im Format <code className="text-brand">7.5Jx18 ET51 225/40 R18</code>, Mischbereifung mit{" "}

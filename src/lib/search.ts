@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gte, inArray, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lte, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { listing, listingFitment, listingImage, postalCode, user, vehicleWheelSpec } from "@/db/schema";
@@ -228,7 +228,7 @@ export async function searchListings(f: SearchFilters, pageSize = PAGE_SIZE) {
 /** Prüft für gespeicherte Suchen, welche neuen Inserate (seit `since`) passen. */
 export async function findNewMatches(f: SearchFilters, since: Date, limit = 5) {
   const { conds } = await buildConditions({ ...f, seite: 1 });
-  conds.push(sql`${listing.publishedAt} > ${since}`);
+  conds.push(gt(listing.publishedAt, since));
   const where = and(...conds);
   const [rows, [{ total }]] = await Promise.all([
     db

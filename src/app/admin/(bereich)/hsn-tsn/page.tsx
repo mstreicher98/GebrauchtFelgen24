@@ -1,7 +1,10 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { hsnTsn, vehicleGeneration, vehicleMake, vehicleModel } from "@/db/schema";
+import { AdminPageHeader } from "@/components/admin-ui";
 import { HsnImportForm } from "@/components/admin-vehicle-forms";
+
+export const metadata = { title: "HSN/TSN" };
 
 export default async function HsnPage() {
   const [[{ n }], latest] = await Promise.all([
@@ -16,6 +19,8 @@ export default async function HsnPage() {
       .limit(50),
   ]);
   return (
+    <>
+    <AdminPageHeader title="HSN/TSN" sub="Schlüsselnummern aus dem Fahrzeugschein einer Baureihe zuordnen." />
     <div className="grid gap-6 lg:grid-cols-2">
       <div>
         <h2 className="font-display text-xl uppercase">HSN/TSN-Zuordnung</h2>
@@ -50,5 +55,6 @@ export default async function HsnPage() {
         </table>
       </div>
     </div>
+    </>
   );
 }

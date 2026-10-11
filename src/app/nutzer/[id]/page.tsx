@@ -8,6 +8,7 @@ import { listing, user } from "@/db/schema";
 import { ListingCard, ListingGrid } from "@/components/listing-card";
 import { ReportButton } from "@/components/report-button";
 import { getFavoriteIds } from "@/lib/favorites";
+import { imageUrl } from "@/lib/image-url";
 import { listingCardColumns } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
@@ -41,9 +42,16 @@ export default async function SellerPage(props: PageProps<"/nutzer/[id]">) {
   return (
     <div className="container-page py-8">
       <div className="card carbon mb-8 flex flex-col gap-5 p-6 sm:flex-row sm:items-center">
-        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-brand-soft text-3xl font-bold text-brand">
-          {dealer ? <Store className="h-9 w-9" /> : displayName(u).slice(0, 1)}
-        </span>
+        {dealer && u.companyLogoKey ? (
+          <span className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl border border-line bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl(u.companyLogoKey, 400)} alt={`Logo ${displayName(u)}`} className="h-full w-full object-contain p-2" />
+          </span>
+        ) : (
+          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-brand-soft text-3xl font-bold text-brand">
+            {dealer ? <Store className="h-9 w-9" /> : displayName(u).slice(0, 1)}
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-3xl font-bold uppercase">{displayName(u)}</h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">

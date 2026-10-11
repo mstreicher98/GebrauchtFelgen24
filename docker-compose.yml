@@ -16,6 +16,8 @@ services:
         condition: service_healthy
     environment:
       APP_URL: ${APP_URL:-https://gebrauchtfelgen24.at}
+      # Admin-Bereich auf eigener Subdomain (leer = unter /admin)
+      ADMIN_URL: ${ADMIN_URL:-https://admin.gebrauchtfelgen24.at}
       DATABASE_URL: postgres://felgen:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt}@db:5432/felgen
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET fehlt (openssl rand -base64 32)}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
@@ -42,7 +44,7 @@ services:
     # Traefik (optional) – Kommentare entfernen und Netzwerk anpassen:
     # labels:
     #   - traefik.enable=true
-    #   - traefik.http.routers.gf24.rule=Host(`gebrauchtfelgen24.at`) || Host(`www.gebrauchtfelgen24.at`)
+    #   - traefik.http.routers.gf24.rule=Host(`gebrauchtfelgen24.at`) || Host(`www.gebrauchtfelgen24.at`) || Host(`admin.gebrauchtfelgen24.at`)
     #   - traefik.http.routers.gf24.entrypoints=websecure
     #   - traefik.http.routers.gf24.tls.certresolver=letsencrypt
     #   - traefik.http.services.gf24.loadbalancer.server.port=3000

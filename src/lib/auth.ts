@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { emailLayout, escapeHtml, sendMail } from "./email";
+import { sharedCookieDomain } from "./admin-url";
 import { deleteStoredImage } from "./images";
 import { env, oauthEnabled } from "./env";
 
@@ -32,7 +33,9 @@ export const auth = betterAuth({
     provider: "pg",
     schema: { user: schema.user, session: schema.session, account: schema.account, verification: schema.verification },
   }),
-  trustedOrigins: [env.appUrl, "https://appleid.apple.com"],
+  trustedOrigins: [env.appUrl, ...(env.adminUrl ? [env.adminUrl] : []), "https://appleid.apple.com"],
+  // Gemeinsame Anmeldung für Website und Admin-Subdomain (admin.gebrauchtfelgen24.at)
+  ...(sharedCookieDomain() ? { advanced: { crossSubDomainCookies: { enabled: true, domain: sharedCookieDomain()! } } } : {}),
   telemetry: { enabled: false },
   emailAndPassword: {
     enabled: true,
@@ -101,8 +104,10 @@ export const auth = betterAuth({
         before: async (u) => {
           // Bilddateien des Nutzers merken und nach dem Löschen entfernen
           const imgs = await db.select({ key: schema.listingImage.key }).from(schema.listingImage).where(eq(schema.listingImage.userId, u.id));
+          const [row] = await db.select({ logo: schema.user.companyLogoKey }).from(schema.user).where(eq(schema.user.id, u.id)).limit(1);
           setTimeout(() => {
             for (const i of imgs) void deleteStoredImage(i.key);
+            if (row?.logo) void deleteStoredImage(row.logo);
           }, 5000);
         },
       },

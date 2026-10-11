@@ -64,9 +64,22 @@ function PasswordInput({ id, value, onChange, autoComplete }: { id: string; valu
   );
 }
 
-export function LoginForm({ google, apple }: { google: boolean; apple: boolean }) {
+export function LoginForm({
+  google,
+  apple,
+  next: fixedNext,
+  forgotHref = "/passwort-vergessen",
+  showRegister = true,
+}: {
+  google: boolean;
+  apple: boolean;
+  /** Feste Zielseite nach dem Login (z. B. im Admin-Bereich) statt ?weiter= */
+  next?: string;
+  forgotHref?: string;
+  showRegister?: boolean;
+}) {
   const sp = useSearchParams();
-  const next = safeNext(sp.get("weiter"));
+  const next = fixedNext ?? safeNext(sp.get("weiter"));
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,7 +109,7 @@ export function LoginForm({ google, apple }: { google: boolean; apple: boolean }
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="label">Passwort</label>
-            <Link href="/passwort-vergessen" className="-my-2 inline-flex min-h-9 items-center text-sm font-medium text-brand hover:underline">Passwort vergessen?</Link>
+            <Link href={forgotHref} className="-my-2 inline-flex min-h-9 items-center text-sm font-medium text-brand hover:underline">Passwort vergessen?</Link>
           </div>
           <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="current-password" />
         </div>
@@ -105,12 +118,14 @@ export function LoginForm({ google, apple }: { google: boolean; apple: boolean }
           {busy ? <Spinner className="h-5 w-5 text-on-brand" /> : "Anmelden"}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-muted">
-        Noch kein Konto?{" "}
-        <Link href={`/registrieren${sp.get("weiter") ? `?weiter=${encodeURIComponent(next)}` : ""}`} className="link font-semibold">
-          Jetzt registrieren
-        </Link>
-      </p>
+      {showRegister && (
+        <p className="mt-6 text-center text-sm text-muted">
+          Noch kein Konto?{" "}
+          <Link href={`/registrieren${sp.get("weiter") ? `?weiter=${encodeURIComponent(next)}` : ""}`} className="link font-semibold">
+            Jetzt registrieren
+          </Link>
+        </p>
+      )}
     </>
   );
 }

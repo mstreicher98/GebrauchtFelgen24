@@ -1,5 +1,7 @@
 export const env = {
   appUrl: (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, ""),
+  /** Eigene Adresse für den Admin-Bereich, z. B. https://admin.gebrauchtfelgen24.at (leer = unter /admin) */
+  adminUrl: process.env.ADMIN_URL?.trim().replace(/\/$/, "") || null,
   appName: "GebrauchtFelgen24",
   uploadDir: process.env.UPLOAD_DIR || "./uploads",
   adminEmail: process.env.ADMIN_EMAIL?.toLowerCase().trim() || undefined,

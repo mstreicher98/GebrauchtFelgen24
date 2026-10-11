@@ -7,7 +7,7 @@ import { imageUrl } from "@/lib/image-url";
 import { Spinner } from "./logo";
 
 /** Verkleinert Fotos im Browser (spart Datenvolumen am Handy). Fällt bei Fehlern auf das Original zurück. */
-async function downscale(file: File, max = 2400): Promise<Blob> {
+async function downscale(file: File, max = 2400, type: "image/jpeg" | "image/png" = "image/jpeg"): Promise<Blob> {
   if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
   try {
     const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -17,17 +17,18 @@ async function downscale(file: File, max = 2400): Promise<Blob> {
     canvas.width = Math.round(bmp.width * scale);
     canvas.height = Math.round(bmp.height * scale);
     canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.88));
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, type, 0.88));
     return blob ?? file;
   } catch {
     return file;
   }
 }
 
-export async function uploadImage(file: File, purpose: "inserat" | "chat" = "inserat") {
-  const blob = await downscale(file);
+/** „logo“ wird wie ein Inseratsbild zwischengespeichert, aber als PNG verkleinert (Transparenz bleibt erhalten). */
+export async function uploadImage(file: File, purpose: "inserat" | "chat" | "logo" = "inserat") {
+  const blob = purpose === "logo" ? await downscale(file, 800, "image/png") : await downscale(file);
   const fd = new FormData();
-  fd.append("file", blob, file.name.replace(/\.\w+$/, ".jpg"));
+  fd.append("file", blob, file.name.replace(/\.\w+$/, purpose === "logo" ? ".png" : ".jpg"));
   const r = await fetch(`/api/upload${purpose === "chat" ? "?zweck=chat" : ""}`, { method: "POST", body: fd });
   const data = await r.json().catch(() => ({ error: "Upload fehlgeschlagen" }));
   if (!r.ok) throw new Error(data.error ?? "Upload fehlgeschlagen");

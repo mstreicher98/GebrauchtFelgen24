@@ -1,9 +1,10 @@
 "use server";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { user } from "@/db/schema";
+import { listingImage, user } from "@/db/schema";
+import { deleteStoredImage } from "@/lib/images";
 import { lookupPostalCode } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
@@ -52,6 +53,7 @@ export async function updateProfile(input: unknown): Promise<{ error?: string; e
       companyName: d.accountType === "haendler" ? d.companyName : null,
       companyUid: d.accountType === "haendler" ? d.companyUid || null : null,
       companyWebsite: d.accountType === "haendler" ? d.companyWebsite || null : null,
+      companyLogoKey: d.accountType === "haendler" ? me.companyLogoKey : null,
       phone: d.phone || null,
       zip: d.zip || null,
       city,
@@ -60,6 +62,26 @@ export async function updateProfile(input: unknown): Promise<{ error?: string; e
       updatedAt: new Date(),
     })
     .where(eq(user.id, me.id));
+  if (d.accountType !== "haendler" && me.companyLogoKey) void deleteStoredImage(me.companyLogoKey);
+  revalidatePath("/konto", "layout");
+  return {};
+}
+
+/** Händler-Logo setzen (Bild-Schlüssel aus /api/upload) oder entfernen (null). */
+export async function updateCompanyLogo(key: string | null): Promise<{ error?: string }> {
+  const me = await getCurrentUser();
+  if (!me) return { error: "Nicht angemeldet" };
+  if (me.accountType !== "haendler") return { error: "Ein Logo ist nur mit Händlerkonto möglich." };
+  if (key) {
+    // Nur eigene, noch freie Uploads übernehmen. Der Eintrag entfällt, damit die Aufräum-Routine das Bild nicht löscht.
+    const claimed = await db
+      .delete(listingImage)
+      .where(and(eq(listingImage.key, key), eq(listingImage.userId, me.id), isNull(listingImage.listingId)))
+      .returning({ key: listingImage.key });
+    if (!claimed.length) return { error: "Bild nicht gefunden – bitte erneut hochladen." };
+  }
+  await db.update(user).set({ companyLogoKey: key, updatedAt: new Date() }).where(eq(user.id, me.id));
+  if (me.companyLogoKey && me.companyLogoKey !== key) void deleteStoredImage(me.companyLogoKey);
   revalidatePath("/konto", "layout");
   return {};
 }

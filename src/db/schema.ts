@@ -44,7 +44,7 @@ export const seasonEnum = pgEnum("season", ["sommer", "winter", "ganzjahr"]);
 export const priceTypeEnum = pgEnum("price_type", ["fest", "vb"]);
 export const wheelPositionEnum = pgEnum("wheel_position", ["alle", "vorne", "hinten"]);
 export const reportStatusEnum = pgEnum("report_status", ["offen", "erledigt"]);
-export const reportTargetEnum = pgEnum("report_target", ["listing", "user", "message"]);
+export const reportTargetEnum = pgEnum("report_target", ["listing", "user", "message", "conversation"]);
 
 /* ------------------------------------------------------------------ */
 /* Auth (better-auth core tables + eigene Felder)                      */
@@ -75,6 +75,8 @@ export const user = pgTable("user", {
   notifyEmail: boolean("notify_email").notNull().default(true),
   notifyPush: boolean("notify_push").notNull().default(true),
   lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+  /** Interne Notiz des Admin-Teams (für Nutzer nicht sichtbar) */
+  adminNote: text("admin_note"),
 });
 
 export const session = pgTable(
@@ -428,7 +430,25 @@ export const report = pgTable("report", {
   status: reportStatusEnum("status").notNull().default("offen"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   handledAt: timestamp("handled_at", { withTimezone: true }),
+  handledById: text("handled_by_id").references(() => user.id, { onDelete: "set null" }),
+  /** Kurze Begründung/Ergebnis der Bearbeitung (intern) */
+  resolution: text("resolution"),
 });
+
+/** Protokoll aller Admin-Aktionen (wer hat wann was geändert). */
+export const adminLog = pgTable(
+  "admin_log",
+  {
+    id: serial("id").primaryKey(),
+    adminId: text("admin_id").references(() => user.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    targetType: text("target_type"),
+    targetId: text("target_id"),
+    details: text("details"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("admin_log_created_idx").on(t.createdAt), index("admin_log_target_idx").on(t.targetType, t.targetId)],
+);
 
 export const pushSubscription = pgTable(
   "push_subscription",

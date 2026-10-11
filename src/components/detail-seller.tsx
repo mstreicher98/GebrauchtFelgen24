@@ -3,6 +3,7 @@ import { ArrowRight, BadgeCheck, Clock, MailCheck, MapPin, Phone, PhoneCall, Sto
 import Link from "next/link";
 import type { user } from "@/db/schema";
 import { formatRelative } from "@/lib/format";
+import { imageUrl } from "@/lib/image-url";
 
 type Seller = typeof user.$inferSelect;
 
@@ -39,9 +40,16 @@ export function DetailSeller({
       </h2>
 
       <div className="mt-4 flex items-center gap-4">
-        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-brand-soft text-xl font-bold text-brand">
-          {dealer ? <Store className="h-6 w-6" aria-hidden="true" /> : displayName.slice(0, 1).toUpperCase()}
-        </span>
+        {dealer && seller.companyLogoKey ? (
+          <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-line bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl(seller.companyLogoKey, 400)} alt={`Logo ${displayName}`} className="h-full w-full object-contain p-1.5" loading="lazy" />
+          </span>
+        ) : (
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-brand-soft text-xl font-bold text-brand">
+            {dealer ? <Store className="h-6 w-6" aria-hidden="true" /> : displayName.slice(0, 1).toUpperCase()}
+          </span>
+        )}
         <div className="min-w-0">
           <Link href={`/nutzer/${seller.id}`} className="block text-lg font-bold leading-tight text-balance hover:text-brand">
             {displayName}

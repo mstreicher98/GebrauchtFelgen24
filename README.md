@@ -12,14 +12,14 @@ Domain: **gebrauchtfelgen24.at** · Betrieb als **Portainer-Stack** (Docker Comp
 
 | Bereich | Umfang |
 | --- | --- |
-| **Konto** | Registrierung mit E-Mail-Bestätigung, Login mit E-Mail/Passwort, Google und Apple (optional), Passwort vergessen, Privat- oder Händlerkonto (Firmenname, UID, Website), Konto löschen (DSGVO) |
+| **Konto** | Registrierung mit E-Mail-Bestätigung, Login mit E-Mail/Passwort, Google und Apple (optional), Passwort vergessen, Privat- oder Händlerkonto (Firmenname, UID, Website, Firmenlogo auf Verkäuferkarte und Profilseite), Konto löschen (DSGVO) |
 | **Inserate** | Felgen & Kompletträder, bis zu 12 Fotos (werden im Browser verkleinert, auf dem Server in 3 Größen als WebP gespeichert, GPS/EXIF entfernt), alle Pflichtfelder (Material, Marke, Zoll, Breite, Lochkreis, ET, Mittenloch, Anzahl, Zustand, Reifengröße, -marke, Saison, Profiltiefe, DOT, RDKS, Preis, Festpreis/VB, Versand/Abholung, PLZ), „Passend für“-Fahrzeuge, automatischer Titelvorschlag, Laufzeit 60 Tage mit Erinnerung & Verlängerung, verkauft/deaktiviert |
 | **Suche** | Volltext, Zoll, Breite, Lochkreis, ET, Preis, Zustand, Material, Saison, Händler/Privat, **Umkreissuche** (44.000 PLZ in AT/DE/CH), Sortierung inkl. Entfernung |
 | **Fahrzeugsuche** | Marke → Modell → Baureihe oder **HSN/TSN**; Modus „Nur passende“ (streng) oder „Auch eventuell passende“ (locker); jedes Inserat bekommt ein Badge *Passt perfekt / Passt / Passt mit Zentrierring / Eventuell passend* mit Hinweisen |
-| **Chat** | wie bei willhaben: Echtzeit (Server-Sent Events über PostgreSQL LISTEN/NOTIFY), Bilder senden, Lesebestätigung, Ungelesen-Zähler, Archivieren, Blockieren, Melden. E-Mail-Adresse und Telefonnummer bleiben privat (Telefon optional pro Inserat freigebbar) |
+| **Chat** | wie bei willhaben: Echtzeit (Server-Sent Events über PostgreSQL LISTEN/NOTIFY), Bilder senden, Lesebestätigung, Ungelesen-Zähler, Archivieren, Blockieren, Melden (Nutzer, einzelne Nachrichten und ganze Unterhaltungen). E-Mail-Adresse und Telefonnummer bleiben privat (Telefon optional pro Inserat freigebbar) |
 | **Benachrichtigungen** | E-Mail und Web-Push (PWA) bei neuen Nachrichten (max. 1 Mail / 15 Min. pro Chat), **Suchaufträge** mit Benachrichtigung bei neuen Treffern, Ablauferinnerung – alles in den Einstellungen abschaltbar |
 | **Merkliste** | Herz auf jeder Karte, Übersicht im Konto |
-| **Admin** | Dashboard, Meldungen bearbeiten, Inserate sperren / als **TOP** hervorheben, Nutzer sperren / Admin-Rechte, Fahrzeugdatenbank bearbeiten, HSN/TSN-CSV-Import |
+| **Admin** | Eigene Subdomain **admin.gebrauchtfelgen24.at** mit eigenem Layout und Login. Dashboard mit Kennzahlen und 30-Tage-Verlauf, Meldungen mit Filtern und Notiz, Einsicht in **gemeldete Unterhaltungen** (nur bei Meldung, jede Einsicht protokolliert), Inserate filtern / sperren / löschen / **TOP** für 7–30 Tage, Nutzer-Detailseite (Statistik, Meldungen, interne Notiz, sperren, E-Mail bestätigen, Abmelden erzwingen, Konto löschen), **Protokoll** aller Admin-Aktionen, **Website-Hinweis** (z. B. Wartung) mit Ablaufzeit, Systemstatus mit Test-E-Mail, Fahrzeugdatenbank, HSN/TSN-CSV-Import |
 | **Design** | Premium in Markenfarbe Königsblau #0D47A1 (aus dem Logo) mit Blau-Schwarz und Chrom, Überschriften in der Logo-Schrift Saira, Hell/Dunkel automatisch nach System (umschaltbar), animierte Chrom-Felge im Hero, sanfte Scroll-Einblendungen, Felgen-Ladeanimation, respektiert „Bewegung reduzieren“ |
 | **Performance** | Server-Rendering, kaum Client-JS, selbst gehostete Schriften, WebP in passenden Größen, PWA mit Offline-Seite. Lighthouse (Mobil): Performance 88–99, Best Practices 100, SEO 100, CLS 0 |
 | **Rechtliches** | Vorlagen für Impressum (ECG/UGB/MedienG + DSA-Kontaktstelle), Datenschutzerklärung (DSGVO), AGB – Platzhalter sind gelb markiert |
@@ -69,6 +69,7 @@ Unter **Environment variables** mindestens setzen (Vorlage: `.env.example`):
 | Variable | Beispiel / Hinweis |
 | --- | --- |
 | `APP_URL` | `https://gebrauchtfelgen24.at` |
+| `ADMIN_URL` | `https://admin.gebrauchtfelgen24.at` (leer = Admin-Bereich unter `/admin`) |
 | `POSTGRES_PASSWORD` | langes Zufallspasswort |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `ADMIN_EMAIL` | E-Mail, die automatisch Admin wird |
@@ -87,6 +88,8 @@ Beim ersten Start werden automatisch die Tabellen angelegt sowie Fahrzeugdatenba
 Die App lauscht auf Port `3000`. Davor gehört ein Reverse Proxy mit SSL, z. B. **Nginx Proxy Manager**:
 
 - Proxy Host `gebrauchtfelgen24.at` (+ `www`) → `http://<server-ip>:3000`, SSL mit Let's Encrypt, „Force SSL“
+- Proxy Host `admin.gebrauchtfelgen24.at` → **derselbe** Container `http://<server-ip>:3000`, ebenfalls mit SSL. Die App erkennt die Subdomain am Host-Namen
+  und liefert dort nur den Admin-Bereich aus; `gebrauchtfelgen24.at/admin` leitet automatisch dorthin um. Die Anmeldung gilt für beide Adressen.
 - Unter *Advanced* eintragen (für Foto-Uploads und den Echtzeit-Chat):
 
   ```nginx
@@ -96,11 +99,11 @@ Die App lauscht auf Port `3000`. Davor gehört ein Reverse Proxy mit SSL, z. B. 
   ```
 
 Für **Traefik** sind Labels in `docker-compose.yml` vorbereitet (auskommentiert).
-DNS: A-Record (und ggf. AAAA) von `gebrauchtfelgen24.at` und `www` auf den Server.
+DNS: A-Record (und ggf. AAAA) von `gebrauchtfelgen24.at`, `www` und `admin` auf den Server.
 
 ### 4. Erster Login
 
-Auf der Seite mit der unter `ADMIN_EMAIL` eingetragenen Adresse registrieren → E-Mail bestätigen → im Menü erscheint **Admin-Bereich**.
+Auf der Seite mit der unter `ADMIN_EMAIL` eingetragenen Adresse registrieren → E-Mail bestätigen → im Menü erscheint **Admin-Bereich** (bzw. direkt **admin.gebrauchtfelgen24.at** öffnen).
 
 ### Updates
 
@@ -190,6 +193,7 @@ npm run dev                    # http://localhost:3000 – Migration & Import la
 
 Demo-Login (nur mit `SEED_DEMO=true`): `demo@gebrauchtfelgen24.at` / `Demo1234!` (privat), `haendler@gebrauchtfelgen24.at` / `Demo1234!` (Händler).
 Ohne SMTP stehen Bestätigungslinks im Server-Log (`[mail] Link: …`).
+Admin-Subdomain lokal testen: `ADMIN_URL=http://admin.localhost:3000` setzen und `http://admin.localhost:3000` öffnen (dort separat anmelden).
 
 | Befehl | Zweck |
 | --- | --- |

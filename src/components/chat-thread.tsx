@@ -34,6 +34,8 @@ function dayLabel(d: Date) {
   return d.toLocaleDateString("de-AT", { weekday: "long", day: "2-digit", month: "long" });
 }
 
+const MENU_ITEM = "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-muted hover:bg-surface-2 hover:text-red";
+
 export function ChatThread({ conversationId, meId, other, listing, initialMessages, otherLastReadAt, blocked }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [readAt, setReadAt] = useState(otherLastReadAt);
@@ -174,9 +176,8 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
               >
                 <Ban className="h-4 w-4" /> {blocked.byMe ? "Blockierung aufheben" : "Nutzer blockieren"}
               </button>
-              <div className="px-3 py-2">
-                <ReportButton targetType="user" targetId={other.id} label="Nutzer melden" loggedIn />
-              </div>
+              <ReportButton targetType="conversation" targetId={conversationId} label="Unterhaltung melden" loggedIn className={MENU_ITEM} />
+              <ReportButton targetType="user" targetId={other.id} label="Nutzer melden" loggedIn className={MENU_ITEM} />
             </div>
           )}
         </div>
@@ -201,7 +202,7 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
                   <span className="rounded-full bg-surface-2 px-3 py-1 text-[11px] font-medium text-faint">{dayLabel(d)}</span>
                 </div>
               )}
-              <div className={clsx("animate-msg-in flex", mine ? "justify-end" : "justify-start")}>
+              <div className={clsx("animate-msg-in group flex items-end gap-1", mine ? "justify-end" : "justify-start")}>
                 <div
                   className={clsx(
                     "max-w-[82%] overflow-hidden rounded-2xl text-[0.95rem] leading-relaxed shadow-sm sm:max-w-[70%]",
@@ -228,6 +229,17 @@ export function ChatThread({ conversationId, meId, other, listing, initialMessag
                       ))}
                   </p>
                 </div>
+                {/* Empfangene Nachricht melden – am Desktop erst bei Hover/Fokus sichtbar, am Handy dezent dauerhaft */}
+                {!mine && m.id > 0 && (
+                  <ReportButton
+                    targetType="message"
+                    targetId={String(m.id)}
+                    label="Nachricht melden"
+                    loggedIn
+                    iconOnly
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-faint opacity-60 hover:text-red hover:bg-surface-2 focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
+                  />
+                )}
               </div>
               {mine && lastOwn?.id === m.id && readAt && new Date(readAt) >= d && <p className="mt-0.5 text-right text-[10px] text-faint">Gelesen</p>}
             </div>

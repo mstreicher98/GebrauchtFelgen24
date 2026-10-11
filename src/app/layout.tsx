@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { MobileTabBar } from "@/components/site-header-client";
 import { RealtimeProvider } from "@/components/realtime-provider";
 import { RevealObserver } from "@/components/reveal-observer";
@@ -7,7 +8,10 @@ import { SiteHeader } from "@/components/site-header";
 import { themeScript } from "@/components/theme";
 import { Toaster } from "@/components/toaster";
 import { ServiceWorkerRegistration } from "@/components/sw-register";
+import { SiteBanner } from "@/components/site-banner";
+import { ADMIN_HEADER } from "@/lib/admin-url";
 import { env } from "@/lib/env";
+import { getSiteBanner } from "@/lib/site-banner";
 import { getCurrentUser } from "@/lib/session";
 import { countUnread } from "@/lib/unread";
 import { inter, saira } from "./fonts";
@@ -50,7 +54,22 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const user = await getCurrentUser();
+  // Admin-Bereich (eigene Subdomain): eigener Rahmen ohne Kopf-/Fußzeile der Website
+  if ((await headers()).get(ADMIN_HEADER) === "1") {
+    return (
+      <html lang="de" data-theme="dark" className={`${inter.variable} ${saira.variable}`} suppressHydrationWarning>
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        </head>
+        <body>
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    );
+  }
+
+  const [user, banner] = await Promise.all([getCurrentUser(), getSiteBanner()]);
   const unread = user ? await countUnread(user.id) : 0;
 
   const body = (
@@ -58,6 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <a href="#inhalt" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-brand-fill focus:px-4 focus:py-2 focus:text-on-brand">
         Zum Inhalt springen
       </a>
+      {banner && <SiteBanner banner={banner} />}
       <SiteHeader user={user} />
       <main id="inhalt" className="min-h-[60vh]">
         {children}
